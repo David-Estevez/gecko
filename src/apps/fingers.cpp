@@ -44,32 +44,44 @@ void contours (cv::Mat &src)
 	cvtColor( src, src_gray, CV_BGR2GRAY );
  	blur( src_gray, src_gray, cv::Size(3,3) );
 
+	/// Detect edges using canny
 
 	cv::Canny( src_gray, canny_output, thresh, thresh*2 );
-	/// Detect edges using canny
+
 
 
 	/// Find contours
+
 	cv::findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 
-	/// Draw contours
 	cv::Mat drawing = cv::Mat::zeros( canny_output.size(), CV_8UC3 );
 
-	for( int i = 0; i< contours.size(); i++ )
-		   cv::drawContours( drawing, contours, i, cv:: Scalar (255,255,255), 2, 8, hierarchy, 0, cv::Point() );
 	 
-
-
-
-	/// Draw the rectangle that contains the hand
-
-	cv:: rectangle (drawing, cv::Point (0,0), cv:: Point (100, 100), cv:: Scalar (0,0,255), 5); 
- //void rectangle(Mat& img, Point pt1, Point pt2, const Scalar& color, int thickness=1, int lineType=8, int shift=0)
-
+	/// Draw the rectangle that contains the hand 
+	
+	cv:: rectangle (drawing, cv:: Point (150,150), cv:: Point(400,450), cv:: Scalar (0,0,255), 5); 
 
 	/// Choose the contours within the rectangle
 
 
+/*	WORKING ON THIS!
+
+	if (cv::waitKey(1)==32)
+	{
+	while(contours)
+ 	{
+    	result = cvApproxPoly(contours, sizeof(CvContour), storage, CV_POLY_APPROX_DP, cvContourPerimeter(contours)*0.02, 0);
+    }
+
+	}
+
+*/
+
+
+	/// Draw the contours
+
+	for( int i = 0; i< contours.size(); i++ )
+		   cv::drawContours( drawing, contours, i, cv:: Scalar (255,255,255), 2, 8, hierarchy, 0, cv::Point() );
 
 	/// Show the results
 
