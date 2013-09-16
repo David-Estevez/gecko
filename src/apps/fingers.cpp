@@ -3,14 +3,27 @@
 
 using namespace std; 
 
-void contours (cv:: Mat &, cv:: Mat &);
-void background_substractor (cv:: Mat &, cv:: Mat &);
+class myBackgroundSubstractor: public cv::BackgroundSubtractorMOG2
+	{
+	public:
+		void setbackgroundRatio(float a){backgroundRatio = a;}
+};
+
+void contours_extraction  (cv:: Mat &, cv:: Mat &);
 
 
 int main () 
 {
-	cv::Mat image, no_back_image, contour_image; 
+
+	cv::Mat image, no_back_image, final_image; 
 	cv::VideoCapture cap(0); 
+	cap.set(CV_CAP_PROP_BRIGHTNESS,1);
+
+	myBackgroundSubstractor bg; 
+	bg.set("nmixtures",3);// set number of gaussian mixtures
+	bg.set("detectShadows", false); //if false: turn shadow detection off
+	bg.setbackgroundRatio(0.0001);
+	vector<vector<cv::Point> > contours;
 
    if (!cap.isOpened())
         cerr << "Cannot open video device" << endl;
@@ -22,15 +35,22 @@ int main ()
 		cvtColor( image, image, CV_BGR2GRAY );
 		cv::flip(image,image,1);
 
-		
-		background_substractor(image, no_back_image); 
-		//contours (image); 
+		bg.operator ()(image,no_back_image);
+
+		cv::erode(no_back_image,no_back_image,cv::Mat());
+        cv::dilate(no_back_image,no_back_image,cv::Mat());
+        cv::findContours(no_back_image,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE);
+        cv::drawContours(image,contours,-1,cv::Scalar(0,0,255),2);
+		image.copyTo(no_back_image, no_back_image);
+
+		contours_extraction (no_back_image, final_image); 
 
 
 		
 		//SHOW THE DIFFERENT IMAGES
-		cv::imshow ("ORIGINAL IMAGE" , image); 
-		//cv::imshow ("CONVEX HULL" , convex_image); 
+		//cv::imshow ("ORIGINAL IMAGE" , image); 
+		//cv::imshow ("NO BACKGROUND IMAGE" , no_back_image); 
+		cv::imshow ("FINAL IMAGE" , final_image); 
 
 
 		if (cv::waitKey(1)== 27)		//press ESC to exit camera
@@ -40,14 +60,8 @@ int main ()
 	return 0;
 }
 
-void background_substractor (cv:: Mat &src, cv:: Mat & result)
-{
 
-
-
-}
-
-void contours (cv::Mat &src, cv :: Mat & result)
+void contours_extraction  (cv::Mat &src, cv :: Mat & result)
 {
 
 	int thresh = 100;
@@ -60,7 +74,7 @@ void contours (cv::Mat &src, cv :: Mat & result)
 	vector<cv::Vec4i> hierarchy;
 
 
- 	//blur( src_gray, src_gray, cv::Size(3,3) );
+ 	blur( src, src, cv::Size(3,3) );
 
 	/// Detect edges using canny
 
