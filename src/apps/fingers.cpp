@@ -10,7 +10,7 @@ class myBackgroundSubstractor: public cv::BackgroundSubtractorMOG2
 };
 
 void contours_extraction  (cv:: Mat &, cv:: Mat &);
-
+void convex_hull (cv::Mat &, cv :: Mat &);
 
 int main () 
 {
@@ -43,9 +43,14 @@ int main ()
         cv::drawContours(image,contours,-1,cv::Scalar(0,0,255),2);
 		image.copyTo(no_back_image, no_back_image);
 
-		contours_extraction (no_back_image, final_image); 
 
 
+//contours
+		//contours_extraction (no_back_image, final_image); 
+
+
+//convex_hull 
+		convex_hull ( no_back_image, final_image); 
 		
 		//SHOW THE DIFFERENT IMAGES
 		//cv::imshow ("ORIGINAL IMAGE" , image); 
@@ -59,6 +64,47 @@ int main ()
    
 	return 0;
 }
+
+
+
+void convex_hull (cv::Mat &src_gray, cv :: Mat & result)
+{/*
+int thresh = 100;
+ int max_thresh = 255;
+ RNG rng(12345);
+
+   cv::Mat threshold_output;
+   vector<vector<cv::Point> > contours;
+   vector<cv::Vec4i> hierarchy;
+
+   /// Detect edges using Threshold
+   cv::threshold( src_gray, threshold_output, thresh, 255, THRESH_BINARY );
+
+   /// Find contours
+   cv::findContours( threshold_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+   /// Find the convex hull object for each contour
+   vector<vector<cv::Point> >hull( contours.size() );
+   for( int i = 0; i < contours.size(); i++ )
+      {  convexHull( Mat(contours[i]), hull[i], false ); }
+
+   /// Draw contours + hull results
+   cv::Mat drawing =cv:: Mat::zeros( threshold_output.size(), CV_8UC3 );
+   for( int i = 0; i< contours.size(); i++ )
+      {
+        cv::Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+       cv:: drawContours( drawing, contours, i, color, 1, 8, vector<cv::Vec4i>(), 0, Point() );
+        cv::drawContours( drawing, hull, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
+      }
+
+   /// Show in a window
+   namedWindow( "Hull demo", CV_WINDOW_AUTOSIZE );
+   imshow( "Hull demo", drawing );
+
+
+*/
+}
+
 
 
 void contours_extraction  (cv::Mat &src, cv :: Mat & result)
