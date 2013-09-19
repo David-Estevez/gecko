@@ -38,9 +38,9 @@ int main ()
 		bg.operator ()(image,no_back_image);
 
 		cv::erode(no_back_image,no_back_image,cv::Mat());
-        cv::dilate(no_back_image,no_back_image,cv::Mat());
-        cv::findContours(no_back_image,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE);
-        cv::drawContours(image,contours,-1,cv::Scalar(0,0,255),2);
+		cv::dilate(no_back_image,no_back_image,cv::Mat());
+		cv::findContours(no_back_image,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE);
+		cv::drawContours(image,contours,-1,cv::Scalar(0,0,255),2);
 		image.copyTo(no_back_image, no_back_image);
 
 
@@ -51,11 +51,11 @@ int main ()
 
 //convex_hull 
 		convex_hull ( no_back_image, final_image); 
-		
+
 		//SHOW THE DIFFERENT IMAGES
-		//cv::imshow ("ORIGINAL IMAGE" , image); 
+		//cv::imshow ("ORIGINAL IMAGE" , image);
 		//cv::imshow ("NO BACKGROUND IMAGE" , no_back_image); 
-		cv::imshow ("FINAL IMAGE" , final_image); 
+		cv::imshow ("FINAL IMAGE" , final_image);
 
 
 		if (cv::waitKey(1)== 27)		//press ESC to exit camera
