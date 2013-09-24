@@ -2,11 +2,8 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include "../libraries/HandDetector.h"
+#include "../libraries/handUtils.h"
 
-void processFrame(cv::Mat &src, cv::Mat &dst, int& thresholdValue, int debug  = 0);
-void drawCalibrationMarks(cv::Mat& input, cv::Mat& output, int halfSide = 20,  cv::Scalar color  = cv::Scalar( 0, 255, 0 ) );
-int getSkinHueValue( cv::Mat &hue_image, int& result);
-void getHue( cv::Mat& src, cv::Mat& hue);
 
 int main( int argc, char * argv[] )
 {
@@ -36,7 +33,7 @@ int main( int argc, char * argv[] )
     //-- Get frame rate
     double rate = cap.get( CV_CAP_PROP_FPS);
     int delay = 1000/rate;
-    delay = 24; //-- Force 24 FPS
+    delay = 24; //-- Force 24 s delay
 
 
     //-- Declare variables
@@ -47,6 +44,7 @@ int main( int argc, char * argv[] )
     //-- For getting skin hue value:
     int skinValue;
     static const int halfSide = 40;
+    int stdDevSkinValue;
 
    // cv::BackgroundSubtractorMOG2 substractor;
    // substractor.bShadowDetection = false;
@@ -80,8 +78,18 @@ int main( int argc, char * argv[] )
 	    cv::Mat ROI = frame( cv::Rect( cv::Point( image_cols / 2 - halfSide,  image_rows/2 - halfSide ),
 					   cv::Point( image_cols / 2 + halfSide,  image_rows/2 + halfSide)));
 	    cv::imshow( "Test", ROI);
-	    getSkinHueValue( ROI, skinValue);
+
+	    //-- Get average color value
+	    skinValue = ceil(getAverage( ROI) );
 	    std::cout << "Skin average value is: " << skinValue << std::endl;
+
+	    //-- Get std deviation of hue
+	    cv::Mat hue;
+	    getHue( ROI, hue);
+	    stdDevSkinValue = 6*ceil(getStdDev( hue) );
+	    std::cout << "Skin 6 sigma is: " << stdDevSkinValue << std::endl;
+
+	    //-- Close window
 	    cvDestroyWindow( "Calibrating skin");
 	    break;
 	}
@@ -101,7 +109,7 @@ int main( int argc, char * argv[] )
 
 	//-- Process it
 	cv::Mat processed = frame.clone();
-	processFrame( frame, processed, skinValue, debugValue);
+	processFrame( frame, processed, skinValue, stdDevSkinValue, 30, 89, 229,  debugValue);
 
 	//-- Show processed image
 	cv::imshow( "Processed Stream", processed);
@@ -111,11 +119,20 @@ int main( int argc, char * argv[] )
 	char key = (char) cv::waitKey( delay);
 	switch( key)
 	{
-	    case 'f': //-- Filtered
+	    case 'f': //-- Filtered frame
 		debugValue = 0;
 		break;
 	    case 'b': //-- By-pass filters
 		debugValue = -1;
+		break;
+	    case 'd': //-- hardcoded filter
+		debugValue = 2;
+		break;
+	    case 's': //-- thresholded hand
+		debugValue = 3;
+		break;
+	    case 'a': //-- blobs + harcoded filter
+		debugValue = 4;
 		break;
 	    case (char) 27:
 		stop = true;
@@ -129,65 +146,135 @@ return 0;
 }
 
 
-void processFrame( cv::Mat& src, cv::Mat& dst, int& thresholdValue, int debug)
+
+
+void processFrame( cv::Mat& src, cv::Mat& dst, int hueThValue, int hueRangeValue, int satThValue, int valThLower, int valThUpper, int debug)
 {
 
-    if (debug == 0 )
+    if (debug == 0 || debug == 4)
     {
 	//canny( src, dst);
 	//substractor(src, dst);
 
+	//-- Get hand thresholded:
+	cv::Mat thresholdedHand;
+	if (debug == 0)
+	{
+	    getThresholdedHand( src, thresholdedHand, hueThValue, hueRangeValue, satThValue, valThLower, valThUpper);
+	}
+	else
+	{
+	    //-- Obtain HSV channels:
+	    //------------------------------------------------------------------------------------------------
+	    cv::Mat hsv;
+	    cv::cvtColor( src, hsv, CV_BGR2HSV);
 
-	//-- Obtain HSV channels:
-	//------------------------------------------------------------------------------------------------
-	cv::Mat srcHSV;
-	cv::cvtColor( src, srcHSV, CV_BGR2HSV);
+	    //-- Hardcoded skin value:
+	    cv::inRange(hsv, cv::Scalar(0, 58, 89), cv::Scalar(25, 173, 229), thresholdedHand);
+	}
 
-	std::vector<cv::Mat> hsv;
-	cv::split( srcHSV, hsv);
-	cv::Mat hue = hsv[0], sat = hsv[1], val = hsv[2];
+	//-- Filter out blobs:
+	cv::Mat blobsFiltered;
+	cv::Mat kernel = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5) );
+	cv::morphologyEx( thresholdedHand, blobsFiltered, cv::MORPH_CLOSE, kernel);
 
+	//-- Find contours:
+	std::vector< std::vector< cv::Point> > contours;
+	std::vector<cv::Vec4i> hierarchy;
 
-	//-- Threshold channels:
-	//------------------------------------------------------------------------------------------------
-	cv::Mat hueThresh, satThresh, valThresh;
+	cv::findContours( blobsFiltered, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cv::Point(0,0) );
+	//std::cout << "Found " << contours.size() << " contours." << std::endl;
 
-	//-- Hue
-	int interval = 10;
-	cv::inRange( hue, thresholdValue-interval/2 < 0 ? 180-thresholdValue : thresholdValue-interval/2,
-			      thresholdValue+interval/2 > 180 ? thresholdValue : thresholdValue+interval/2,
-			      hueThresh);
+	//-- Find largest contour:
+	int largestId = 0, largestValue = 0;
+	for (int i = 0; i < contours.size(); i++)
+	    if ( contours[i].size() > largestValue )
+	    {
+		largestId = i;
+		largestValue = contours[i].size();
+	    }
 
-	cv::imshow( "Hue", hueThresh);
+	//-- Draw contours:
+	//dst = cv::Mat::zeros( blobsFiltered.size(), CV_8UC3);
+	cv::cvtColor( blobsFiltered, dst, CV_GRAY2BGR );
+	//for (int i = 0; i < contours.size(); i++)
+	    cv::drawContours( dst, contours, largestId, cv::Scalar( 0, 0, 255), 2, 8);
+	    cv::fillConvexPoly( dst, contours[largestId], cv::Scalar( 255, 255, 255));
 
-	//-- Saturation
-	cv::threshold( sat, satThresh, 30, 0, cv::THRESH_TOZERO);
-	cv::imshow( "Sat", satThresh);
+	//-- Draw rotated rectangle:
+	cv::RotatedRect minRect = cv::minAreaRect( contours[largestId]);
+	cv::Point2f rect_points[4]; minRect.points( rect_points );
+	for( int j = 0; j < 4; j++ )
+	    cv::line( dst, rect_points[j], rect_points[(j+1)%4], cv::Scalar(255, 0, 0) , 1, 8 );
 
-	//-- Value
-	cv::threshold( val, valThresh, 60, 0, cv::THRESH_TOZERO);
-	cv::imshow( "Val", valThresh);
-
-
-	//-- Joint channels and convert back to BGR
-	//------------------------------------------------------------------------------------------------
-	std::vector<cv::Mat> hsvThresh;
-	hsvThresh.push_back(hueThresh);
-	hsvThresh.push_back(satThresh);
-	hsvThresh.push_back(valThresh);
-
-	cv::merge( hsvThresh, dst);
-	cv::cvtColor( dst, dst, CV_HSV2BGR);
-
-	//dst = satThresh;
+	//-- Bounding rectangle:
+	//cv::rectangle( dst, cv::boundingRect( contours[largestId]), cv::Scalar(255, 0, 0) , 1, 8 );
     }
+
     else if (debug == -1)
     {
 	//-- Do nothing
 	return;
     }
+    else if (debug == 2)
+    {
 
+	//-- Obtain HSV channels:
+	//------------------------------------------------------------------------------------------------
+	cv::Mat hsv;
+	cv::cvtColor( src, hsv, CV_BGR2HSV);
+
+	//-- Hardcoded skin value:
+	cv::inRange(hsv, cv::Scalar(0, 58, 89), cv::Scalar(25, 173, 229), dst);
+    }
+    else if (debug == 3 )
+    {
+	//-- Get hand thresholded:
+	getThresholdedHand( src, dst, hueThValue, hueRangeValue, satThValue, valThLower, valThUpper);
+    }
 }
+
+
+void getThresholdedHand(cv::Mat& src, cv::Mat& dst, int hueThValue, int hueRangeValue, int satThValue, int valThLower, int valThUpper )
+{
+    //-- Obtain HSV channels:
+    //------------------------------------------------------------------------------------------------
+    cv::Mat srcHSV;
+    cv::cvtColor( src, srcHSV, CV_BGR2HSV);
+
+    std::vector<cv::Mat> hsv;
+    cv::split( srcHSV, hsv);
+    cv::Mat hue = hsv[0], sat = hsv[1], val = hsv[2];
+
+
+    //-- Threshold channels:
+    //------------------------------------------------------------------------------------------------
+    cv::Mat hueThresh, satThresh, valThresh;
+
+    //-- Hue
+    filterHueRange( hue, hueThresh, hueThValue, hueRangeValue);
+    //cv::imshow( "Hue", hueThresh);
+
+    //-- Saturation
+    cv::threshold( sat, satThresh, satThValue, 255, cv::THRESH_BINARY);
+    //cv::imshow( "Sat", satThresh);
+
+    //-- Value
+    if (valThUpper == -1 )
+    {
+	cv::threshold( val, valThresh, valThLower, 255, cv::THRESH_BINARY);
+    }
+    else
+    {
+	cv::inRange( val, valThLower, valThUpper, valThresh);
+    }
+    //cv::imshow( "Val", valThresh);
+
+    //-- Apply an 'and' operation to the three thresholds
+    cv::bitwise_and( satThresh, valThresh, dst);
+    cv::bitwise_and( hueThresh, dst, dst);
+}
+
 
 void drawCalibrationMarks( cv::Mat& input, cv::Mat& output, int halfSide, cv::Scalar color)
 {
@@ -204,32 +291,5 @@ void drawCalibrationMarks( cv::Mat& input, cv::Mat& output, int halfSide, cv::Sc
 		   );
 }
 
-void getHue( cv::Mat& src, cv::Mat& hue)
-{
-    //-- Convert the image to HSV
-    cv::Mat dst;
-    cv::cvtColor( src, dst, CV_BGR2HSV);
 
-    //-- Extract hue channel
-    std::vector<cv::Mat> hsv;
-    cv::split( dst, hsv);
-    hue = hsv[0];
 
-}
-
-int getSkinHueValue( cv::Mat& ROI , int& result )
-{
-    //-- Obtain hue channel:
-    cv::Mat hue;
-    getHue( ROI, hue);
-
-    //-- Calculate average value
-    int average = 0;
-
-    for (int i = 0; i < hue.cols; i++ )
-	for( int j = 0; j < hue.rows; j++)
-	    average += (int) hue.at<unsigned char>(i, j);
-
-    average /= (hue.cols * hue.rows);
-    result = average;
-}
