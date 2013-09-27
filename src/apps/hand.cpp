@@ -9,7 +9,7 @@ int main( int argc, char * argv[] )
 {
     //-- Setup video
     //--------------------------------------------------------------
-
+    cv::Mat subs;
     cv::VideoCapture cap;
 
     //-- Open video source
@@ -40,14 +40,13 @@ int main( int argc, char * argv[] )
     //--------------------------------------------------------------------
     bool stop = false;
     int debugValue = 0;
+    HandDetector myHandDetector;
 
     //-- For getting skin hue value:
     int skinValue;
     static const int halfSide = 40;
     int stdDevSkinValue;
 
-   // cv::BackgroundSubtractorMOG2 substractor;
-   // substractor.bShadowDetection = false;
 
     //-- Calibration loop
     //--------------------------------------------------------------------
@@ -109,7 +108,9 @@ int main( int argc, char * argv[] )
 
 	//-- Process it
 	cv::Mat processed = frame.clone();
-	processFrame( frame, processed, skinValue, stdDevSkinValue, 30, 89, 229,  debugValue);
+	//processFrame( frame, processed, skinValue, stdDevSkinValue, 30, 89, 229,  debugValue);
+
+	myHandDetector( frame, processed);
 
 	//-- Show processed image
 	cv::imshow( "Processed Stream", processed);
@@ -154,7 +155,6 @@ void processFrame( cv::Mat& src, cv::Mat& dst, int hueThValue, int hueRangeValue
     if (debug == 0 || debug == 4)
     {
 	//canny( src, dst);
-	//substractor(src, dst);
 
 	//-- Get hand thresholded:
 	cv::Mat thresholdedHand;
@@ -183,7 +183,6 @@ void processFrame( cv::Mat& src, cv::Mat& dst, int hueThValue, int hueRangeValue
 	std::vector<cv::Vec4i> hierarchy;
 
 	cv::findContours( blobsFiltered, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cv::Point(0,0) );
-	//std::cout << "Found " << contours.size() << " contours." << std::endl;
 
 	//-- Find largest contour:
 	int largestId = 0, largestValue = 0;
@@ -198,7 +197,7 @@ void processFrame( cv::Mat& src, cv::Mat& dst, int hueThValue, int hueRangeValue
 	//dst = cv::Mat::zeros( blobsFiltered.size(), CV_8UC3);
 	cv::cvtColor( blobsFiltered, dst, CV_GRAY2BGR );
 	//for (int i = 0; i < contours.size(); i++)
-	    cv::drawContours( dst, contours, largestId, cv::Scalar( 0, 0, 255), 2, 8);
+	    cv::drawContours( dst, contours, largestId, cv::Scalar( 0, 0, 255), 1, 8);
 	    cv::fillConvexPoly( dst, contours[largestId], cv::Scalar( 255, 255, 255));
 
 	//-- Draw rotated rectangle:
