@@ -77,3 +77,61 @@ void filterHueRange( cv::Mat& hueSrc, cv::Mat& dst, int hueValue, int range)
     }
 }
 
+void drawHistogram(const cv::Mat& img)
+{
+    int bins = 256;
+    int nc = img.channels();
+    std::vector<cv::Mat> hist( nc);
+    std::vector<cv::Mat> canvas( nc);
+    int hmax[3] = {0,0,0};
+
+    for (int i = 0; i < hist.size(); i++)
+	hist[i] = cv::Mat::zeros(1, bins, CV_32SC1);
+
+    for (int i = 0; i < img.rows; i++)
+    {
+	for (int j = 0; j < img.cols; j++)
+	{
+	    for (int k = 0; k < nc; k++)
+	    {
+		uchar val = nc == 1 ? img.at<uchar>(i,j) : img.at<cv::Vec3b>(i,j)[k];
+		hist[k].at<int>(val) += 1;
+	    }
+	}
+    }
+
+    for (int i = 0; i < nc; i++)
+    {
+	for (int j = 0; j < bins-1; j++)
+	    hmax[i] = hist[i].at<int>(j) > hmax[i] ? hist[i].at<int>(j) : hmax[i];
+    }
+
+    const char* wname[3] = { "channel 1", "channel 2", "channel 3" };
+    cv::Scalar colors[3] = { cv::Scalar(255,0,0), cv::Scalar(0,255,0), cv::Scalar(0,0,255) };
+
+    for (int i = 0; i < nc; i++)
+    {
+	canvas[i] = cv::Mat::ones(125, bins, CV_8UC3);
+
+	for (int j = 0, rows = canvas[i].rows; j < bins-1; j++)
+	{
+	    cv::line(
+			canvas[i],
+			cv::Point(j, rows),
+			cv::Point(j, rows - (hist[i].at<int>(j) * rows/hmax[i])),
+			nc == 1 ? cv::Scalar(200,200,200) : colors[i],
+			1, 8, 0
+			);
+	}
+
+	cv::imshow(nc == 1 ? "value" : wname[i], canvas[i]);
+    }
+}
+
+void drawHistogramHSV(const cv::Mat &image)
+{
+    cv::Mat image_hsv;
+    cv::cvtColor( image, image_hsv, CV_BGR2HSV);
+
+    drawHistogram( image_hsv);
+}

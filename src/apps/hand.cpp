@@ -40,12 +40,12 @@ int main( int argc, char * argv[] )
     //--------------------------------------------------------------------
     bool stop = false;
     int debugValue = 0;
-    HandDetector myHandDetector;
 
-    //-- For getting skin hue value:
-    int skinValue;
+    //-- These are the new, compact variables
+    HandDetector handDetector;
+    cv::Scalar lower, upper;
     static const int halfSide = 40;
-    int stdDevSkinValue;
+
 
 
     //-- Calibration loop
@@ -78,15 +78,10 @@ int main( int argc, char * argv[] )
 					   cv::Point( image_cols / 2 + halfSide,  image_rows/2 + halfSide)));
 	    cv::imshow( "Test", ROI);
 
-	    //-- Get average color value
-	    skinValue = ceil(getAverage( ROI) );
-	    std::cout << "Skin average value is: " << skinValue << std::endl;
+	    handDetector.calibrate( ROI );
+	    handDetector.getCalibration( lower, upper);
 
-	    //-- Get std deviation of hue
-	    cv::Mat hue;
-	    getHue( ROI, hue);
-	    stdDevSkinValue = 6*ceil(getStdDev( hue) );
-	    std::cout << "Skin 6 sigma is: " << stdDevSkinValue << std::endl;
+	    drawHistogramHSV( ROI );
 
 	    //-- Close window
 	    cvDestroyWindow( "Calibrating skin");
@@ -97,7 +92,6 @@ int main( int argc, char * argv[] )
     //-- Main loop
     //--------------------------------------------------------------------
     stop = false;
-
     while(!stop)
     {
 	//-- Get current frame
@@ -108,9 +102,31 @@ int main( int argc, char * argv[] )
 
 	//-- Process it
 	cv::Mat processed = frame.clone();
-	//processFrame( frame, processed, skinValue, stdDevSkinValue, 30, 89, 229,  debugValue);
+	switch( debugValue )
+	{
+	    case 0:
+		handDetector.calibrate();
+		handDetector( frame, processed);
+		cv::putText( processed, "Default values", cv::Point(0, 18),
+			     cv::FONT_HERSHEY_SIMPLEX, 0.33, cv::Scalar(0, 0, 255));
+		break;
 
-	myHandDetector( frame, processed);
+	    case 1:
+		handDetector.calibrate( lower, upper);
+		handDetector( frame, processed);
+		/*
+		std::stringstream message;
+		message << "Custom values: " << lower << ", " << upper ;
+		std::string mssg; message >> mssg;
+		cv::putText( processed, mssg.c_str(), cv::Point(0, 18),
+			     cv::FONT_HERSHEY_SIMPLEX, 0.33, cv::Scalar(0, 0, 255));
+		*/
+		break;
+
+	    default:
+		break;
+	   }
+
 
 	//-- Show processed image
 	cv::imshow( "Processed Stream", processed);
@@ -127,13 +143,7 @@ int main( int argc, char * argv[] )
 		debugValue = -1;
 		break;
 	    case 'd': //-- hardcoded filter
-		debugValue = 2;
-		break;
-	    case 's': //-- thresholded hand
-		debugValue = 3;
-		break;
-	    case 'a': //-- blobs + harcoded filter
-		debugValue = 4;
+		debugValue = 1;
 		break;
 	    case (char) 27:
 		stop = true;

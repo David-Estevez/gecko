@@ -15,4 +15,7 @@ void filterHueRange( cv::Mat& hueSrc, cv::Mat& dst, int hueValue, int range);
 double getAverage( cv::Mat &ROI);
 double getStdDev( cv::Mat& ROI );
 
+void drawHistogram(const cv::Mat& image);
+void drawHistogramHSV( const cv::Mat& image);
+
 #endif // HANDUTILS_H

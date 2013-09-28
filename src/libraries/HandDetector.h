@@ -1,4 +1,4 @@
-#include <opencv2/opencv.hpp>
+ #include <opencv2/opencv.hpp>
 
 class HandDetector {
    public:
@@ -7,9 +7,9 @@ class HandDetector {
 	HandDetector( cv::Mat& ROI);
 
 	//-- Calibration functions
-	//! \todo Check if values for hue are out of the limits
 	void calibrate( cv::Mat& ROI);
-	void calibrate( cv::Scalar lower_limit, cv::Scalar upper_limit);
+	void calibrate( cv::Scalar lower_limit = cv::Scalar( 0, 58, 89), cv::Scalar upper_limit = cv::Scalar( 25, 173, 229) );
+	void getCalibration( cv::Scalar& lower_limit, cv::Scalar& upper_limit);
 
 	//-- Hand-detection
 	void operator()(const cv::Mat& src, cv::Mat& dst);
@@ -26,6 +26,7 @@ class HandDetector {
     private:
 	//-- Statistical functions:
 	int average( cv::Mat& ROI);
+	int median( cv::Mat& ROI);
 	int stdDeviation( cv::Mat& ROI);
 
 	//-- Drawing result ?
@@ -34,6 +35,7 @@ class HandDetector {
 	//-- HSV limits
 	cv::Scalar lower_limit;
 	cv::Scalar upper_limit;
+	bool hue_invert;
 
 	//-- HSV sigma multiplier
 	int hue_sigma_mult;
