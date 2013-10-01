@@ -13,15 +13,20 @@ class HandDetector {
 
 	//-- Hand-detection
 	void operator()(const cv::Mat& src, cv::Mat& dst);
-	//! \todo If dst is not allocated, make a clone of src and use it
 	void find(const cv::Mat& src, cv::Mat& dst);
 
+	//-- Find hand functions
+	//! \todo Filter S only by lowerst value (grey); filter V at both ends.
+	void getContours(const cv::Mat& src, std::vector< std::vector < cv::Point > >& contours, cv::Mat& dst);
+
 	//-- Display configuration
+	/*
 	void setDisplayBoundingBox( const bool displayBoundingBox);
 	void setDisplayBoundingRotRect( const bool displayBoundingRotRect);
 	void setDisplayContour( const bool displayContour);
 	void setDisplayThreshold( const bool displayThreshold);
 	void setDisplay( const bool displayBoundingBox, const bool displayBoundingRotRect, const bool displayContour, const bool displayThreshold);
+	*/
 
     private:
 	//-- Statistical functions:
@@ -29,8 +34,8 @@ class HandDetector {
 	int median( cv::Mat& ROI);
 	int stdDeviation( cv::Mat& ROI);
 
-	//-- Drawing result ?
-	void draw( const cv::Mat& src, const cv::Mat& dst);
+	//-- Filter contours:
+	void filterContours( std::vector< std::vector < cv::Point > >& contours , std::vector< std::vector < cv::Point > >& filteredContours);
 
 	//-- HSV limits
 	cv::Scalar lower_limit;
@@ -43,8 +48,11 @@ class HandDetector {
 	int val_sigma_mult;
 
 	//-- Config flags
+	/*
 	bool displayBoundingBox;
 	bool displayBoundingRotRect;
 	bool displayContour;
 	bool displayThreshold;
+	*/
+
 };

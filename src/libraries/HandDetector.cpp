@@ -17,10 +17,12 @@ HandDetector::HandDetector()
     hue_invert = false;
 
     //-- Display options:
+    /*
     displayBoundingBox = false;
     displayBoundingRotRect = true;
     displayContour = true;
     displayThreshold = true;
+    */
 }
 
 HandDetector::HandDetector( cv::Mat& ROI)
@@ -34,10 +36,12 @@ HandDetector::HandDetector( cv::Mat& ROI)
     calibrate( ROI );
 
     //-- Display options:
+    /*
     displayBoundingBox = false;
     displayBoundingRotRect = true;
     displayContour = true;
     displayThreshold = true;
+    */
 }
 
 
@@ -152,61 +156,16 @@ void HandDetector::find(const cv::Mat &src, cv::Mat &dst)
     //-- Filtering
     //----------------------------------------------------------------------------------------------------
     //-- Filter out blobs:
-    cv::Mat blobsFiltered;
     cv::Mat kernel = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5) );
-    cv::morphologyEx( thresholdedHand, blobsFiltered, cv::MORPH_CLOSE, kernel);
-
-    //-- Contours:
-    //----------------------------------------------------------------------------------------------------
-    //-- Find contours:
-    std::vector< std::vector< cv::Point> > contours;
-    cv::findContours( blobsFiltered, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cv::Point(0,0) );
-
-    //-- Find largest contour:
-    int largestId = 0, largestValue = 0;
-    for (int i = 0; i < contours.size(); i++)
-	if ( contours[i].size() > largestValue )
-	{
-	    largestId = i;
-	    largestValue = contours[i].size();
-	}
-
-    //-- Display things:
-    //---------------------------------------------------------------------------------------------------
-    if (contours.size() > 0 )
-	if ( displayThreshold && ( displayBoundingBox || displayBoundingRotRect || displayContour) )
-	{
-	    cv::cvtColor( blobsFiltered, dst, CV_GRAY2BGR );
-
-	    //-- Draw contours:
-	    if (displayContour  )
-	    {
-		cv::drawContours( dst, contours, largestId, cv::Scalar( 0, 0, 255), 1, 8);
-		cv::fillConvexPoly( dst, contours[largestId], cv::Scalar( 255, 255, 255));
-	    }
-
-	    //-- Draw rotated rectangle:
-	    if ( displayBoundingRotRect )
-	    {
-		cv::RotatedRect minRect = cv::minAreaRect( contours[largestId]);
-		cv::Point2f rect_points[4]; minRect.points( rect_points );
-		for( int j = 0; j < 4; j++ )
-		    cv::line( dst, rect_points[j], rect_points[(j+1)%4], cv::Scalar(255, 0, 0) , 1, 8 );
-	    }
-
-	    //-- Bounding rectangle:
-	    if (displayBoundingBox)
-		cv::rectangle( dst, cv::boundingRect( contours[largestId]), cv::Scalar(255, 0, 0) , 1, 8 );
-	}
+    cv::morphologyEx( thresholdedHand, dst, cv::MORPH_CLOSE, kernel);
 
 }
-
 
 
 //--------------------------------------------------------------------------------------------------------
 //-- Display configuration
 //--------------------------------------------------------------------------------------------------------
-
+/*
 void HandDetector::setDisplayBoundingBox( const bool displayBoundingBox)
 {
     this->displayBoundingBox = displayBoundingBox;
@@ -234,7 +193,7 @@ void HandDetector::setDisplay( const bool displayBoundingBox, const bool display
     this->displayContour = displayContour;
     this->displayThreshold = displayThreshold;
 }
-
+*/
 
 //--------------------------------------------------------------------------------------------------------
 //-- Statistical functions:
@@ -293,3 +252,7 @@ int HandDetector::median(cv::Mat &ROI)
 	return ceil(mean);
     }
 }
+
+
+
+
