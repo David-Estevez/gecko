@@ -16,13 +16,6 @@ HandDetector::HandDetector()
     upper_limit = cv::Scalar( 25, 173, 229);
     hue_invert = false;
 
-    //-- Display options:
-    /*
-    displayBoundingBox = false;
-    displayBoundingRotRect = true;
-    displayContour = true;
-    displayThreshold = true;
-    */
 }
 
 HandDetector::HandDetector( cv::Mat& ROI)
@@ -34,14 +27,6 @@ HandDetector::HandDetector( cv::Mat& ROI)
 
     //-- Skin color limits
     calibrate( ROI );
-
-    //-- Display options:
-    /*
-    displayBoundingBox = false;
-    displayBoundingRotRect = true;
-    displayContour = true;
-    displayThreshold = true;
-    */
 }
 
 
@@ -60,22 +45,22 @@ void HandDetector::calibrate(cv::Mat &ROI)
     cv::split( HSV_ROI, HSV_splitted);
 
     //-- Calculate values:
-    int hue_mean = average( HSV_splitted[0] );
-    int sat_mean = average( HSV_splitted[1] );
-    int val_mean = average( HSV_splitted[2] );
+    int hue_mean = median( HSV_splitted[0] );
+    //int sat_mean = median( HSV_splitted[1] );
+    //int val_mean = median( HSV_splitted[2] );
 
     int hue_sigma = stdDeviation( HSV_splitted[0] );
-    int sat_sigma = stdDeviation( HSV_splitted[1] );
-    int val_sigma = stdDeviation( HSV_splitted[2] );
+    //int sat_sigma = stdDeviation( HSV_splitted[1] );
+    //int val_sigma = stdDeviation( HSV_splitted[2] );
 
     //-- Calculate limits
     int hue_lower_limit = hue_mean - hue_sigma_mult * hue_sigma / 2;
-    int sat_lower_limit = sat_mean - sat_sigma_mult * sat_sigma / 2;
-    int val_lower_limit = val_mean - val_sigma_mult * val_sigma / 2;
+    //int sat_lower_limit = sat_mean - sat_sigma_mult * sat_sigma / 2;
+    //int val_lower_limit = val_mean - val_sigma_mult * val_sigma / 2;
 
     int hue_upper_limit = hue_mean + hue_sigma_mult * hue_sigma / 2;
-    int sat_upper_limit = sat_mean + sat_sigma_mult * sat_sigma / 2;
-    int val_upper_limit = val_mean + val_sigma_mult * val_sigma / 2;
+    //int sat_upper_limit = sat_mean + sat_sigma_mult * sat_sigma / 2;
+    //int val_upper_limit = val_mean + val_sigma_mult * val_sigma / 2;
 
     //-- Check the limits of the values
     if ( hue_lower_limit < 0)
@@ -94,15 +79,18 @@ void HandDetector::calibrate(cv::Mat &ROI)
     }
     else
 	hue_invert = false;
-
+/*
     if ( sat_lower_limit < 0) sat_lower_limit = 0;
     if ( val_lower_limit < 0) val_lower_limit = 0;
     if ( sat_upper_limit > 255 ) sat_upper_limit = 255;
     if ( val_lower_limit > 255 ) val_upper_limit = 255;
-
+*/
     //-- Compose the values:
-    lower_limit = cv::Scalar( hue_lower_limit, sat_lower_limit, val_lower_limit );
-    upper_limit = cv::Scalar( hue_upper_limit, sat_upper_limit, val_upper_limit );
+  //  lower_limit = cv::Scalar( hue_lower_limit, sat_lower_limit, val_lower_limit );
+  //  upper_limit = cv::Scalar( hue_upper_limit, sat_upper_limit, val_upper_limit );
+
+    lower_limit = cv::Scalar( hue_lower_limit, 58, 89  );
+    upper_limit = cv::Scalar( hue_upper_limit, 173, 229 );
 
     std::cout << "[Debug] Lower limit is: " << lower_limit << std::endl;
     std::cout << "[Debug] Upper limit is: " << upper_limit << std::endl;
@@ -161,39 +149,6 @@ void HandDetector::find(const cv::Mat &src, cv::Mat &dst)
 
 }
 
-
-//--------------------------------------------------------------------------------------------------------
-//-- Display configuration
-//--------------------------------------------------------------------------------------------------------
-/*
-void HandDetector::setDisplayBoundingBox( const bool displayBoundingBox)
-{
-    this->displayBoundingBox = displayBoundingBox;
-}
-
-void HandDetector::setDisplayBoundingRotRect( const bool displayBoundingRotRect)
-{
-    this->displayBoundingRotRect = displayBoundingRotRect;
-}
-
-void HandDetector::setDisplayContour( const bool displayContour)
-{
-    this->displayContour = displayContour;
-}
-
-void HandDetector::setDisplayThreshold( const bool displayThreshold)
-{
-    this->displayThreshold = displayThreshold;
-}
-
-void HandDetector::setDisplay( const bool displayBoundingBox, const bool displayBoundingRotRect, const bool displayContour, const bool displayThreshold)
-{
-    this->displayBoundingBox = displayBoundingBox;
-    this->displayBoundingRotRect = displayBoundingRotRect;
-    this->displayContour = displayContour;
-    this->displayThreshold = displayThreshold;
-}
-*/
 
 //--------------------------------------------------------------------------------------------------------
 //-- Statistical functions:

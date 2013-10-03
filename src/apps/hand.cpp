@@ -45,6 +45,7 @@ int main( int argc, char * argv[] )
     HandDetector handDetector;
     cv::Scalar lower, upper;
     static const int halfSide = 40;
+    cv::RotatedRect minRect;
 
     //-- Angle of hand
     float handAngle = 0;
@@ -79,7 +80,7 @@ int main( int argc, char * argv[] )
 
 	    cv::Mat ROI = frame( cv::Rect( cv::Point( image_cols / 2 - halfSide,  image_rows/2 - halfSide ),
 					   cv::Point( image_cols / 2 + halfSide,  image_rows/2 + halfSide)));
-	    cv::imshow( "Test", ROI);
+	    //cv::imshow( "Test", ROI);
 
 	    handDetector.calibrate( ROI );
 	    handDetector.getCalibration( lower, upper);
@@ -119,13 +120,6 @@ int main( int argc, char * argv[] )
 	    case 1:
 		handDetector.calibrate( lower, upper);
 		handDetector( frame, processed);
-		/*
-		std::stringstream message;
-		message << "Custom values: " << lower << ", " << upper ;
-		std::string mssg; message >> mssg;
-		cv::putText( processed, mssg.c_str(), cv::Point(0, 18),
-			     cv::FONT_HERSHEY_SIMPLEX, 0.33, cv::Scalar(0, 0, 255));
-		*/
 		break;
 
 	    default:
@@ -143,24 +137,31 @@ int main( int argc, char * argv[] )
 
 	//-- Filter contours:
 	std::vector<std::vector<cv::Point> > filteredContours;
-	const int min = 500, max = 1400;
+	const int min = 350, max = 1800;
 
 	for (int i = 0; i < contours.size(); i++)
 	    if ( (int) contours[i].size() > min && (int) contours[i].size() < max )
 		filteredContours.push_back( contours[i] );
 
-	//std::cout << "[Debug] Contours before: " << contours.size() << " Contours after: " << filteredContours.size() << std::endl;
+	std::cout << "[Debug] Contours before: " << contours.size() << " Contours after: " << filteredContours.size() << std::endl;
 
 
 	//-- Find largest contour:
-	int largestId = 0, largestValue = 0;
-	for (int i = 0; i < contours.size(); i++)
-	    if ( (int) contours[i].size() > largestValue )
+	int largestId = 0;
+	if ( (int) filteredContours.size() > 0)
+	{
+
+	int largestValue = (int) filteredContours[0].size();
+	for (int i = 0; i < filteredContours.size(); i++)
+	    if ( (int) filteredContours[i].size() > largestValue )
 	    {
 		largestId = i;
-		largestValue = (int) contours[i].size();
+		largestValue = (int) filteredContours[i].size();
 	    }
-	//std::cout << "[Debug] Number of contours: " << (int) contours.size() << " Largest contour: " << (int) largestValue << std::endl;
+	std::cout << "[Debug] Number of contours: " << (int) contours.size() << " Largest contour: " << (int) largestValue << std::endl;
+	}
+	else
+	    std::cerr << "All filtered!" << std::endl;
 
 	//-- Draw things:
 	const bool displayContour = true;
@@ -170,30 +171,47 @@ int main( int argc, char * argv[] )
 	if ( display.total() == 0)
 	    display = frame.clone();
 
-	if ( contours.size() > 0 )
+	if ( (int) filteredContours.size() > 0 )
 	{
 	    //-- Draw contours:
 	    if (displayContour  )
 	    {
-		cv::drawContours( display, contours, largestId, cv::Scalar( 0, 0, 255), 1, 8);
+		cv::drawContours( display, filteredContours, largestId, cv::Scalar( 0, 0, 255), 1, 8);
 		//cv::fillConvexPoly( dst, contours[largestId], cv::Scalar( 255, 255, 255));
 	    }
 
 	    //-- Draw rotated rectangle:
 	    if ( displayBoundingRotRect )
 	    {
-		cv::RotatedRect minRect = cv::minAreaRect( contours[largestId]);
+		minRect = cv::minAreaRect( filteredContours[largestId]);
 		cv::Point2f rect_points[4]; minRect.points( rect_points );
 		for( int j = 0; j < 4; j++ )
 		    cv::line( display, rect_points[j], rect_points[(j+1)%4], cv::Scalar(255, 0, 0) , 1, 8 );
 
-		handAngle = getAngle(minRect);
+		double newHandAngle = getAngle(minRect);
+		handAngle = newHandAngle < 0 ? handAngle : newHandAngle;
 		std::cout << "[" << handAngle << "]" << std::endl;
+
+
+		//-- Show hand ROI
+		//! \todo This explodes when rectangle is out of the frame. :P
+		try{
+
+		    cv::Rect rect  = minRect.boundingRect();
+		    std::cout << "Frame: " << frame.size() << " Rect: " << rect.size() << std::endl;
+		    cv::Mat ROI_hand = frame( rect).clone();
+		    cv::imshow("hand", ROI_hand);
+		}
+		catch (const std::exception& ex)
+		{
+		    std::cerr << "An exception occurred! :P" << std::endl;
+		}
 	    }
 
 	    //-- Bounding rectangle:
 	    if (displayBoundingBox)
-		cv::rectangle( display, cv::boundingRect( contours[largestId]), cv::Scalar(255, 0, 0) , 1, 8 );
+		cv::rectangle( display, cv::boundingRect(filteredContours[largestId]), cv::Scalar(255, 0, 0) , 1, 8 );
+
 	}
 	else
 	    std::cerr << "No contours found!" << std::endl;
@@ -220,9 +238,6 @@ int main( int argc, char * argv[] )
 	std::string text = ss.str();
 	cv::putText( display, text.c_str(), cv::Point(0, 18),
 		     cv::FONT_HERSHEY_SIMPLEX, 0.33, cv::Scalar(0, 0, 255));
-	/*
-
-	*/
 
 	//-----------------------------------------------------------------------------------------------------
 	//-- Show processed image
@@ -252,9 +267,6 @@ int main( int argc, char * argv[] )
 	    case 'f': //-- Filtered frame
 		debugValue = 0;
 		break;
-	    /*case 'b': //-- By-pass filters
-		debugValue = -1;
-		break;*/
 	    case 'd': //-- hardcoded filter
 		debugValue = 1;
 		break;
