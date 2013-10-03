@@ -108,3 +108,38 @@ double getAngle( cv::RotatedRect boundingRect)
    return atan2( -vector_y , vector_x)*180/3.1415;
 }
 
+void filteredContour( cv::Mat& src, std::vector< std::vector<cv::Point> >& handContour, const int min, const int max)
+{
+    std::vector<std::vector<cv::Point> > contours;
+    cv::findContours(src, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cv::Point(0,0) );
+
+    std::vector<std::vector<cv::Point> > filteredContours;
+    for (int i = 0; i < contours.size(); i++)
+	if ( (int) contours[i].size() > min && (int) contours[i].size() < max )
+	    filteredContours.push_back( contours[i] );
+
+    std::cout << "[Debug] Contours before: " << contours.size() << " Contours after: " << filteredContours.size() << std::endl;
+
+
+    //-- Find largest contour:
+    int largestId = 0;
+    if ( (int) filteredContours.size() > 0)
+    {
+
+    int largestValue = (int) filteredContours[0].size();
+    for (int i = 0; i < filteredContours.size(); i++)
+	if ( (int) filteredContours[i].size() > largestValue )
+	{
+	    largestId = i;
+	    largestValue = (int) filteredContours[i].size();
+	}
+    std::cout << "[Debug] Number of contours: " << (int) contours.size() << " Largest contour: " << (int) largestValue << std::endl;
+    }
+    else
+	std::cerr << "All filtered!" << std::endl;
+
+
+    handContour.clear();
+    if ( (int) filteredContours.size() > 0)
+	handContour.push_back( filteredContours[largestId]);
+}
