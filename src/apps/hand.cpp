@@ -148,7 +148,7 @@ int main( int argc, char * argv[] )
 	    //cv::fillConvexPoly( dst, contours[largestId], cv::Scalar( 255, 255, 255));
 
 	    //-- Draw rotated rectangle:
-	    cv::Rect minRect = cv::minAreaRect( handContour[0]);
+	    cv::RotatedRect minRect = cv::minAreaRect( handContour[0]);
 	    cv::Point2f rect_points[4]; minRect.points( rect_points );
 	    for( int j = 0; j < 4; j++ )
 		cv::line( display, rect_points[j], rect_points[(j+1)%4], cv::Scalar(255, 0, 0) , 1, 8 );
