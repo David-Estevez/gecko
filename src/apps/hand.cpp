@@ -194,10 +194,11 @@ int main( int argc, char * argv[] )
 
 
 		//-- Show hand ROI
+		/*
 		//! \todo This explodes when rectangle is out of the frame. :P
 		try{
 
-		    cv::Rect rect  = minRect.boundingRect();
+		    cv::Rect rect  =  cv::boundingRect(filteredContours[largestId]);
 		    std::cout << "Frame: " << frame.size() << " Rect: " << rect.size() << std::endl;
 		    cv::Mat ROI_hand = frame( rect).clone();
 		    cv::imshow("hand", ROI_hand);
@@ -206,6 +207,11 @@ int main( int argc, char * argv[] )
 		{
 		    std::cerr << "An exception occurred! :P" << std::endl;
 		}
+		*/
+
+		cv::Rect rect  =  cv::boundingRect(filteredContours[largestId]);
+		cv::Mat ROI_hand = frame( rect).clone();
+		cv::imshow("hand", ROI_hand);
 	    }
 
 	    //-- Bounding rectangle:
