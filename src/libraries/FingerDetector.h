@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <opencv2/opencv.hpp>
+#include<algorithm>
 
 class FingerDetector 
 {
@@ -11,6 +12,12 @@ class FingerDetector
 		//-- Constructors
 		FingerDetector();
 		FingerDetector(cv::Mat &, int &);
+		
+	private:	
+	
+		//-- Geometric functions
+		double distance(cv::Point,cv::Point );
+		std::pair<cv::Point,double> circle(cv::Point, cv::Point, cv::Point);
 		
 };
  
