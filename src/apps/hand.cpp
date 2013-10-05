@@ -3,6 +3,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include "../libraries/HandDetector.h"
 #include "../libraries/handUtils.h"
+#include "../libraries/FingerDetector.h"
 
 int main( int argc, char * argv[] )
 {
@@ -14,19 +15,19 @@ int main( int argc, char * argv[] )
     //-- Open video source
     if ( argc > 1)
     {
-	cap.open( argv[1] );
+		cap.open( argv[1] );
     }
     else
     {
-	cap.open(-1);
-	cap.set(CV_CAP_PROP_BRIGHTNESS, 0.5);
+		cap.open(-1);
+		cap.set(CV_CAP_PROP_BRIGHTNESS, 0.5);
     }
 
     //-- Check if open
     if ( !cap.isOpened() )
     {
-	std::cerr << "Device could not be opened." << std::endl;
-	return(1);
+		std::cerr << "Device could not be opened." << std::endl;
+		return(1);
     }
 
     //-- Get frame rate
@@ -162,6 +163,12 @@ int main( int argc, char * argv[] )
 	    cv::Rect rect  =  cv::boundingRect(handContour[0]);
 	    cv::Mat ROI_hand = frame( rect).clone();
 	    cv::imshow("hand", ROI_hand);
+	    
+	    //-- Finger detector 
+	    int fingers=0; 
+	    FingerDetector (ROI_hand, fingers);
+	    
+	    cv::imshow("fingers", ROI_hand);
 
 	}
 	else
