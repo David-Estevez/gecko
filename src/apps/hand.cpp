@@ -4,6 +4,7 @@
 #include "../libraries/HandDetector.h"
 #include "../libraries/handUtils.h"
 #include "../libraries/FingerDetector.h"
+#include "../libraries/mouse.h"
 
 int main( int argc, char * argv[] )
 {
@@ -51,7 +52,6 @@ int main( int argc, char * argv[] )
     float handAngle = 0;
 
 
-
     //-- Calibration loop
     //--------------------------------------------------------------------
     cv::namedWindow( "Calibrating skin", cv::WINDOW_AUTOSIZE);
@@ -85,7 +85,7 @@ int main( int argc, char * argv[] )
 	    handDetector.calibrate( ROI );
 	    handDetector.getCalibration( lower, upper);
 
-	    drawHistogramHSV( ROI );
+	    //drawHistogramHSV( ROI );
 
 	    //-- Close window
 	    cvDestroyWindow( "Calibrating skin");
@@ -112,7 +112,7 @@ int main( int argc, char * argv[] )
 	cv::Mat processed;
 	switch( debugValue )
 	{
-	    case 0:
+	    case 0: case 2:
 		handDetector.calibrate();
 		handDetector( frame, processed);
 		break;
@@ -134,10 +134,6 @@ int main( int argc, char * argv[] )
 	//-- Obtain contours:
 	std::vector< std::vector<cv::Point> > handContour;
 	filteredContour( processed, handContour);
-
-	//-- Draw things:
-	const bool displayContour = true;
-	const bool displayBoundingRotRect = true;
 
 	if ( display.total() == 0)
 	    display = frame.clone();
@@ -165,10 +161,11 @@ int main( int argc, char * argv[] )
 	    cv::imshow("hand", ROI_hand);
 	    
 	    //-- Finger detector 
+	    /*
 	    int fingers=0; 
 	    FingerDetector (ROI_hand, fingers);
 	    
-	    cv::imshow("fingers", ROI_hand);
+	    cv::imshow("fingers", ROI_hand);*/
 
 	}
 	else
@@ -189,6 +186,10 @@ int main( int argc, char * argv[] )
 
 	    case 1:
 	    ss << "Custom values->" << lower << " " << upper;
+	    break;
+
+	    case 2:
+	    ss << "Tracking hand";
 	    break;
 
 	}
@@ -217,6 +218,22 @@ int main( int argc, char * argv[] )
 	cv::imshow( "Gauge", gauge);
 
 	//-----------------------------------------------------------------------------------------------------
+	//-- Move cursor
+	//-----------------------------------------------------------------------------------------------------
+	if ( debugValue == 2)
+	{
+	    int x = 0, y = 0;
+	    getMousePos( x, y);
+
+	    int height, width;
+	    getDisplayDimensions( width, height);
+
+	    x = width  * cos( rad_ang);
+	    moveMouse(x, y );
+
+	}
+
+	//-----------------------------------------------------------------------------------------------------
 	//-- Decide what to do next depending on key pressed
 	//-----------------------------------------------------------------------------------------------------
 	char key = (char) cv::waitKey( delay);
@@ -227,6 +244,9 @@ int main( int argc, char * argv[] )
 		break;
 	    case 'd': //-- hardcoded filter
 		debugValue = 1;
+		break;
+	    case 'k': //-- Move mouse
+		debugValue = 2;
 		break;
 	    case (char) 27:
 		stop = true;
