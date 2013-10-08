@@ -44,46 +44,51 @@ FingerDetector :: FingerDetector (cv::Mat & ROI, int & fingers)
 
 				if(hullsI[0].size()>0)
 				{
-					cv::Point2f rect_Points[4]; 
-					for( int j = 0; j < 4; j++ )
-						cv::line( ROI, rect_Points[j], rect_Points[(j+1)%4], cv::Scalar(255,0,0), 1, 8 );
+//					cv::Point2f rect_Points[4]; 
+//					for( int j = 0; j < 4; j++ )
+//						cv::line( ROI, rect_Points[j], rect_Points[(j+1)%4], cv::Scalar(255,0,0), 1, 8 );
 					cv::Point rough_palm_center;
 					convexityDefects(final_contours[0], hullsI[0], defects);
 					if(defects.size()>=3)
 					{
-						std::vector<cv::Point> palm_Points;
+						std::vector<cv::Point> palm_contour;
+						
 						for(int j=0;j<defects.size();j++)
 						{
-							int startidx=defects[j][0]; cv::Point ptStart( final_contours[0][startidx] );
-							int endidx=defects[j][1]; cv::Point ptEnd( final_contours[0][endidx] );
-							int faridx=defects[j][2]; cv::Point ptFar( final_contours[0][faridx] );
+							cv::Point startingPoint( final_contours[0][defects[j][0]] );
+							cv::Point endingPoint( final_contours[0][defects[j][1]] );
+							cv::Point ptFar( final_contours[0][defects[j][2]] );
 							
-							//-- Average the defects points
-							rough_palm_center+=ptFar+ptStart+ptEnd;
-							palm_Points.push_back(ptFar);
-							palm_Points.push_back(ptStart);
-							palm_Points.push_back(ptEnd);
+							//-- Add the defects points to the hand center coordinate to average it
+							rough_palm_center+=ptFar+startingPoint+endingPoint;
+							palm_contour.push_back(ptFar);
+							palm_contour.push_back(startingPoint);
+							palm_contour.push_back(endingPoint);
 							
-
 						}
-						//Get palm center by 1st getting the average of all defect cv::Points, this is the rough palm center,
-						//Then U chose the closest 3 cv::Points ang get the circle radius and center formed from them which is the palm center.
+						
+						//-- Average the hand center coordinates (we divide each coordinate by the size of the defects vector multiplied by the three coordinates we sum in each iteration)
+												
 						rough_palm_center.x/=defects.size()*3;
 						rough_palm_center.y/=defects.size()*3;
-						cv::Point closest_pt=palm_Points[0];
+						
+			
+						//--
 						std::vector< std::pair <double,int> > distancevec;
-						for(int i=0;i<palm_Points.size();i++)
-							distancevec.push_back(std::make_pair(distance(rough_palm_center,palm_Points[i]),i));
+						for(int i=0;i<palm_contour.size();i++)
+							distancevec.push_back(std::make_pair(distance(rough_palm_center,palm_contour[i]),i));
+							
+							
+						//-- Sort the vector to obtain the largest circles first
 						sort(distancevec.begin(),distancevec.end());
 
-						//Keep choosing 3 cv::Points till you find a circle with a valid radius
-						//As there is a high chance that the closes cv::Points might be in a linear line or too close that it forms a very large circle
+						//-- Compute the circle for each palm contour obtained until you find one with a radius larger than 0
 						std::pair<cv::Point,double> soln_circle;
 						for(int i=0;i+2<distancevec.size();i++)
 						{
-							cv::Point p1=palm_Points[distancevec[i+0].second];
-							cv::Point p2=palm_Points[distancevec[i+1].second];
-							cv::Point p3=palm_Points[distancevec[i+2].second];
+							cv::Point p1=palm_contour[distancevec[i+0].second];
+							cv::Point p2=palm_contour[distancevec[i+1].second];
+							cv::Point p3=palm_contour[distancevec[i+2].second];
 							soln_circle=circle(p1,p2,p3);//Final palm center,radius
 							if(soln_circle.second!=0)
 								break;
@@ -107,28 +112,29 @@ FingerDetector :: FingerDetector (cv::Mat & ROI, int & fingers)
 						radius/=palm_centers.size();
 
 						//-- The palm center is drawn
-						cv::circle(ROI,palm_center,5,cv::Scalar(144,144,255),3);
-						//cv::circle(ROI,palm_center,radius,cv::Scalar(144,144,255),2);
+						cv::circle(ROI,palm_center,5,cv::Scalar(0,0,255),20);
 
+
+						//
 						//Detect fingers by finding cv::Points that form an almost isosceles triangle with certain thesholds
 
 						for(int j=0;j<defects.size();j++)
 						{
-							int startidx=defects[j][0]; cv::Point ptStart( final_contours[0][startidx] );
-							int endidx=defects[j][1]; cv::Point ptEnd( final_contours[0][endidx] );
+							int startidx=defects[j][0]; cv::Point startingPoint( final_contours[0][startidx] );
+							int endidx=defects[j][1]; cv::Point endingPoint( final_contours[0][endidx] );
 							int faridx=defects[j][2]; cv::Point ptFar( final_contours[0][faridx] );
 							//X o--------------------------o Y
 							double Xdistance=sqrt(distance(palm_center,ptFar));
-							double Ydistance=sqrt(distance(palm_center,ptStart));
-							double length=sqrt(distance(ptFar,ptStart));
+							double Ydistance=sqrt(distance(palm_center,startingPoint));
+							double length=sqrt(distance(ptFar,startingPoint));
 
-							double retLength=sqrt(distance(ptEnd,ptFar));
+							double retLength=sqrt(distance(endingPoint,ptFar));
 							//Play with these thresholds to improve performance
 							if(length<=3*radius&&Ydistance>=0.4*radius&&length>=10&&retLength>=10&&std::max(length,retLength)/std::min(length,retLength)>=0.8)
 								if(std::min(Xdistance,Ydistance)/std::max(Xdistance,Ydistance)<=0.8)
 								{
 									if((Xdistance>=0.1*radius&&Xdistance<=1.3*radius&&Xdistance<Ydistance)||(Ydistance>=0.1*radius&&Ydistance<=1.3*radius&&Xdistance>Ydistance))
-										line( ROI, ptEnd, ptFar, cv::Scalar(0,255,0), 1 ),n_fingers++;
+										line( ROI, endingPoint, ptFar, cv::Scalar(0,255,0), 1 ),n_fingers++;
 								}
 
 
