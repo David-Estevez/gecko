@@ -57,7 +57,7 @@ void getMousePos( int &x, int &y)
 	}
 
 	int number_of_screens = XScreenCount(display);
-	std::cout << "There are " << number_of_screens << " screens." << std::endl;
+	//std::cout << "There are " << number_of_screens << " screens." << std::endl;
 
 
 	root_windows = (Window *) malloc(sizeof(Window) * number_of_screens);
@@ -82,7 +82,7 @@ void getMousePos( int &x, int &y)
 	   exit(-1);
 	}
 
-	std::cout << "Mouse is at (" << root_x << ", " << root_y << ")" << std::endl;
+	//std::cout << "Mouse is at (" << root_x << ", " << root_y << ")" << std::endl;
 
 	free(root_windows);
 	XCloseDisplay(display);

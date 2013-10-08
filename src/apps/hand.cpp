@@ -199,6 +199,58 @@ int main( int argc, char * argv[] )
 		     cv::FONT_HERSHEY_SIMPLEX, 0.33, cv::Scalar(0, 0, 255));
 
 	//-----------------------------------------------------------------------------------------------------
+	//-- Move cursor
+	//-----------------------------------------------------------------------------------------------------
+	if ( debugValue == 2)
+	{
+	    if ( (int) handContour.size() > 0 )
+	    {
+		//-- Get image dimensions:
+		int imageWidth = frame.cols, imageHeight = frame.rows;
+		//std::cout << "Captured image: " << imageWidth << " x " << imageHeight << std::endl;
+
+		//-- Get hand center (uncomment the selected method):
+		int cogX = 0, cogY = 0;
+
+		//-------------------- With RotatedRect --------------------------------------
+		/*
+		cv::RotatedRect minRect = cv::minAreaRect( handContour[0]);
+		cv::Point2f rect_points[4]; minRect.points( rect_points );
+		for( int j = 0; j < 4; j++ )
+		{
+		    cogX += rect_points[j].x;
+		    cogY += rect_points[j].y;
+		}
+
+		cogX /= 4;
+		cogY /= 4;
+		*/
+
+		//-------------------- With Bounding Rectangle --------------------------------
+		//-- (This is more stable than the rotated rectangle)
+		cv::Rect rect  =  cv::boundingRect(handContour[0]);
+		cogX = rect.x + rect.width / 2;
+		cogY = rect.y + rect.height / 2;
+
+
+		//-- (Optional) Print cog on screen:
+		cv::circle( display, cv::Point(cogX, cogY), 5, cv::Scalar( 255, 0, 0), 2 );
+
+		//-- Get screen dimensions:
+		int screenHeight, screenWidth;
+		getDisplayDimensions( screenWidth, screenHeight);
+
+		//-- Get new cursor position by mapping the points:
+		int x, y;
+		x = cogX * screenWidth / imageWidth;
+		y = cogY * screenHeight / imageHeight;
+
+		//-- Move the mouse to the specified position:
+		moveMouse( x, y );
+	    }
+	}
+
+	//-----------------------------------------------------------------------------------------------------
 	//-- Show processed image
 	//-----------------------------------------------------------------------------------------------------
 	cv::imshow( "Processed Stream", display);
@@ -216,22 +268,6 @@ int main( int argc, char * argv[] )
 
 	cv::line( gauge, cv::Point( 200/2, 80 ), cv::Point( 200/2 + x_coord , 80 - y_coord), cv::Scalar( 0, 0, 255));
 	cv::imshow( "Gauge", gauge);
-
-	//-----------------------------------------------------------------------------------------------------
-	//-- Move cursor
-	//-----------------------------------------------------------------------------------------------------
-	if ( debugValue == 2)
-	{
-	    int x = 0, y = 0;
-	    getMousePos( x, y);
-
-	    int height, width;
-	    getDisplayDimensions( width, height);
-
-	    x = width  * cos( rad_ang);
-	    moveMouse(x, y );
-
-	}
 
 	//-----------------------------------------------------------------------------------------------------
 	//-- Decide what to do next depending on key pressed
