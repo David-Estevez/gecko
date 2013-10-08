@@ -19,9 +19,8 @@ FingerDetector :: FingerDetector (cv::Mat & ROI, int & fingers)
 	
 	//-- Detect edges using Threshold
 	
-	//cv::inRange(bwROI,cv::Scalar(0,58,89), cv::Scalar(25,173,229), threshold_output); 
 	cv::threshold( bwROI, threshold_output, 100, 255, cv::THRESH_BINARY );
-	cv:: imshow ("THRESHOLDED PICTURE", threshold_output);
+	//cv:: imshow ("THRESHOLDED PICTURE", threshold_output);
 	
 	//-- Find contours in the processed image
 	findContours(threshold_output,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE);
@@ -38,13 +37,13 @@ FingerDetector :: FingerDetector (cv::Mat & ROI, int & fingers)
 
 				//-- Convex Hull
 				convexHull(cv:: Mat(final_contours[0]),hulls[0],false);
-				convexHull(cv:: Mat(final_contours[0]),hullsI[0],false);
+			//	convexHull(cv:: Mat(final_contours[0]),hullsI[0],false);
 				drawContours(ROI,hulls,-1,cv::Scalar(0,255,0),2);
 
 				//-- Convex Defects
 
-				if(hullsI[0].size()>0)
-				{
+				//if(hullsI[0].size()>0)
+			//	{
 					cv::Point2f rect_Points[4]; 
 					for( int j = 0; j < 4; j++ )
 						cv::line( ROI, rect_Points[j], rect_Points[(j+1)%4], cv::Scalar(255,0,0), 1, 8 );
@@ -58,7 +57,8 @@ FingerDetector :: FingerDetector (cv::Mat & ROI, int & fingers)
 							int startidx=defects[j][0]; cv::Point ptStart( final_contours[0][startidx] );
 							int endidx=defects[j][1]; cv::Point ptEnd( final_contours[0][endidx] );
 							int faridx=defects[j][2]; cv::Point ptFar( final_contours[0][faridx] );
-							//Sum up all the hull and defect cv::Points to compute average
+							
+							//-- Average the defects points
 							rough_palm_center+=ptFar+ptStart+ptEnd;
 							palm_Points.push_back(ptFar);
 							palm_Points.push_back(ptStart);
@@ -106,10 +106,9 @@ FingerDetector :: FingerDetector (cv::Mat & ROI, int & fingers)
 						palm_center.y/=palm_centers.size();
 						radius/=palm_centers.size();
 
-						//Draw the palm center and the palm circle
-						//The size of the palm gives the depth of the hand
+						//-- The palm center is drawn
 						cv::circle(ROI,palm_center,5,cv::Scalar(144,144,255),3);
-						cv::circle(ROI,palm_center,radius,cv::Scalar(144,144,255),2);
+						//cv::circle(ROI,palm_center,radius,cv::Scalar(144,144,255),2);
 
 						//Detect fingers by finding cv::Points that form an almost isosceles triangle with certain thesholds
 
@@ -136,14 +135,13 @@ FingerDetector :: FingerDetector (cv::Mat & ROI, int & fingers)
 						}
 						
 						
-			
+						//-- Catch possible aliens
 						if (n_fingers>5)
 							n_fingers=5; 
 
-						std::cout<<"NO OF FINGERS: "<<n_fingers<<std::endl;
-				
+						FingerDetector::number_of_fingers=n_fingers; 				
 					}
-				}
+				//}
 
 	}
 }
@@ -153,7 +151,8 @@ double FingerDetector:: distance (cv::Point x, cv::Point y)
 	return (x.x-y.x)*(x.x-y.x)+(x.y-y.y)*(x.y-y.y);	
 }
 
-
+int FingerDetector::getFingers()
+{	return FingerDetector::number_of_fingers; }
 
 
 std::pair<cv::Point,double> FingerDetector::circle(cv::Point p1, cv::Point p2, cv::Point p3)
