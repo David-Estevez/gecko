@@ -37,13 +37,13 @@ FingerDetector :: FingerDetector (cv::Mat & ROI, int & fingers)
 
 				//-- Convex Hull
 				convexHull(cv:: Mat(final_contours[0]),hulls[0],false);
-			//	convexHull(cv:: Mat(final_contours[0]),hullsI[0],false);
+				convexHull(cv:: Mat(final_contours[0]),hullsI[0],false);
 				drawContours(ROI,hulls,-1,cv::Scalar(0,255,0),2);
 
 				//-- Convex Defects
 
-				//if(hullsI[0].size()>0)
-			//	{
+				if(hullsI[0].size()>0)
+				{
 					cv::Point2f rect_Points[4]; 
 					for( int j = 0; j < 4; j++ )
 						cv::line( ROI, rect_Points[j], rect_Points[(j+1)%4], cv::Scalar(255,0,0), 1, 8 );
@@ -141,7 +141,7 @@ FingerDetector :: FingerDetector (cv::Mat & ROI, int & fingers)
 
 						FingerDetector::number_of_fingers=n_fingers; 				
 					}
-				//}
+				}
 
 	}
 }
