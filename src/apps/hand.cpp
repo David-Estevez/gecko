@@ -51,7 +51,6 @@ int main( int argc, char * argv[] )
     //-- Angle of hand
     float handAngle = 0;
 
-
     //-- Calibration loop
     //--------------------------------------------------------------------
     cv::namedWindow( "Calibrating skin", cv::WINDOW_AUTOSIZE);
@@ -126,7 +125,6 @@ int main( int argc, char * argv[] )
 		processed = frame;
 		break;
 	   }
-
 
 	//----------------------------------------------------------------------------------------------------
 	//-- Process data and print it on screen:
