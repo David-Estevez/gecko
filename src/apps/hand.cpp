@@ -4,6 +4,7 @@
 #include "../libraries/HandDetector.h"
 #include "../libraries/handUtils.h"
 #include "../libraries/FingerDetector.h"
+#include "../libraries/mouse.h"
 
 int main( int argc, char * argv[] )
 {
@@ -52,6 +53,61 @@ int main( int argc, char * argv[] )
 
 
 
+    //-- Kalman filter setup
+    //---------------------------------------------------------------------
+
+    //-- Create filter:
+    cv::KalmanFilter kalmanFilter( 4, 2, 0);
+    kalmanFilter.transitionMatrix = *( cv::Mat_<float>(4, 4) << 1, 0, 1, 0,
+								0, 1, 0, 1,
+								0, 0, 1, 0,
+								0, 0, 0, 1);
+
+    //-- Create matrix for storing the measurement (measured position of hand)
+    cv::Mat_<float> measurement(2, 1);
+    measurement.setTo( cv::Scalar(0));
+
+    //-- Get mouse position:
+    //! \todo Change this for screen center?
+    int initial_mouse_x, initial_mouse_y;
+    getMousePos( initial_mouse_x, initial_mouse_y);
+
+    //-- Initial state:
+    kalmanFilter.statePre.at<float>(0) = initial_mouse_x; //-- x Position
+    kalmanFilter.statePre.at<float>(1) = initial_mouse_y; //-- y Position
+    kalmanFilter.statePre.at<float>(2) = 0;		  //-- x Velocity
+    kalmanFilter.statePre.at<float>(3) = 0;		  //-. y Velocity
+
+    //-- Set the rest of the matrices:
+    cv::setIdentity( kalmanFilter.measurementMatrix );
+    cv::setIdentity( kalmanFilter.processNoiseCov, cv::Scalar::all(0.0001));
+    cv::setIdentity( kalmanFilter.measurementNoiseCov, cv::Scalar::all(0.1));
+    cv::setIdentity( kalmanFilter.errorCovPost, cv::Scalar::all(0.1));
+
+
+
+    //-- Kalman filter setup for estimating hand angle:
+    //-----------------------------------------------------------------------
+    //-- Create filter:
+    cv::KalmanFilter kalmanFilterAngle( 2, 1, 0);
+    kalmanFilterAngle.transitionMatrix = *( cv::Mat_<float>(2, 2) << 1, 1,
+								     0, 1);
+
+    //-- Create matrix for storing the measurement (measured position of hand)
+    cv::Mat_<float> angleMeasurement(1, 1);
+    angleMeasurement.setTo( cv::Scalar(0));
+
+    //-- Initial state:
+    kalmanFilterAngle.statePre.at<float>(0) = 90; //-- initial angle
+    kalmanFilterAngle.statePre.at<float>(1) = 0;  //-- initial angular velocity
+
+    //-- Set the rest of the matrices:
+    cv::setIdentity( kalmanFilterAngle.measurementMatrix );
+    cv::setIdentity( kalmanFilterAngle.processNoiseCov, cv::Scalar::all(0.0001));
+    cv::setIdentity( kalmanFilterAngle.measurementNoiseCov, cv::Scalar::all(0.1));
+    cv::setIdentity( kalmanFilterAngle.errorCovPost, cv::Scalar::all(0.1));
+
+
     //-- Calibration loop
     //--------------------------------------------------------------------
     cv::namedWindow( "Calibrating skin", cv::WINDOW_AUTOSIZE);
@@ -85,7 +141,7 @@ int main( int argc, char * argv[] )
 	    handDetector.calibrate( ROI );
 	    handDetector.getCalibration( lower, upper);
 
-	    drawHistogramHSV( ROI );
+	    //drawHistogramHSV( ROI );
 
 	    //-- Close window
 	    cvDestroyWindow( "Calibrating skin");
@@ -112,7 +168,7 @@ int main( int argc, char * argv[] )
 	cv::Mat processed;
 	switch( debugValue )
 	{
-	    case 0:
+	    case 0: case 2:
 		handDetector.calibrate();
 		handDetector( frame, processed);
 		break;
@@ -127,17 +183,12 @@ int main( int argc, char * argv[] )
 		break;
 	   }
 
-
 	//----------------------------------------------------------------------------------------------------
 	//-- Process data and print it on screen:
 	//----------------------------------------------------------------------------------------------------
 	//-- Obtain contours:
 	std::vector< std::vector<cv::Point> > handContour;
 	filteredContour( processed, handContour);
-
-	//-- Draw things:
-	const bool displayContour = true;
-	const bool displayBoundingRotRect = true;
 
 	if ( display.total() == 0)
 	    display = frame.clone();
@@ -165,10 +216,11 @@ int main( int argc, char * argv[] )
 	    cv::imshow("hand", ROI_hand);
 	    
 	    //-- Finger detector 
+	    /*
 	    int fingers=0; 
 	    FingerDetector (ROI_hand, fingers);
 	    
-	    cv::imshow("fingers", ROI_hand);
+	    cv::imshow("fingers", ROI_hand);*/
 
 	}
 	else
@@ -191,11 +243,88 @@ int main( int argc, char * argv[] )
 	    ss << "Custom values->" << lower << " " << upper;
 	    break;
 
+	    case 2:
+	    ss << "Tracking hand";
+	    break;
+
 	}
 	ss << " Angle: " << (int) handAngle << "";
 	std::string text = ss.str();
 	cv::putText( display, text.c_str(), cv::Point(0, 18),
 		     cv::FONT_HERSHEY_SIMPLEX, 0.33, cv::Scalar(0, 0, 255));
+
+	//-----------------------------------------------------------------------------------------------------
+	//-- Move cursor
+	//-----------------------------------------------------------------------------------------------------
+	if ( debugValue == 2)
+	{
+	    if ( (int) handContour.size() > 0 )
+	    {
+		//-- Get image dimensions:
+		int imageWidth = frame.cols, imageHeight = frame.rows;
+		//std::cout << "Captured image: " << imageWidth << " x " << imageHeight << std::endl;
+
+
+		//-- Predict next cursor position with kalman filter:
+		cv::Mat prediction = kalmanFilter.predict();
+		cv::Point predictedPoint( prediction.at<float>(0), prediction.at<float>(1) );
+
+		//-- (Optional) Print predicted point on screen:
+		cv::circle( display, predictedPoint, 4, cv::Scalar( 0, 255, 0), 2 );
+
+		//-- Measure actual point (uncomment the selected method):
+		int cogX = 0, cogY = 0;
+
+		//-------------------- With RotatedRect --------------------------------------
+		/*
+		cv::RotatedRect minRect = cv::minAreaRect( handContour[0]);
+		cv::Point2f rect_points[4]; minRect.points( rect_points );
+		for( int j = 0; j < 4; j++ )
+		{
+		    cogX += rect_points[j].x;
+		    cogY += rect_points[j].y;
+		}
+
+		cogX /= 4;
+		cogY /= 4;
+		*/
+
+		//-------------------- With Bounding Rectangle --------------------------------
+		//-- (This is more stable than the rotated rectangle)
+		cv::Rect rect  =  cv::boundingRect(handContour[0]);
+		cogX = rect.x + rect.width / 2;
+		cogY = rect.y + rect.height / 2;
+
+		measurement(0) = cogX;
+		measurement(1) = cogY;
+
+		cv::Point cog( cogX, cogY);
+
+		//-- (Optional) Print cog on screen:
+		cv::circle( display, cog, 5, cv::Scalar( 255, 0, 0), 2 );
+
+		//-- Correct estimation:
+		cv::Mat estimation = kalmanFilter.correct( measurement);
+		cv::Point estimationPoint( estimation.at<float>(0), estimation.at<float>(1) );
+
+		//- (Optional) Print estimation on screen:
+		cv::circle( display, estimationPoint, 3, cv::Scalar( 0, 0, 255), 2 );
+
+		//-- Get screen dimensions:
+		int screenHeight, screenWidth;
+		getDisplayDimensions( screenWidth, screenHeight);
+
+		//-- Get new cursor position by mapping the points:
+		int x, y;
+		//x = cogX * screenWidth / imageWidth;
+		//y = cogY * screenHeight / imageHeight;
+		x = estimationPoint.x * screenWidth / imageWidth;
+		y = estimationPoint.y * screenHeight / imageHeight;
+
+		//-- Move the mouse to the specified position:
+		moveMouse( x, y );
+	    }
+	}
 
 	//-----------------------------------------------------------------------------------------------------
 	//-- Show processed image
@@ -206,14 +335,44 @@ int main( int argc, char * argv[] )
 	//-----------------------------------------------------------------------------------------------------
 	//-- Print "Angle control"
 	//-----------------------------------------------------------------------------------------------------
+	//-- Matrix that shows the gauge
 	cv::Mat gauge = cv::Mat::zeros( 100, 200, CV_8UC3);
 
+	//-- Predict angle with Kalman filter:
+	cv::Mat anglePrediction = kalmanFilterAngle.predict();
+
+	//-- Measure:
+	angleMeasurement(0) = handAngle;
+
+	//-- Correct prediction:
+	cv::Mat angleEstimation = kalmanFilterAngle.correct( angleMeasurement );
+
+	//-- Define gauge:
 	int gauge_l = 60;
+	cv::Point gaugeOrigin( 200/2, 80 );
+
+	//-- Calculate actual end:
 	double rad_ang = handAngle * 3.1415 / 180.0;
 	int x_coord = gauge_l * cos( rad_ang);
 	int y_coord = gauge_l * sin( rad_ang);
+	cv::Point gaugeEnd( 200/2 + x_coord , 80 - y_coord);
 
-	cv::line( gauge, cv::Point( 200/2, 80 ), cv::Point( 200/2 + x_coord , 80 - y_coord), cv::Scalar( 0, 0, 255));
+	//-- Calculate predicted end:
+	double rad_ang_predicted = anglePrediction.at<float>(0) * 3.1415 / 180.0;
+	int x_coord_predicted = gauge_l * cos( rad_ang_predicted);
+	int y_coord_predicted = gauge_l * sin( rad_ang_predicted);
+	cv::Point predictedGaugeEnd( 200/2 + x_coord_predicted , 80 - y_coord_predicted);
+
+	//-- Calculate estimated end:
+	double rad_ang_estimated = angleEstimation.at<float>(0) * 3.1415 / 180.0;
+	int x_coord_estimated = gauge_l * cos( rad_ang_estimated);
+	int y_coord_estimated = gauge_l * sin( rad_ang_estimated);
+	cv::Point estimatedGaugeEnd( 200/2 + x_coord_estimated , 80 - y_coord_estimated);
+
+	//-- Show the gauge(s):
+	cv::line( gauge, gaugeOrigin, gaugeEnd, cv::Scalar( 255, 0, 0), 1); //-- Actual angle
+	cv::line( gauge, gaugeOrigin, predictedGaugeEnd, cv::Scalar( 0, 255, 0), 2); //-- Predicted angle
+	cv::line( gauge, gaugeOrigin, estimatedGaugeEnd, cv::Scalar( 0, 0, 255)), 3; //-- Estimated angle
 	cv::imshow( "Gauge", gauge);
 
 	//-----------------------------------------------------------------------------------------------------
@@ -227,6 +386,9 @@ int main( int argc, char * argv[] )
 		break;
 	    case 'd': //-- hardcoded filter
 		debugValue = 1;
+		break;
+	    case 'k': //-- Move mouse
+		debugValue = 2;
 		break;
 	    case (char) 27:
 		stop = true;
