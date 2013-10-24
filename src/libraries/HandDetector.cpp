@@ -117,11 +117,11 @@ void HandDetector::getCalibration(cv::Scalar &lower_limit, cv::Scalar &upper_lim
 
 void HandDetector::operator ()( const cv::Mat& src, cv::Mat& dst)
 {
-    find( src, dst);
+    filter_hand( src, dst);
 }
 
 
-void HandDetector::find(const cv::Mat &src, cv::Mat &dst)
+void HandDetector::filter_hand(const cv::Mat &src, cv::Mat &dst)
 {
     //-- HSV thresholding
     //----------------------------------------------------------------------------------------------------

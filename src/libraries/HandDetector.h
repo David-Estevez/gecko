@@ -13,14 +13,13 @@ class HandDetector {
 
 	//-- Hand-detection
 	void operator()(const cv::Mat& src, cv::Mat& dst);
-	void find(const cv::Mat& src, cv::Mat& dst);
-
-	//-- Find hand functions
-	//! \todo Filter S only by lowest value (grey); filter V at both ends.
-	void getContours(const cv::Mat& src, std::vector< std::vector < cv::Point > >& contours, cv::Mat& dst);
+	void filter_hand(const cv::Mat& src, cv::Mat& dst);
 
 
     private:
+    
+    //-- Static background substractor
+    
 	//-- Statistical functions:
 	int average( cv::Mat& ROI);
 	int median( cv::Mat& ROI);
