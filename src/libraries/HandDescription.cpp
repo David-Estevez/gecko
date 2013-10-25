@@ -15,6 +15,8 @@ HandDescription:: HandDescription()
     //-- Initial state:
     kalmanFilterAngle.statePre.at<float>(0) = 90; //-- initial angle
     kalmanFilterAngle.statePre.at<float>(1) = 0;  //-- initial angular velocity
+    
+    
 
     //-- Set the rest of the matrices:
     cv::setIdentity( kalmanFilterAngle.measurementMatrix );
@@ -99,14 +101,15 @@ void HandDescription:: angleControl()
 	cv::Mat gauge = cv::Mat::zeros( 100, 200, CV_8UC3);
 	
 	//-- Create matrix for storing the measurement (measured position of hand)
-    cv::Mat_<float> angleMeasurement;
-    angleMeasurement(1, 1);
+    cv::Mat_<float> angleMeasurement(1, 1);
     angleMeasurement.setTo( cv::Scalar(0));
+
 
 	//-- Predict angle with Kalman filter:
 	cv::Mat anglePrediction = kalmanFilterAngle.predict();
 
-	//-- Measure:
+
+	//-- Measure: --> error here!!
 	angleMeasurement(0) = _hand_angle;
 
 	//-- Correct prediction:
