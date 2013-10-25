@@ -1,5 +1,5 @@
 #include <iostream>
-#include <opencv2/opencv.hpp>
+//#include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include "../libraries/HandDetector.h"
 #include "../libraries/HandDescription.h"
@@ -58,46 +58,46 @@ int main( int argc, char * argv[] )
 	Mouse mouse; 
 
 
-    //-- Calibration loop
-    //--------------------------------------------------------------------
-    cv::namedWindow( "Calibrating skin", cv::WINDOW_AUTOSIZE);
+//    //-- Calibration loop
+//    //--------------------------------------------------------------------
+//    cv::namedWindow( "Calibrating skin", cv::WINDOW_AUTOSIZE);
 
-    while( !stop)
-    {
-	//-- Get current frame
-	cv::Mat frame, cal_screen;
-	if (! cap.read( frame ) )
-	    break;
-	cv::flip(frame,frame,1);
+//    while( !stop)
+//    {
+//	//-- Get current frame
+//	cv::Mat frame, cal_screen;
+//	if (! cap.read( frame ) )
+//	    break;
+//	cv::flip(frame,frame,1);
 
-	//-- Add calibration frame
-	drawCalibrationMarks(frame, cal_screen, halfSide);
+//	//-- Add calibration frame
+//	drawCalibrationMarks(frame, cal_screen, halfSide);
 
-	//-- Show calibration screen
-	cv::imshow( "Calibrating skin", cal_screen);
+//	//-- Show calibration screen
+//	cv::imshow( "Calibrating skin", cal_screen);
 
-	//-- Wait for user confirmation
-	char key =  cv::waitKey(delay);
-	if ( key == 10 || key == 13 )
-	{
-	    //-- Get region of interest data:
-	    int image_rows = frame.rows;
-	    int image_cols = frame.cols;
+//	//-- Wait for user confirmation
+//	char key =  cv::waitKey(delay);
+//	if ( key == 10 || key == 13 )
+//	{
+//	    //-- Get region of interest data:
+//	    int image_rows = frame.rows;
+//	    int image_cols = frame.cols;
 
-	    cv::Mat ROI = frame( cv::Rect( cv::Point( image_cols / 2 - halfSide,  image_rows/2 - halfSide ),
-					   cv::Point( image_cols / 2 + halfSide,  image_rows/2 + halfSide)));
-	    //cv::imshow( "Test", ROI);
+//	    cv::Mat ROI = frame( cv::Rect( cv::Point( image_cols / 2 - halfSide,  image_rows/2 - halfSide ),
+//					   cv::Point( image_cols / 2 + halfSide,  image_rows/2 + halfSide)));
+//	    //cv::imshow( "Test", ROI);
 
-	    handDetector.calibrate( ROI );
-	    handDetector.getCalibration( lower, upper);
+//	    handDetector.calibrate( ROI );
+//	    handDetector.getCalibration( lower, upper);
 
-	    //drawHistogramHSV( ROI );
+//	    //drawHistogramHSV( ROI );
 
-	    //-- Close window
-	    cvDestroyWindow( "Calibrating skin");
-	    break;
-	}
-    }
+//	    //-- Close window
+//	    cvDestroyWindow( "Calibrating skin");
+//	    break;
+//	}
+//    }
 
     //-- Main loop
     //--------------------------------------------------------------------

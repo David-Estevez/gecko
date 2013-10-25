@@ -6,3 +6,5 @@ ADD_LIBRARY( FingerDetector FingerDetector.cpp)
 ADD_LIBRARY( Mouse mouse.cpp)
 
 TARGET_LINK_LIBRARIES (Mouse X11)
+
+TARGET_LINK_LIBRARIES (HandDescription HandUtils)
