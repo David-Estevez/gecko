@@ -25,6 +25,9 @@ class Mouse
 		void getMousePos( int &x, int &y);
 		void getDisplayDimensions( int& width, int& height);
 		void moveCursor (cv:: Mat frame);
+		
+	private: 
+		cv::KalmanFilter kalmanFilter;
 
 };
 

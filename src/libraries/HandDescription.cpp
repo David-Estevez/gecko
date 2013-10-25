@@ -86,8 +86,12 @@ void HandDescription :: contourExtraction(cv::Mat frame, cv::Mat processed)
 
 	}
 	else
-	    std::cerr << "No contours found!" << std::endl;
+	    std::cerr << "No contours found!" << std::endl; 
 	    
+	//-----------------------------------------------------------------------------------------------------
+	//-- Show processed image
+	//-----------------------------------------------------------------------------------------------------
+	cv::imshow( "Processed Stream", display);
 }
 
 
@@ -109,7 +113,7 @@ void HandDescription:: angleControl()
 	cv::Mat anglePrediction = kalmanFilterAngle.predict();
 
 
-	//-- Measure: --> error here!!
+	//-- Measure:
 	angleMeasurement(0) = _hand_angle;
 
 	//-- Correct prediction:

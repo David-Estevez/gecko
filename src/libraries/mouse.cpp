@@ -1,7 +1,38 @@
 #include "mouse.h"
 
 Mouse::Mouse()
-{}
+{
+	//-- Kalman filter mouse setup
+    //---------------------------------------------------------------------
+
+    //-- Create filter:
+    kalmanFilter.init( 4, 2, 0);
+    kalmanFilter.transitionMatrix = *( cv::Mat_<float>(4, 4) << 1, 0, 1, 0,
+								0, 1, 0, 1,
+								0, 0, 1, 0,
+								0, 0, 0, 1);
+
+    //-- Create matrix for storing the measurement (measured position of hand)
+    cv::Mat_<float> measurement(2, 1);
+    measurement.setTo( cv::Scalar(0));
+
+    //-- Get mouse position:
+    //! \todo Change this for screen center?
+    int initial_mouse_x, initial_mouse_y;
+    getMousePos( initial_mouse_x, initial_mouse_y);
+
+    //-- Initial state:
+    kalmanFilter.statePre.at<float>(0) = initial_mouse_x; //-- x Position
+    kalmanFilter.statePre.at<float>(1) = initial_mouse_y; //-- y Position
+    kalmanFilter.statePre.at<float>(2) = 0;		  //-- x Velocity
+    kalmanFilter.statePre.at<float>(3) = 0;		  //-. y Velocity
+
+    //-- Set the rest of the matrices:
+    cv::setIdentity( kalmanFilter.measurementMatrix );
+    cv::setIdentity( kalmanFilter.processNoiseCov, cv::Scalar::all(0.0001));
+    cv::setIdentity( kalmanFilter.measurementNoiseCov, cv::Scalar::all(0.1));
+    cv::setIdentity( kalmanFilter.errorCovPost, cv::Scalar::all(0.1));
+}
 
 void Mouse::controlMouse ()
 {}
@@ -99,36 +130,8 @@ void Mouse::getMousePos( int &x, int &y)
 
 void Mouse::moveCursor (cv:: Mat frame)
 {
-	//-- Kalman filter mouse setup
-    //---------------------------------------------------------------------
 
-    //-- Create filter:
-    cv::KalmanFilter kalmanFilter( 4, 2, 0);
-    kalmanFilter.transitionMatrix = *( cv::Mat_<float>(4, 4) << 1, 0, 1, 0,
-								0, 1, 0, 1,
-								0, 0, 1, 0,
-								0, 0, 0, 1);
-
-    //-- Create matrix for storing the measurement (measured position of hand)
-    cv::Mat_<float> measurement(2, 1);
-    measurement.setTo( cv::Scalar(0));
-
-    //-- Get mouse position:
-    //! \todo Change this for screen center?
-    int initial_mouse_x, initial_mouse_y;
-    getMousePos( initial_mouse_x, initial_mouse_y);
-
-    //-- Initial state:
-    kalmanFilter.statePre.at<float>(0) = initial_mouse_x; //-- x Position
-    kalmanFilter.statePre.at<float>(1) = initial_mouse_y; //-- y Position
-    kalmanFilter.statePre.at<float>(2) = 0;		  //-- x Velocity
-    kalmanFilter.statePre.at<float>(3) = 0;		  //-. y Velocity
-
-    //-- Set the rest of the matrices:
-    cv::setIdentity( kalmanFilter.measurementMatrix );
-    cv::setIdentity( kalmanFilter.processNoiseCov, cv::Scalar::all(0.0001));
-    cv::setIdentity( kalmanFilter.measurementNoiseCov, cv::Scalar::all(0.1));
-    cv::setIdentity( kalmanFilter.errorCovPost, cv::Scalar::all(0.1));
+    
 	//-----------------------------------------------------------------------------------------------------
 	//-- Move cursor
 	//-----------------------------------------------------------------------------------------------------

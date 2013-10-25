@@ -54,11 +54,8 @@ int main( int argc, char * argv[] )
 	HandDescription hand_descriptor;
 	
 	
-	//-- Mouse object that includes a kalman filter
+	//-- Mouse object to control the mouse 
 	Mouse mouse; 
-
-
-
 
 
     //-- Calibration loop
@@ -178,12 +175,8 @@ int main( int argc, char * argv[] )
 	if ( debugValue == 2)
 		mouse.moveCursor(frame); 
 		
-	//-----------------------------------------------------------------------------------------------------
-	//-- Show processed image
-	//-----------------------------------------------------------------------------------------------------
-//	cv::imshow( "Processed Stream", display);
 
-// ---> floating point exception!! 
+
 	hand_descriptor.angleControl();
 
 	//-----------------------------------------------------------------------------------------------------
