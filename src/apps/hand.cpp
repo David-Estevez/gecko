@@ -173,9 +173,8 @@ int main( int argc, char * argv[] )
 //--	Move Cursor 
 
 	if ( debugValue == 2)
-		mouse.moveCursor(frame); 
+		mouse.moveCursor(frame, hand_descriptor.getContours()); 
 		
-
 
 	hand_descriptor.angleControl();
 

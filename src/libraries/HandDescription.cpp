@@ -39,6 +39,10 @@ double HandDescription:: getHandAngle ()
 	return _hand_angle; 
 }
 
+std::vector< std::vector<cv::Point> > HandDescription:: getContours()
+{
+	return _hand_contour; 
+}
 
 //-- Draws the bounding rectangle of the ROI
 void HandDescription::boundingRectangle(cv::Mat display)

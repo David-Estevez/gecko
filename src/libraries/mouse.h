@@ -20,11 +20,10 @@ class Mouse
 {
 	public:
 		Mouse();
-		void controlMouse ();
 		void moveMouse( const int& x, const int& y, const bool absoluteMode = true);
 		void getMousePos( int &x, int &y);
 		void getDisplayDimensions( int& width, int& height);
-		void moveCursor (cv:: Mat frame);
+		void moveCursor (cv:: Mat, std::vector< std::vector<cv::Point> >);
 		
 	private: 
 		cv::KalmanFilter kalmanFilter;

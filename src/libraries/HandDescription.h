@@ -19,6 +19,8 @@ class HandDescription
    
    		void setHandAngle(double &); 
    		double getHandAngle ();
+   		
+   		std::vector< std::vector<cv::Point> > getContours();
    
    private: 
    
