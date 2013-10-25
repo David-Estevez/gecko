@@ -136,9 +136,9 @@ void HandDetector::filter_hand(const cv::Mat &src, cv::Mat &dst)
     //-- If color limit is arround 0, hue channel needs to be inverted
     if (hue_invert)
     {
-	std::vector< cv::Mat > hsv;
-	cv::split( thresholdedHand, hsv);
-	cv::bitwise_not( hsv[0], hsv[0] );
+		std::vector< cv::Mat > hsv;
+		cv::split( thresholdedHand, hsv);
+		cv::bitwise_not( hsv[0], hsv[0] );
     }
 
     //-- Filtering

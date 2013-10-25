@@ -1,6 +1,12 @@
 #include "mouse.h"
 
-void moveMouse(const int &x, const int &y, const bool absoluteMode)
+Mouse::Mouse()
+{}
+
+void Mouse::controlMouse ()
+{}
+
+void Mouse::moveMouse(const int &x, const int &y, const bool absoluteMode)
 {
     Display * displayMain = XOpenDisplay( NULL);
 
@@ -28,7 +34,7 @@ void moveMouse(const int &x, const int &y, const bool absoluteMode)
     XCloseDisplay( displayMain);
 }
 
-void getDisplayDimensions( int& width, int& height)
+void Mouse::getDisplayDimensions( int& width, int& height)
 {
     Display * displayMain = XOpenDisplay( NULL);
 
@@ -38,7 +44,7 @@ void getDisplayDimensions( int& width, int& height)
     XCloseDisplay( displayMain);
 }
 
-void getMousePos( int &x, int &y)
+void Mouse::getMousePos( int &x, int &y)
 {
 	Bool result;
 
@@ -89,4 +95,110 @@ void getMousePos( int &x, int &y)
 
 	x = root_x;
 	y = root_y;
+}
+
+void Mouse::moveCursor (cv:: Mat frame)
+{
+	//-- Kalman filter mouse setup
+    //---------------------------------------------------------------------
+
+    //-- Create filter:
+    cv::KalmanFilter kalmanFilter( 4, 2, 0);
+    kalmanFilter.transitionMatrix = *( cv::Mat_<float>(4, 4) << 1, 0, 1, 0,
+								0, 1, 0, 1,
+								0, 0, 1, 0,
+								0, 0, 0, 1);
+
+    //-- Create matrix for storing the measurement (measured position of hand)
+    cv::Mat_<float> measurement(2, 1);
+    measurement.setTo( cv::Scalar(0));
+
+    //-- Get mouse position:
+    //! \todo Change this for screen center?
+    int initial_mouse_x, initial_mouse_y;
+    getMousePos( initial_mouse_x, initial_mouse_y);
+
+    //-- Initial state:
+    kalmanFilter.statePre.at<float>(0) = initial_mouse_x; //-- x Position
+    kalmanFilter.statePre.at<float>(1) = initial_mouse_y; //-- y Position
+    kalmanFilter.statePre.at<float>(2) = 0;		  //-- x Velocity
+    kalmanFilter.statePre.at<float>(3) = 0;		  //-. y Velocity
+
+    //-- Set the rest of the matrices:
+    cv::setIdentity( kalmanFilter.measurementMatrix );
+    cv::setIdentity( kalmanFilter.processNoiseCov, cv::Scalar::all(0.0001));
+    cv::setIdentity( kalmanFilter.measurementNoiseCov, cv::Scalar::all(0.1));
+    cv::setIdentity( kalmanFilter.errorCovPost, cv::Scalar::all(0.1));
+	//-----------------------------------------------------------------------------------------------------
+	//-- Move cursor
+	//-----------------------------------------------------------------------------------------------------
+
+//	    if ( (int) handContour.size() > 0 )
+//	    {
+//		//-- Get image dimensions:
+//		int imageWidth = frame.cols, imageHeight = frame.rows;
+//		//std::cout << "Captured image: " << imageWidth << " x " << imageHeight << std::endl;
+
+
+//		//-- Predict next cursor position with kalman filter:
+//		cv::Mat prediction = kalmanFilter.predict();
+//		cv::Point predictedPoint( prediction.at<float>(0), prediction.at<float>(1) );
+
+//		//-- (Optional) Print predicted point on screen:
+//		cv::circle( display, predictedPoint, 4, cv::Scalar( 0, 255, 0), 2 );
+
+//		//-- Measure actual point (uncomment the selected method):
+//		int cogX = 0, cogY = 0;
+
+//		//-------------------- With RotatedRect --------------------------------------
+//		/*
+//		cv::RotatedRect minRect = cv::minAreaRect( handContour[0]);
+//		cv::Point2f rect_points[4]; minRect.points( rect_points );
+//		for( int j = 0; j < 4; j++ )
+//		{
+//		    cogX += rect_points[j].x;
+//		    cogY += rect_points[j].y;
+//		}
+
+//		cogX /= 4;
+//		cogY /= 4;
+//		*/
+
+//		//-------------------- With Bounding Rectangle --------------------------------
+//		//-- (This is more stable than the rotated rectangle)
+//		cv::Rect rect  =  cv::boundingRect(handContour[0]);
+//		cogX = rect.x + rect.width / 2;
+//		cogY = rect.y + rect.height / 2;
+
+//		measurement(0) = cogX;
+//		measurement(1) = cogY;
+
+//		cv::Point cog( cogX, cogY);
+
+//		//-- (Optional) Print cog on screen:
+//		cv::circle( display, cog, 5, cv::Scalar( 255, 0, 0), 2 );
+
+//		//-- Correct estimation:
+//		cv::Mat estimation = kalmanFilter.correct( measurement);
+//		cv::Point estimationPoint( estimation.at<float>(0), estimation.at<float>(1) );
+
+//		//- (Optional) Print estimation on screen:
+//		cv::circle( display, estimationPoint, 3, cv::Scalar( 0, 0, 255), 2 );
+
+//		//-- Get screen dimensions:
+//		int screenHeight, screenWidth;
+//		getDisplayDimensions( screenWidth, screenHeight);
+
+//		//-- Get new cursor position by mapping the points:
+//		int x, y;
+//		//x = cogX * screenWidth / imageWidth;
+//		//y = cogY * screenHeight / imageHeight;
+//		x = estimationPoint.x * screenWidth / imageWidth;
+//		y = estimationPoint.y * screenHeight / imageHeight;
+
+//		//-- Move the mouse to the specified position:
+//		moveMouse( x, y );
+//	    }
+//	
+
 }

@@ -1,4 +1,7 @@
- #include <opencv2/opencv.hpp>
+#ifndef HAND_DETECTOR
+#define HAND_DETECTOR
+
+#include <opencv2/opencv.hpp>
 
 class HandDetector {
    public:
@@ -39,3 +42,5 @@ class HandDetector {
 	int val_sigma_mult;
 
 };
+
+#endif // HAND_DETECTOR
