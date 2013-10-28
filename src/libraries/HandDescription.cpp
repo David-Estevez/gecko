@@ -81,13 +81,6 @@ void HandDescription :: contourExtraction(cv::Mat frame, cv::Mat processed)
 	    cv::Mat ROI_hand = frame( rect).clone();
 	    cv::imshow("hand", ROI_hand);
 	    
-//	    //-- Finger detector 
-//	    
-//	    int fingers=0; 
-//	    FingerDetector (ROI_hand, fingers);
-//	    
-//	    cv::imshow("fingers", ROI_hand);
-
 	}
 	else
 	    std::cerr << "No contours found!" << std::endl; 

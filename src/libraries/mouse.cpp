@@ -205,5 +205,4 @@ void Mouse::moveCursor (cv:: Mat frame, std::vector< std::vector<cv::Point> > ha
 		moveMouse( x, y );
 	}
 
-
 }

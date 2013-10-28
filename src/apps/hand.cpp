@@ -110,6 +110,7 @@ int main( int argc, char * argv[] )
 	cv::Mat frame, display;
 	if ( ! cap.read( frame ) )
 	    break;
+	    
 	cv::flip(frame,frame,1);
 
 	//------------------------------------------------------------------------------------------------------
@@ -119,17 +120,17 @@ int main( int argc, char * argv[] )
 	switch( debugValue )
 	{
 	    case 0: case 2:
-		handDetector.calibrate();
-		handDetector( frame, processed);
+			handDetector.calibrate();
+			handDetector( frame, processed);
 		break;
 
 	    case 1:
-		handDetector.calibrate( lower, upper);
-		handDetector( frame, processed);
+			handDetector.calibrate( lower, upper);
+			handDetector( frame, processed);
 		break;
 
 	    default:
-		processed = frame;
+			processed = frame;
 		break;
 	   }
 
@@ -203,5 +204,3 @@ int main( int argc, char * argv[] )
 
 return 0;
 }
-
-
