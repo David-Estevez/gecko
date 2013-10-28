@@ -209,5 +209,59 @@ int HandDetector::median(cv::Mat &ROI)
 }
 
 
+void HandDetector:: calibrationLoop(cv::VideoCapture cap)
+{   
+	//-- Calibration loop
+    //--------------------------------------------------------------------
+    cv::namedWindow( "Calibrating skin", cv::WINDOW_AUTOSIZE);
+    bool stop = false;
 
+    int delay=24; 
+    
+    while( !stop)
+    {
+		//-- Get current frame
+		cv::Mat frame, cal_screen;
+		if (! cap.read( frame ) )
+			break;
+		cv::flip(frame,frame,1);
+
+		//-- Add calibration frame
+		drawCalibrationMarks(frame, cal_screen, halfSide);
+
+		//-- Show calibration screen
+		cv::imshow( "Calibrating skin", cal_screen);
+
+		//-- Wait for user confirmation
+		char key =  cv::waitKey(delay);
+		if ( key == 10 || key == 13 )
+		{
+			//-- Get region of interest data:
+			int image_rows = frame.rows;
+			int image_cols = frame.cols;
+
+			cv::Mat ROI = frame( cv::Rect( cv::Point( image_cols / 2 - halfSide,  image_rows/2 - halfSide ),
+						   cv::Point( image_cols / 2 + halfSide,  image_rows/2 + halfSide)));
+			//cv::imshow( "Test", ROI);
+
+			HandDetector::calibrate( ROI );
+			HandDetector::getCalibration( lower, upper);
+
+			//drawHistogramHSV( ROI );
+
+			//-- Close window
+			cvDestroyWindow( "Calibrating skin");
+			break;
+		}
+    }
+}
+
+cv::Scalar HandDetector::getLower()
+{
+	return lower; 
+}
+cv::Scalar HandDetector:: getUpper()
+{
+	return upper; 
+} 
 

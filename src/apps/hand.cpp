@@ -33,9 +33,9 @@ int main( int argc, char * argv[] )
     }
 
     //-- Get frame rate
-    double rate = cap.get( CV_CAP_PROP_FPS);
-    int delay = 1000/rate;
-    delay = 24; //-- Force 24 s delay
+//    double rate = cap.get( CV_CAP_PROP_FPS);
+//    int delay = 1000/rate;
+    int delay = 24; //-- Force 24 s delay
 
 
     //-- Declare variables
@@ -46,8 +46,7 @@ int main( int argc, char * argv[] )
 
     //-- To find the hand
     HandDetector handDetector;
-    cv::Scalar lower, upper;
-    static const int halfSide = 40;
+
 
 
 	//-- Object that will store the parameters of the hand
@@ -57,47 +56,9 @@ int main( int argc, char * argv[] )
 	//-- Mouse object to control the mouse 
 	Mouse mouse; 
 
-
-    //-- Calibration loop
-    //--------------------------------------------------------------------
-    cv::namedWindow( "Calibrating skin", cv::WINDOW_AUTOSIZE);
-
-    while( !stop)
-    {
-	//-- Get current frame
-	cv::Mat frame, cal_screen;
-	if (! cap.read( frame ) )
-	    break;
-	cv::flip(frame,frame,1);
-
-	//-- Add calibration frame
-	drawCalibrationMarks(frame, cal_screen, halfSide);
-
-	//-- Show calibration screen
-	cv::imshow( "Calibrating skin", cal_screen);
-
-	//-- Wait for user confirmation
-	char key =  cv::waitKey(delay);
-	if ( key == 10 || key == 13 )
-	{
-	    //-- Get region of interest data:
-	    int image_rows = frame.rows;
-	    int image_cols = frame.cols;
-
-	    cv::Mat ROI = frame( cv::Rect( cv::Point( image_cols / 2 - halfSide,  image_rows/2 - halfSide ),
-					   cv::Point( image_cols / 2 + halfSide,  image_rows/2 + halfSide)));
-	    //cv::imshow( "Test", ROI);
-
-	    handDetector.calibrate( ROI );
-	    handDetector.getCalibration( lower, upper);
-
-	    //drawHistogramHSV( ROI );
-
-	    //-- Close window
-	    cvDestroyWindow( "Calibrating skin");
-	    break;
-	}
-    }
+	//-- Calibration loop
+	
+	handDetector.calibrationLoop(cap);
 
     //-- Main loop
     //--------------------------------------------------------------------
@@ -125,7 +86,7 @@ int main( int argc, char * argv[] )
 		break;
 
 	    case 1:
-			handDetector.calibrate( lower, upper);
+			handDetector.calibrate( handDetector.getLower(), handDetector.getUpper());
 			handDetector( frame, processed);
 		break;
 
@@ -157,7 +118,7 @@ int main( int argc, char * argv[] )
 	    break;
 
 	    case 1:
-	    ss << "Custom values->" << lower << " " << upper;
+	    ss << "Custom values->" << handDetector.getLower() << " " << handDetector.getUpper();
 	    break;
 
 	    case 2:
@@ -202,5 +163,5 @@ int main( int argc, char * argv[] )
 	}
     }
 
-return 0;
+	return 0;
 }

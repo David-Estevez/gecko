@@ -2,12 +2,16 @@
 #define HAND_DETECTOR
 
 #include <opencv2/opencv.hpp>
+#include "handUtils.h"
 
 class HandDetector {
    public:
 	//-- Constructors
 	HandDetector();
 	HandDetector( cv::Mat& ROI);
+
+	//-- Calibration loop
+	void calibrationLoop(cv::VideoCapture); 
 
 	//-- Calibration functions
 	void calibrate( cv::Mat& ROI);
@@ -17,6 +21,10 @@ class HandDetector {
 	//-- Hand-detection
 	void operator()(const cv::Mat& src, cv::Mat& dst);
 	void filter_hand(const cv::Mat& src, cv::Mat& dst);
+	
+	//-- Get lower and upper level (calibration)
+	cv::Scalar getLower(); 
+	cv::Scalar getUpper(); 
 
 
     private:
@@ -41,6 +49,8 @@ class HandDetector {
 	int sat_sigma_mult;
 	int val_sigma_mult;
 
+	cv::Scalar lower, upper;
+    static const int halfSide=40;
 };
 
 #endif // HAND_DETECTOR
