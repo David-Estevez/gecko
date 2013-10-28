@@ -17,4 +17,8 @@ void filteredContour(cv::Mat& src, std::vector< std::vector<cv::Point> >  &handC
 //-- Rectangle characterization:
 double getAngle( cv::RotatedRect boundingRect);
 
+//-- Static background substractor
+
+cv:: Mat sBackgroundSubs(cv::Mat );	
+
 #endif // HANDUTILS_H

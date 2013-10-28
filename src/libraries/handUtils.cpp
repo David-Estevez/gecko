@@ -143,3 +143,15 @@ void filteredContour( cv::Mat& src, std::vector< std::vector<cv::Point> >& handC
     if ( (int) filteredContours.size() > 0)
 	handContour.push_back( filteredContours[largestId]);
 }
+
+
+
+cv:: Mat sBackgroundSubs(cv::Mat frame)
+{
+	cv:: Mat final; 
+	
+	
+	frame.copyTo(final);
+
+	return final; 
+}

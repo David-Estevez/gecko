@@ -29,7 +29,7 @@ class HandDetector {
 
     private:
     
-    //-- Static background substractor
+
     
 	//-- Statistical functions:
 	int average( cv::Mat& ROI);
