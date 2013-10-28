@@ -16,18 +16,8 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
-class Mouse 
-{
-	public:
-		Mouse();
-		void moveMouse( const int& x, const int& y, const bool absoluteMode = true);
-		void getMousePos( int &x, int &y);
-		void getDisplayDimensions( int& width, int& height);
-		void moveCursor (cv:: Mat, std::vector< std::vector<cv::Point> >);
-		
-	private: 
-		cv::KalmanFilter kalmanFilter;
-
-};
+void moveMouse( std::pair <int, int> coordinates, const bool absoluteMode = true);
+void getMousePos( int &x, int &y);
+void getDisplayDimensions( int& width, int& height);
 
 #endif	//MOUSE_H

@@ -51,10 +51,7 @@ int main( int argc, char * argv[] )
 
 	//-- Object that will store the parameters of the hand
 	HandDescription hand_descriptor;
-	
-	
-	//-- Mouse object to control the mouse 
-	Mouse mouse; 
+
 
 	//-- Calibration loop
 	
@@ -139,8 +136,9 @@ int main( int argc, char * argv[] )
 //--	Move Cursor 
 
 	if ( debugValue == 2)
-		mouse.moveCursor(frame, hand_descriptor.getContours()); 
-		
+	{
+		moveMouse(hand_descriptor.centerHand(frame)); 
+	}
 
 	hand_descriptor.angleControl();
 

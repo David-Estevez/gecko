@@ -3,6 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 #include "handUtils.h"
+#include "mouse.h"
 
 class HandDescription 
 {
@@ -20,6 +21,7 @@ class HandDescription
    		void setHandAngle(double &); 
    		double getHandAngle ();
    		
+   		std::pair <int, int> centerHand (cv:: Mat );
    		std::vector< std::vector<cv::Point> > getContours();
    
    private: 
@@ -29,6 +31,8 @@ class HandDescription
    		double _hand_angle; 
    		std::vector< std::vector<cv::Point> > _hand_contour;
    		cv::KalmanFilter kalmanFilterAngle;
+   		
+   		cv::KalmanFilter kalmanFilterCenter;
 
    		
    		
