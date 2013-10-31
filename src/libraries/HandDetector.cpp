@@ -16,6 +16,9 @@ HandDetector::HandDetector()
     upper_limit = cv::Scalar( 25, 173, 229);
     hue_invert = false;
 
+    //-- Initialize cascade classifier:
+    initCascadeClassifier();
+
 }
 
 HandDetector::HandDetector( cv::Mat& ROI)
@@ -27,6 +30,9 @@ HandDetector::HandDetector( cv::Mat& ROI)
 
     //-- Skin color limits
     calibrate( ROI );
+
+    //-- Initialize cascade classifier:
+    initCascadeClassifier();
 }
 
 
@@ -147,8 +153,95 @@ void HandDetector::filter_hand(const cv::Mat &src, cv::Mat &dst)
     cv::Mat kernel = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5) );
     cv::morphologyEx( thresholdedHand, dst, cv::MORPH_CLOSE, kernel);
 
+
+    //-- Filter head:
+    //--..................................................................
+    //-- Get mask
+    cv::Mat headTrackingMask;
+    filterFace( src, headTrackingMask );
+
+    //-- Apply mask
+    cv::bitwise_and( thresholdedHand, headTrackingMask, thresholdedHand );
+
+    //-- cv::imshow("Final mask", thresholdedHand );
+
 }
 
+
+
+//--------------------------------------------------------------------------------------------------------
+//-- Face detection
+//--------------------------------------------------------------------------------------------------------
+
+//-- Initialize the cascade classifier:
+void HandDetector::initCascadeClassifier( )
+{
+    //-- Load file with the classifier features:
+    if ( ! faceDetector.load( "/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml" ) )
+    {
+	std::cerr << "[Error] Could not load cascade classifier features file." << std::endl;
+    }
+
+}
+
+//-- Filter out faces:
+void HandDetector::filterFace(const cv::Mat &src, cv::Mat &dstMask )
+{
+    //-- Create variables to store faces
+    std::vector< cv::Rect > detectedFaces;
+
+    //-- Convert the source image to a greyscale image:
+    cv::Mat srcGrey;
+    cv::cvtColor( src, srcGrey, CV_BGR2GRAY );
+
+    cv::Mat srcGreySmall;
+    cv::resize( srcGrey, srcGreySmall, cv::Size(0, 0), 0.25, 0.25 );
+
+    //-- Detect face:
+    faceDetector.detectMultiScale( srcGreySmall, detectedFaces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, cv::Size( 30, 30) );
+
+    dstMask = cv::Mat(  srcGrey.size() , CV_8UC1,  cv::Scalar( 255, 255, 255) );
+
+    //-- Show detected faces:
+    if ( ! detectedFaces.empty() )
+    {
+	for (int i = 0; i < detectedFaces.size(); i++)
+	{
+	    //-- Resize the rectangles:
+	    static const double factorX = 1.5; //-- Factors to resize the rectangle
+	    static const double factorY = 1.5;
+	    cv::Rect resizedRect;
+
+	    if ( factorX == 1 && factorY == 1 )
+	    {
+		//-- Do not resize:
+		resizedRect = cv::Rect( detectedFaces[i].x * 4,
+					detectedFaces[i].y * 4,
+					detectedFaces[i].width  * 4,
+					detectedFaces[i].height * 4 );
+	    }
+	    else
+	    {
+		//-- Resize:
+		//-- Calculate original center:
+		double cx = detectedFaces[i].x * 4 + detectedFaces[i].width * 2;
+		double cy = detectedFaces[i].y * 4 + detectedFaces[i].height * 2;
+
+		//-- Calculate new size:
+		double newW = detectedFaces[i].width * 4 * factorX;
+		double newH = detectedFaces[i].width * 4 * factorY;
+
+		//-- Calculate new center:
+		double newX = cx - newW / 2;
+		double newY = cy - newH / 2;
+
+		resizedRect = cv::Rect( newX, newY, newW, newH );
+	    }
+
+	    cv::rectangle( dstMask, resizedRect, cv::Scalar( 0, 0, 0), CV_FILLED );
+	}
+    }
+}
 
 //--------------------------------------------------------------------------------------------------------
 //-- Statistical functions:
@@ -209,9 +302,9 @@ int HandDetector::median(cv::Mat &ROI)
 }
 
 
-void HandDetector:: calibrationLoop(cv::VideoCapture cap)
+void HandDetector::calibrationLoop(cv::VideoCapture cap)
 {   
-	//-- Calibration loop
+    //-- Calibration loop
     //--------------------------------------------------------------------
     cv::namedWindow( "Calibrating skin", cv::WINDOW_AUTOSIZE);
     bool stop = false;

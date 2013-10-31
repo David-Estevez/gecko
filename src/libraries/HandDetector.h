@@ -28,9 +28,6 @@ class HandDetector {
 
 
     private:
-    
-
-    
 	//-- Statistical functions:
 	int average( cv::Mat& ROI);
 	int median( cv::Mat& ROI);
@@ -39,6 +36,20 @@ class HandDetector {
 	//-- Filter contours:
 	void filterContours( std::vector< std::vector < cv::Point > >& contours , std::vector< std::vector < cv::Point > >& filteredContours);
 
+	//-- Filter face:
+	//----------------------------------------------------------------------------------
+	//! -- \brief Cascade classifier to detect faces:
+	cv::CascadeClassifier faceDetector;
+
+	//! -- \brief Initializes the face detector
+	void initCascadeClassifier();
+
+	//! -- \brief Removes the face from the src image
+	void filterFace(const cv::Mat& src, cv::Mat& dstMask );
+
+
+	//-- Skin hue calibration
+	//-----------------------------------------------------------------------------------
 	//-- HSV limits
 	cv::Scalar lower_limit;
 	cv::Scalar upper_limit;
@@ -50,7 +61,8 @@ class HandDetector {
 	int val_sigma_mult;
 
 	cv::Scalar lower, upper;
-    static const int halfSide=40;
+
+	static const int halfSide=40;
 };
 
 #endif // HAND_DETECTOR
