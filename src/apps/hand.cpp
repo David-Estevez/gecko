@@ -145,7 +145,7 @@ int main( int argc, char * argv[] )
 
 
 	//-----------------------------------------------------------------------------------------------------
-	//--Move Cursor
+	//-- Move Cursor
 	//-----------------------------------------------------------------------------------------------------
 	if ( debugValue == 2)
 	{
@@ -156,8 +156,8 @@ int main( int argc, char * argv[] )
 	    std::pair< int, int> hand_center = hand_descriptor.getCenterHandEstimated();
 
 	    std::pair< float, float> relativeCoordinates;
-	    relativeCoordinates.first = hand_center.first / frame.cols;
-	    relativeCoordinates.second= hand_center.second / frame.rows;
+	    relativeCoordinates.first = hand_center.first /  (double) frame.cols;
+	    relativeCoordinates.second= hand_center.second / (double) frame.rows;
 
 	    moveMousePercentage( relativeCoordinates );
 	}
