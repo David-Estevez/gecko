@@ -12,11 +12,10 @@ void moveMouse(std::pair <int, int> coordinates, const bool absoluteMode)
 
     if (absoluteMode)
     {
-	int currentX, currentY;
-	getMousePos( currentX, currentY);
+	std::pair <int, int> current = getMousePos();
 
-	int xDisplacement = coordinates.first - currentX;
-	int yDisplacement = coordinates.second - currentY;
+	int xDisplacement = coordinates.first - current.first;
+	int yDisplacement = coordinates.second - current.second;
 
 	XWarpPointer( displayMain, None, None, 0, 0, 0, 0, xDisplacement, yDisplacement);
     }
@@ -28,17 +27,33 @@ void moveMouse(std::pair <int, int> coordinates, const bool absoluteMode)
     XCloseDisplay( displayMain);
 }
 
-void getDisplayDimensions( int& width, int& height)
+void moveMousePercentage(std::pair<double, double> coordinates)
+{
+    //-- Get screen dimensions
+    std::pair< int, int> screen = getDisplayDimensions();
+
+    //-- Calculate the new position
+    std::pair< int, int> newPosition;
+    newPosition.first = (int) ( coordinates.first * screen.first);
+    newPosition.second = (int) ( coordinates.second * screen.second);
+
+    //-- Move there
+    moveMouse( newPosition, true);
+}
+
+std::pair<int, int> getDisplayDimensions( )
 {
     Display * displayMain = XOpenDisplay( NULL);
 
-    width = XDisplayWidth( displayMain, 0);
-    height= XDisplayHeight( displayMain, 0);
+    int width  = XDisplayWidth(  displayMain, 0);
+    int height = XDisplayHeight( displayMain, 0);
 
     XCloseDisplay( displayMain);
+
+    return std::pair<int, int> ( width, height );
 }
 
-void getMousePos( int &x, int &y)
+std::pair<int, int> getMousePos()
 {
 	Bool result;
 
@@ -87,8 +102,7 @@ void getMousePos( int &x, int &y)
 	free(root_windows);
 	XCloseDisplay(display);
 
-	x = root_x;
-	y = root_y;
+	return std::pair <int, int> ( root_x, root_y );
 }
 
 

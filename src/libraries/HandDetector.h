@@ -24,7 +24,7 @@ class HandDetector {
 
 	//-- Face-tracking
 	std::vector< cv::Rect >& getLastFacesPos();
-	void drawFaceMarks( const cv::Mat& src, cv::Mat& dst , cv::Scalar color = cv::Scalar( 0, 0, 255), int thickness = 1  );
+	void drawFaceMarks( const cv::Mat& src, cv::Mat& dst , cv::Scalar color = cv::Scalar(0, 255, 0), int thickness = 1  );
 	
 	//-- Get lower and upper level (calibration)
 	cv::Scalar getLower(); 

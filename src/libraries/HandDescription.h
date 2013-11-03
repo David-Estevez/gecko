@@ -28,11 +28,15 @@ public:
     bool handFound();
 
     //! \brief Returns the angle of the box enclosing the hand
-    double getHandAngle ();
+    double getHandAngle();
+    double getHandAnglePredicted();
+    double getHandAngleEstimated();
 
     //! \brief Returns the position of the center of the hand
-    std::pair <int, int> getCenterHand (cv:: Mat );
-    std::pair <int, int> getCenterHand ( );
+    std::pair <int, int> getCenterHand(cv:: Mat );
+    std::pair <int, int> getCenterHand( );
+    std::pair <int, int> getCenterHandPredicted();
+    std::pair <int, int> getCenterHandEstimated();
 
     //! \brief Returns the contours of the detected hand
     std::vector< std::vector<cv::Point> > getContours();
@@ -50,10 +54,13 @@ public:
     //-- Plot characteristics on some image:
     //--------------------------------------------------------------------------
     //! \brief Plots the rectangle around the hand on display
-    void plotBoundingRectangle(const cv::Mat& src, cv::Mat& dst, bool rotated = false);
+    void plotBoundingRectangle(const cv::Mat& src, cv::Mat& dst, bool rotated = true);
 
     //! \brief Plot the contours on display
     void plotContours(const cv::Mat& src, cv::Mat& dst );
+
+    //! \brief Plot the center of the hand on display
+    void plotCenter( const cv::Mat& src, cv::Mat& dst, bool show_corrected = true,  bool show_actual = true, bool show_predicted = true );
 
     //! \brief Prints the angle gauge on a separate window
     void angleControl( bool show_corrected = true,  bool show_actual = true, bool show_predicted = true );
@@ -71,7 +78,6 @@ private:
     //--------------------------------------------------------------------------
     void contourExtraction(const cv::Mat& skinMask);
     void boundingBoxExtraction( const cv::Mat& src);
-
     void angleExtraction();
     void centerExtraction();
     void gestureExtraction();

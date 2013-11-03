@@ -11,25 +11,24 @@ int main( int argc, char * argv[] )
 {
     //-- Setup video
     //--------------------------------------------------------------
-    cv::Mat subs;
     cv::VideoCapture cap;
 
     //-- Open video source
     if ( argc > 1)
     {
-		cap.open( argv[1] );
+	cap.open( argv[1] );
     }
     else
     {
-		cap.open(-1);
-		cap.set(CV_CAP_PROP_BRIGHTNESS, 0.5);
+	cap.open(-1);
+	cap.set(CV_CAP_PROP_BRIGHTNESS, 0.5);
     }
 
     //-- Check if open
     if ( !cap.isOpened() )
     {
-		std::cerr << "Device could not be opened." << std::endl;
-		return(1);
+	std::cerr << "Device could not be opened." << std::endl;
+	return(1);
     }
 
     //-- Get frame rate
@@ -65,7 +64,7 @@ int main( int argc, char * argv[] )
 	cv::Mat frame, display;
 	if ( ! cap.read( frame ) )
 	    break;
-	    
+
 	cv::flip(frame,frame,1);
 
 	//-- Remove the background
@@ -78,20 +77,20 @@ int main( int argc, char * argv[] )
 	cv::Mat processed;
 	switch( debugValue )
 	{
-	    case 0: case 2:
-			handDetector.calibrate();
-			handDetector( frame, processed);
-		break;
+	case 0: case 2:
+	    handDetector.calibrate();
+	    handDetector( frame, processed);
+	    break;
 
-	    case 1:
-			handDetector.calibrate( handDetector.getLower(), handDetector.getUpper());
-			handDetector( frame, processed);
-		break;
+	case 1:
+	    handDetector.calibrate( handDetector.getLower(), handDetector.getUpper());
+	    handDetector( frame, processed);
+	    break;
 
-	    default:
-			processed = frame;
-		break;
-	   }
+	default:
+	    processed = frame;
+	    break;
+	}
 
 
 	//-- Contour extraction
@@ -111,8 +110,8 @@ int main( int argc, char * argv[] )
 
 	//-- Plot contours on image
 	//--------------------------------------------
-	//! \todo This
-
+	hand_descriptor.plotBoundingRectangle( display, display );
+	hand_descriptor.plotContours(display, display);
 
 	//-- Adding text:
 	//--------------------------------------------
@@ -121,15 +120,15 @@ int main( int argc, char * argv[] )
 
 	switch( debugValue)
 	{
-	    case 0:
+	case 0:
 	    ss << "Default values";
 	    break;
 
-	    case 1:
+	case 1:
 	    ss << "Custom values->" << handDetector.getLower() << " " << handDetector.getUpper();
 	    break;
 
-	    case 2:
+	case 2:
 	    ss << "Tracking hand";
 	    break;
 
@@ -145,17 +144,22 @@ int main( int argc, char * argv[] )
 	handDetector.drawFaceMarks( display, display );
 
 
-	//-- Show processed image
-	//--------------------------------------------
-	cv::imshow( "Processed Stream", display);
-
-
 	//-----------------------------------------------------------------------------------------------------
 	//--Move Cursor
 	//-----------------------------------------------------------------------------------------------------
 	if ( debugValue == 2)
 	{
-		moveMouse(hand_descriptor.getCenterHand(frame));
+	    //-- Show hand center of screen
+	    hand_descriptor.plotCenter( display, display );
+
+	    //-- Calculate relative position and move there:
+	    std::pair< int, int> hand_center = hand_descriptor.getCenterHandEstimated();
+
+	    std::pair< float, float> relativeCoordinates;
+	    relativeCoordinates.first = hand_center.first / frame.cols;
+	    relativeCoordinates.second= hand_center.second / frame.rows;
+
+	    moveMousePercentage( relativeCoordinates );
 	}
 
 
@@ -165,6 +169,10 @@ int main( int argc, char * argv[] )
 	hand_descriptor.angleControl();
 
 
+	//-----------------------------------------------------------------------------------------------------
+	//-- Show feedback image
+	//-----------------------------------------------------------------------------------------------------
+	cv::imshow( "Processed Stream", display);
 
 	//-----------------------------------------------------------------------------------------------------
 	//-- Decide what to do next depending on key pressed
@@ -172,22 +180,22 @@ int main( int argc, char * argv[] )
 	char key = (char) cv::waitKey( delay);
 	switch( key)
 	{
-	    case 'f': //-- Filtered frame
-		debugValue = 0;
-		break;
-	    case 'd': //-- hardcoded filter
-		debugValue = 1;
-		break;
-	    case 'k': //-- Move mouse
-		debugValue = 2;
-		break;
-	    case (char) 27:
-		stop = true;
-		break;
-	    default:
-		continue;
+	case 'f': //-- Filtered frame
+	    debugValue = 0;
+	    break;
+	case 'd': //-- hardcoded filter
+	    debugValue = 1;
+	    break;
+	case 'k': //-- Move mouse
+	    debugValue = 2;
+	    break;
+	case (char) 27:
+	    stop = true;
+	    break;
+	default:
+	    continue;
 	}
     }
 
-	return 0;
+    return 0;
 }

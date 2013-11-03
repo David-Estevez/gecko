@@ -43,14 +43,13 @@ HandDescription:: HandDescription()
 								0, 0, 0, 1);
     //-- Get mouse position:
     //! \todo Change this for screen center?
-    int initial_mouse_x, initial_mouse_y;
-    getMousePos( initial_mouse_x, initial_mouse_y);
+    std::pair <int, int> initial_mouse = getMousePos( );
 
     //-- Initial state:
-    kalmanFilterCenter.statePre.at<float>(0) = initial_mouse_x; //-- x Position
-    kalmanFilterCenter.statePre.at<float>(1) = initial_mouse_y; //-- y Position
-    kalmanFilterCenter.statePre.at<float>(2) = 0;		  //-- x Velocity
-    kalmanFilterCenter.statePre.at<float>(3) = 0;		  //-. y Velocity
+    kalmanFilterCenter.statePre.at<float>(0) = initial_mouse.first;  //-- x Position
+    kalmanFilterCenter.statePre.at<float>(1) = initial_mouse.second; //-- y Position
+    kalmanFilterCenter.statePre.at<float>(2) = 0;		     //-- x Velocity
+    kalmanFilterCenter.statePre.at<float>(3) = 0;		     //-- y Velocity
 
     //-- Set the rest of the matrices:
     cv::setIdentity( kalmanFilterCenter.measurementMatrix );
@@ -79,8 +78,8 @@ void HandDescription::update(const cv::Mat& src, const cv::Mat& skinMask )
     {
 	boundingBoxExtraction(src);
 
-//	angleExtraction();
-//	centerExtraction();
+	angleExtraction();
+	centerExtraction();
 
 //	gestureExtraction();
 //	numFingersExtraction();
@@ -103,9 +102,29 @@ double HandDescription::getHandAngle ()
     return _hand_angle;
 }
 
+double HandDescription::getHandAnglePredicted()
+{
+    return _hand_angle_prediction;
+}
+
+double HandDescription::getHandAngleEstimated()
+{
+    return _hand_angle_estimation;
+}
+
 std::pair <int, int> HandDescription::getCenterHand ()
 {
     return _hand_center;
+}
+
+std::pair <int, int> HandDescription::getCenterHandPredicted()
+{
+    return _hand_center_prediction;
+}
+
+std::pair <int, int> HandDescription::getCenterHandEstimated()
+{
+    return _hand_center_estimation;
 }
 
 std::vector< std::vector<cv::Point> > HandDescription::getContours()
@@ -141,22 +160,24 @@ void HandDescription::plotBoundingRectangle(const cv::Mat& src, cv::Mat& dst, bo
     if ( dst.total() == 0 )
 	dst = src.clone();
 
-    //-- Choose between rotated or std box:
-    if ( rotated )
+    if ( _hand_found )
     {
-	//-- Draw rotated rectangle:
-	cv::Point2f rect_points[4]; _hand_rotated_bounding_box.points( rect_points );
-	for( int j = 0; j < 4; j++ )
-	    cv::line( dst, rect_points[j], rect_points[(j+1)%4], cv::Scalar(255, 0, 0) , 1, 8 );
-    }
-    else
-    {
-	cv::rectangle( dst, _hand_bounding_box, cv::Scalar( 255, 0, 255) );
+	//-- Choose between rotated or std box:
+	if ( rotated )
+	{
+	    //-- Draw rotated rectangle:
+	    cv::Point2f rect_points[4]; _hand_rotated_bounding_box.points( rect_points );
+	    for( int j = 0; j < 4; j++ )
+		cv::line( dst, rect_points[j], rect_points[(j+1)%4], cv::Scalar(255, 0, 0) , 2 );
+	}
+	else
+	{
+	    cv::rectangle( dst, _hand_bounding_box, cv::Scalar( 255, 0, 0), 2 );
+	}
     }
 }
 
 
-//-- Extracts the contour of the ROI and stores the hand's parameters in the private variables
 void HandDescription::plotContours(const cv::Mat& src, cv::Mat& dst)
 {
     //-- Allocate the display matrix if needed:
@@ -164,7 +185,7 @@ void HandDescription::plotContours(const cv::Mat& src, cv::Mat& dst)
 	dst = src.clone();
 
     //-- Plot contours:
-    if ( (int) _hand_contour.size() > 0 )
+    if ( _hand_found )
     {
 	//-- Draw contours:
 	cv::drawContours( dst, _hand_contour, 0, cv::Scalar( 0, 0, 255), 1, 8);
@@ -173,6 +194,41 @@ void HandDescription::plotContours(const cv::Mat& src, cv::Mat& dst)
     else
 	std::cerr << "No contours found!" << std::endl;
 }
+
+
+void HandDescription::plotCenter(const cv::Mat& src, cv::Mat& dst, bool show_corrected, bool show_actual, bool show_predicted)
+{
+    //-- Allocate the display matrix if needed:
+    if ( dst.total() == 0 )
+	dst = src.clone();
+
+    //-- Plot center
+    if ( _hand_found )
+    {
+	if ( show_predicted )
+	{
+	    //-- Print predicted point on screen:
+	    cv::Point predictedPoint( _hand_center_prediction.first, _hand_center_prediction.second );
+	    cv::circle( dst, predictedPoint, 4, cv::Scalar( 0, 255, 0), 2 );
+	}
+
+	if ( show_actual )
+	{
+	    //-- Print cog on screen:
+	    cv::Point cog( _hand_center.first, _hand_center.second );
+	    cv::circle( dst, cog, 5, cv::Scalar( 255, 0, 0), 2 );
+	}
+
+	if ( show_corrected )
+	{
+	    //-- Print estimation on screen:
+	    cv::Point estimationPoint( _hand_center_estimation.first, _hand_center_estimation.second );
+	    cv::circle( dst, estimationPoint, 3, cv::Scalar( 0, 0, 255), 2 );
+	}
+    }
+
+}
+
 
 
 void HandDescription::angleControl(bool show_corrected, bool show_actual, bool show_predicted)
@@ -220,47 +276,33 @@ void HandDescription::angleControl(bool show_corrected, bool show_actual, bool s
 
 }
 
-std::pair <int, int> HandDescription::getCenterHand (cv:: Mat frame)
-{
-
-    //-- Copy the frame to display to draw there the results
-    cv:: Mat display;
-    frame.copyTo(display);
+//std::pair <int, int> HandDescription::getCenterHand (cv:: Mat frame)
+//{
 
 
+//    if ( (int) _hand_contour.size() > 0 )
+//    {
+//	//-- Get image dimensions:
+//	int imageWidth = frame.cols, imageHeight = frame.rows;
+//	//std::cout << "Captured image: " << imageWidth << " x " << imageHeight << std::endl;
 
-    if ( (int) _hand_contour.size() > 0 )
-    {
-	//-- Get image dimensions:
-	int imageWidth = frame.cols, imageHeight = frame.rows;
-	//std::cout << "Captured image: " << imageWidth << " x " << imageHeight << std::endl;
 
+//	//! \todo this s part of the plotting thing, not the actual center of the hand:
+//	//-- Get screen dimensions:
+//	int screenHeight, screenWidth;
+//	getDisplayDimensions( screenWidth, screenHeight);
 
-//	//-- (Optional) Print predicted point on screen:
-//	cv::circle( display, predictedPoint, 4, cv::Scalar( 0, 255, 0), 2 );
+//	//-- Get new cursor position by mapping the points:
+//	int x, y;
+//	//x = cogX * screenWidth / imageWidth;
+//	//y = cogY * screenHeight / imageHeight;
+////	x = estimationPoint.x * screenWidth / imageWidth;
+////	y = estimationPoint.y * screenHeight / imageHeight;
 
-//	//-- (Optional) Print cog on screen:
-//	cv::circle( display, cog, 5, cv::Scalar( 255, 0, 0), 2 );
+//	return std::pair<int, int> (x, y);
+//    }
 
-//	//- (Optional) Print estimation on screen:
-//	cv::circle( display, estimationPoint, 3, cv::Scalar( 0, 0, 255), 2 );
-
-	//! \todo this s part of the plotting thing, not the actual center of the hand:
-	//-- Get screen dimensions:
-	int screenHeight, screenWidth;
-	getDisplayDimensions( screenWidth, screenHeight);
-
-	//-- Get new cursor position by mapping the points:
-	int x, y;
-	//x = cogX * screenWidth / imageWidth;
-	//y = cogY * screenHeight / imageHeight;
-//	x = estimationPoint.x * screenWidth / imageWidth;
-//	y = estimationPoint.y * screenHeight / imageHeight;
-
-	return std::pair<int, int> (x, y);
-    }
-
-}
+//}
 
 
 
@@ -317,16 +359,11 @@ void HandDescription::angleExtraction()
 
 void HandDescription::centerExtraction()
 {
-    //-- Create matrix for storing the measurement (measured position of hand)
-    cv::Mat_<float> measurement(2, 1);
-    measurement.setTo( cv::Scalar(0));
-
     //-- Predict next center position with kalman filter:
     cv::Mat prediction = kalmanFilterCenter.predict();
     _hand_center_prediction = std::pair <int, int> ( prediction.at<float>(0), prediction.at<float>(1) );
 
     //-- Measure actual point (uncomment the selected method):
-    std::pair <int, int> cog;
 
     //-------------------- With RotatedRect --------------------------------------
 //    cv::Point2f rect_points[4]; _hand_rotated_bounding_box.points( rect_points );
@@ -342,11 +379,14 @@ void HandDescription::centerExtraction()
 
     //-------------------- With Bounding Rectangle --------------------------------
     //-- (This is more stable than the rotated rectangle)
-    cog.first  = _hand_bounding_box.x + _hand_bounding_box.width  / 2;
-    cog.second = _hand_bounding_box.y + _hand_bounding_box.height / 2;
+    _hand_center.first  = _hand_bounding_box.x + _hand_bounding_box.width  / 2;
+    _hand_center.second = _hand_bounding_box.y + _hand_bounding_box.height / 2;
 
-    measurement(0) = cog.first;
-    measurement(1) = cog.second;
+
+    //-- Create matrix for storing the measurement (measured position of hand)
+    cv::Mat_<float> measurement(2, 1);
+    measurement(0) = _hand_center.first;
+    measurement(1) = _hand_center.second;
 
     //-- Correct estimation:
     cv::Mat estimation = kalmanFilterCenter.correct( measurement);
