@@ -18,12 +18,15 @@ public:
 
     //-- Refresh the detected hand characteristics
     //-----------------------------------------------------------------------
-    void operator ()( const cv::Mat src );
-    void update( const cv::Mat src );
+    void operator ()(const cv::Mat& src, const cv::Mat& skinMask );
+    void update(const cv::Mat& src, const cv::Mat& skinMask );
 
 
     //-- Get the characteristics of the hand:
     //-----------------------------------------------------------------------
+    //! \brief Returns true if a hand was found
+    bool handFound();
+
     //! \brief Returns the angle of the box enclosing the hand
     double getHandAngle ();
 
@@ -53,7 +56,7 @@ public:
     void plotContours(const cv::Mat& src, cv::Mat& dst );
 
     //! \brief Prints the angle gauge on a separate window
-    void angleControl();
+    void angleControl( bool show_corrected = true,  bool show_actual = true, bool show_predicted = true );
 
 
     //-- List of available gestures
@@ -66,7 +69,7 @@ public:
 private:
     //-- Functions that extract characteristics:
     //--------------------------------------------------------------------------
-    void contourExtraction( const cv::Mat& src );
+    void contourExtraction(const cv::Mat& skinMask);
     void boundingBoxExtraction( const cv::Mat& src);
 
     void angleExtraction();
@@ -74,23 +77,45 @@ private:
     void gestureExtraction();
     void numFingersExtraction();
 
+
     //-- Parameters that describe the hand:
     //--------------------------------------------------------------------------
-    //! \brief Contains the angle of the box enclosing the hand
+    //! \brief Whether a hand was found or not:
+    bool _hand_found;
+
+
+    //! \brief Contains the actual angle of the box enclosing the hand
     double _hand_angle;
 
-    //! \brief Center of the hand
+    //! \brief Contains the predicted angle by the kalman filter
+    double _hand_angle_prediction;
+
+    //! \brief Contains the corrected estimation by the kalman filter
+    double _hand_angle_estimation;
+
+
+    //! \brief Actual center of the hand
     std::pair<int, int> _hand_center;
+
+    //! \brief Predicted center of the hand by the kalman filter
+    std::pair<int, int> _hand_center_prediction;
+
+    //! \brief Corrected estimation by the kalman filter
+    std::pair<int, int> _hand_center_estimation;
+
 
     //! \brief Contours of the candidates to be a hand
     std::vector< std::vector<cv::Point> > _hand_contour;
+
 
     //! \brief Box enclosing the hand
     cv::RotatedRect _hand_rotated_bounding_box;
     cv::Rect _hand_bounding_box;
 
+
     //! \brief Last detected gesture
     int _hand_gesture;
+
 
     //! \brief Number of fingers (visible)
     int _hand_num_fingers;
@@ -99,6 +124,7 @@ private:
     //-- ROI of the hand, for gesture analysis:
     //-------------------------------------------------------------------------
     cv::Mat _hand_ROI;
+
 
     //-- Kalman filters for smoothing:
     //---------------------------------------------------------------------

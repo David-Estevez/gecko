@@ -95,7 +95,7 @@ int main( int argc, char * argv[] )
 
 
 	//-- Contour extraction
-	//hand_descriptor.contourExtraction(frame, processed);
+	hand_descriptor( frame, processed );
 
 
 	//-- Hand's angle
