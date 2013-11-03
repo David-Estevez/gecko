@@ -164,6 +164,7 @@ void HandDetector::getCalibration(cv::Scalar &lower_limit, cv::Scalar &upper_lim
     upper_limit = this->upper_limit;
 }
 
+
 //--------------------------------------------------------------------------------------------------------
 //-- Hand-detection
 //--------------------------------------------------------------------------------------------------------
@@ -177,21 +178,23 @@ void HandDetector::operator ()( const cv::Mat& src, cv::Mat& dst)
 void HandDetector::filter_hand(const cv::Mat &src, cv::Mat &dst)
 {
     //-- Background substraction:
-    //----------------------------------------------------------------------------------------------------
+    //------------------------------------------------
     cv::Mat withoutBackground;
     backgroundSubstraction( src, withoutBackground );
 
     //-- Skin thresholding
+    //------------------------------------------------
     cv::Mat thresholdedHand;
     threshold( withoutBackground, thresholdedHand );
 
     //-- Filter out small blobs:
+    //------------------------------------------------
     cv::Mat withoutBlobs;
     filterBlobs( thresholdedHand, withoutBlobs );
 
 
-    //-- Filter head:
-    //--..................................................................
+    //-- Filter out head:
+    //------------------------------------------------
     //-- Get mask
     cv::Mat headTrackingMask;
     filterFace( src, headTrackingMask );
@@ -199,7 +202,9 @@ void HandDetector::filter_hand(const cv::Mat &src, cv::Mat &dst)
     //-- Apply mask
     cv::bitwise_and( withoutBlobs, headTrackingMask, dst );
 
-    cv::imshow("Filtered hand", dst );
+    //-- Show result (optional)
+    //------------------------------------------------
+    cv::imshow("[Debug] Filtered hand", dst );
 
 }
 
@@ -298,7 +303,7 @@ std::vector< cv::Rect >& HandDetector::getLastFacesPos()
 void HandDetector::drawFaceMarks(const cv::Mat &src, cv::Mat &dst, cv::Scalar color, int thickness )
 {
     //-- Allocate the dst matrix if empty:
-    if ( dst.empty() )
+    if ( dst.total() == 0)
 	    dst = src.clone();
 
     //-- Plot the bounding rectangles:

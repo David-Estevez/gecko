@@ -3,10 +3,13 @@
 //-- Initialization of the private parameters in the constructor
 HandDescription:: HandDescription()
 {
-    //-- Initalize hand angle
+    //-- Initalize hand parameters
     //-----------------------------------------------------------------------
     _hand_angle=0;
-	
+    _hand_center = std::pair <int, int> (0, 0);
+    _hand_bounding_box = cv::Rect();
+    _hand_gesture = HAND_GESTURE_NONE;
+    _hand_num_fingers = -1;
 
 
     //-- Kalman filter setup for estimating hand angle:
@@ -28,7 +31,7 @@ HandDescription:: HandDescription()
 
 
 
-    //-- Kalman filter mouse setup
+    //-- Kalman filter for estimating hand center
     //---------------------------------------------------------------------
 
     //-- Create filter:
@@ -56,17 +59,61 @@ HandDescription:: HandDescription()
 }
 
 
+
+//-----------------------------------------------------------------------------------------------------------------------
+//-- Refresh the detected hand characteristics
+//-----------------------------------------------------------------------------------------------------------------------
+void HandDescription::operator ()( const cv::Mat src )
+{
+    update ( src );
+}
+
+void HandDescription::update(const cv::Mat src)
+{
+    //-- Do things to update each parameter
+}
+
+
+
+//-----------------------------------------------------------------------------------------------------------------------
+//-- Get the characteristics of the hand
+//-----------------------------------------------------------------------------------------------------------------------
+
 double HandDescription:: getHandAngle ()
 {
-	return _hand_angle; 
+    return _hand_angle;
 }
 
-
-std::vector< std::vector<cv::Point> > HandDescription:: getContours()
+std::pair <int, int> HandDescription::getCenterHand ()
 {
-	return _hand_contour; 
+    return _hand_center;
 }
 
+std::vector< std::vector<cv::Point> > HandDescription::getContours()
+{
+    return _hand_contour;
+}
+
+cv::Rect HandDescription::getBoundingBox()
+{
+    return _hand_bounding_box;
+}
+
+int HandDescription::getGesture()
+{
+    return _hand_gesture;
+}
+
+int HandDescription::getNumFingers()
+{
+    return _hand_num_fingers;
+}
+
+
+
+//-----------------------------------------------------------------------------------------------------------------------
+//-- Plot characteristics on some image
+//-----------------------------------------------------------------------------------------------------------------------
 
 //-- Draws the bounding rectangle of the ROI
 void HandDescription::boundingRectangle(cv::Mat display)
