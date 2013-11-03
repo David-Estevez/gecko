@@ -12,7 +12,7 @@ void drawHistogramHSV( const cv::Mat& image);
 
 //-- Contour finding and filtering:
 void getContours(const cv::Mat &src, std::vector<std::vector<cv::Point> > &contours);
-void filteredContour(cv::Mat& src, std::vector< std::vector<cv::Point> >  &handContour , const int min = 350, const int max = 1800);
+void filterContours(std::vector< std::vector<cv::Point> >& srcContours, std::vector< std::vector<cv::Point> >& handContour , const int min = 350, const int max = 1800);
 
 //-- Rectangle characterization:
 double getAngle( cv::RotatedRect boundingRect);

@@ -47,10 +47,10 @@ public:
     //-- Plot characteristics on some image:
     //--------------------------------------------------------------------------
     //! \brief Plots the rectangle around the hand on display
-    void boundingRectangle(cv::Mat display);
+    void plotBoundingRectangle(const cv::Mat& src, cv::Mat& dst, bool rotated = false);
 
-    //! \brief Extract the countours of a image
-    void contourExtraction(cv::Mat, cv::Mat);
+    //! \brief Plot the contours on display
+    void plotContours(const cv::Mat& src, cv::Mat& dst );
 
     //! \brief Prints the angle gauge on a separate window
     void angleControl();
@@ -67,9 +67,10 @@ private:
     //-- Functions that extract characteristics:
     //--------------------------------------------------------------------------
     void contourExtraction( const cv::Mat& src );
+    void boundingBoxExtraction( const cv::Mat& src);
+
     void angleExtraction();
     void centerExtraction();
-    void boundingBoxExtraction();
     void gestureExtraction();
     void numFingersExtraction();
 
@@ -84,7 +85,8 @@ private:
     //! \brief Contours of the candidates to be a hand
     std::vector< std::vector<cv::Point> > _hand_contour;
 
-    //! \brief Box around the hand
+    //! \brief Box enclosing the hand
+    cv::RotatedRect _hand_rotated_bounding_box;
     cv::Rect _hand_bounding_box;
 
     //! \brief Last detected gesture
@@ -93,6 +95,10 @@ private:
     //! \brief Number of fingers (visible)
     int _hand_num_fingers;
 
+
+    //-- ROI of the hand, for gesture analysis:
+    //-------------------------------------------------------------------------
+    cv::Mat _hand_ROI;
 
     //-- Kalman filters for smoothing:
     //---------------------------------------------------------------------

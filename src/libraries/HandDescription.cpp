@@ -71,6 +71,14 @@ void HandDescription::operator ()( const cv::Mat src )
 void HandDescription::update(const cv::Mat src)
 {
     //-- Do things to update each parameter
+    contourExtraction( src );
+    boundingBoxExtraction(src);
+
+//    angleExtraction();
+//    centerExtraction();
+
+//    gestureExtraction();
+//    numFingersExtraction();
 }
 
 
@@ -116,48 +124,47 @@ int HandDescription::getNumFingers()
 //-----------------------------------------------------------------------------------------------------------------------
 
 //-- Draws the bounding rectangle of the ROI
-void HandDescription::boundingRectangle(cv::Mat display)
+void HandDescription::plotBoundingRectangle(const cv::Mat& src, cv::Mat& dst, bool rotated )
 {
-	    //-- Draw rotated rectangle:
-	    cv::RotatedRect minRect = cv::minAreaRect( _hand_contour[0]);
-	    cv::Point2f rect_points[4]; minRect.points( rect_points );
-	    for( int j = 0; j < 4; j++ )
-		cv::line( display, rect_points[j], rect_points[(j+1)%4], cv::Scalar(255, 0, 0) , 1, 8 );
+    //-- Allocate the display matrix if needed:
+    if ( dst.total() == 0 )
+	dst = src.clone();
 
-	    double newHandAngle = getAngle(minRect);
-	    _hand_angle = newHandAngle < 0 ? _hand_angle : newHandAngle;
+    //-- Choose between rotated or std box:
+    if ( rotated )
+    {
+	//-- Draw rotated rectangle:
+	cv::Point2f rect_points[4]; _hand_rotated_bounding_box.points( rect_points );
+	for( int j = 0; j < 4; j++ )
+	    cv::line( dst, rect_points[j], rect_points[(j+1)%4], cv::Scalar(255, 0, 0) , 1, 8 );
+
+	//! \todo This is not ok here:
+	double newHandAngle = getAngle(_hand_rotated_bounding_box);
+	_hand_angle = newHandAngle < 0 ? _hand_angle : newHandAngle;
+    }
+    else
+    {
+	cv::rectangle( dst, _hand_bounding_box, cv::Scalar( 255, 0, 255) );
+    }
 }
 
 
 //-- Extracts the contour of the ROI and stores the hand's parameters in the private variables
-void HandDescription::contourExtraction(cv::Mat frame, cv::Mat processed)
+void HandDescription::plotContours(const cv::Mat& src, cv::Mat& dst)
 {
-	filteredContour( processed, _hand_contour);
+    //-- Allocate the display matrix if needed:
+    if ( dst.total() == 0 )
+	dst = src.clone();
 
-	cv::Mat display; 
-	
-
-	if ( (int) _hand_contour.size() > 0 )
-	{
-	    //-- Draw contours:
-	    cv::drawContours( display, _hand_contour, 0, cv::Scalar( 0, 0, 255), 1, 8);
-	    //cv::fillConvexPoly( dst, contours[largestId], cv::Scalar( 255, 255, 255));
-	    
-	    HandDescription:: boundingRectangle(display);
-
-	    //-- Show hand ROI
-	    cv::Rect rect  =  cv::boundingRect(_hand_contour[0]);
-	    cv::Mat ROI_hand = frame( rect).clone();
-	    cv::imshow("hand", ROI_hand);
-	    
-	}
-	else
-	    std::cerr << "No contours found!" << std::endl; 
-
-	//-----------------------------------------------------------------------------------------------------
-	//-- Show processed image
-	//-----------------------------------------------------------------------------------------------------
-	//cv::imshow( "Processed Stream", display);
+    //-- Plot contours:
+    if ( (int) _hand_contour.size() > 0 )
+    {
+	//-- Draw contours:
+	cv::drawContours( dst, _hand_contour, 0, cv::Scalar( 0, 0, 255), 1, 8);
+	//cv::fillConvexPoly( dst, contours[largestId], cv::Scalar( 255, 255, 255));
+    }
+    else
+	std::cerr << "No contours found!" << std::endl;
 }
 
 
@@ -299,4 +306,33 @@ std::pair <int, int> HandDescription::getCenterHand (cv:: Mat frame)
 		return std::pair<int, int> (x, y);
 	}
 
+}
+
+
+
+//-----------------------------------------------------------------------------------------------------------------------
+//-- Functions that extract characteristics:
+//-----------------------------------------------------------------------------------------------------------------------
+
+void HandDescription::contourExtraction(const cv::Mat& src)
+{
+    //-- Extract skin contours:
+    std::vector<std::vector<cv::Point> > raw_contours;
+    cv::findContours(src, raw_contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cv::Point(0,0) );
+
+    //-- Filter the contours by size:
+    filterContours( raw_contours, _hand_contour);
+}
+
+void HandDescription::boundingBoxExtraction(const cv::Mat& src)
+{
+    //-- Extract minimal rectangle enclosing the hand:
+    _hand_rotated_bounding_box = cv::minAreaRect( _hand_contour[0]);
+
+    //-- Extract bounding box:
+    _hand_bounding_box  =  cv::boundingRect( _hand_contour[0] );
+
+    //-- Extract hand ROI:
+    _hand_ROI = src( _hand_bounding_box ).clone();
+    cv::imshow("[Debug] Hand", _hand_ROI);
 }
