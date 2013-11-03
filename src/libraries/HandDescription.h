@@ -80,7 +80,7 @@ private:
     void boundingBoxExtraction( const cv::Mat& src);
     void angleExtraction();
     void centerExtraction();
-    void gestureExtraction();
+    void gestureExtraction(const cv::Mat &);
     void numFingersExtraction();
 
 

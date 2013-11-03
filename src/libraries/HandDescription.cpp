@@ -81,11 +81,22 @@ void HandDescription::update(const cv::Mat& src, const cv::Mat& skinMask )
 	angleExtraction();
 	centerExtraction();
 
-//	gestureExtraction();
+//	gestureExtraction(src);
 //	numFingersExtraction();
     }
 }
 
+void HandDescription::gestureExtraction(const cv::Mat & src)
+{
+	//C++: void matchTemplate(InputArray image, InputArray templ, OutputArray result, int method)
+	cv::Mat result; 
+	cv::Mat templ=cv::imread("../data/hand1.jpg");
+
+	matchTemplate (src,templ, result,0);
+	std::string name="MatchTemplate";
+	cv::imshow(name, result);	
+
+}
 
 
 //-----------------------------------------------------------------------------------------------------------------------
