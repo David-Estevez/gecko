@@ -287,35 +287,6 @@ void HandDescription::angleControl(bool show_corrected, bool show_actual, bool s
 
 }
 
-//std::pair <int, int> HandDescription::getCenterHand (cv:: Mat frame)
-//{
-
-
-//    if ( (int) _hand_contour.size() > 0 )
-//    {
-//	//-- Get image dimensions:
-//	int imageWidth = frame.cols, imageHeight = frame.rows;
-//	//std::cout << "Captured image: " << imageWidth << " x " << imageHeight << std::endl;
-
-
-//	//! \todo this s part of the plotting thing, not the actual center of the hand:
-//	//-- Get screen dimensions:
-//	int screenHeight, screenWidth;
-//	getDisplayDimensions( screenWidth, screenHeight);
-
-//	//-- Get new cursor position by mapping the points:
-//	int x, y;
-//	//x = cogX * screenWidth / imageWidth;
-//	//y = cogY * screenHeight / imageHeight;
-////	x = estimationPoint.x * screenWidth / imageWidth;
-////	y = estimationPoint.y * screenHeight / imageHeight;
-
-//	return std::pair<int, int> (x, y);
-//    }
-
-//}
-
-
 
 //-----------------------------------------------------------------------------------------------------------------------
 //-- Functions that extract characteristics:

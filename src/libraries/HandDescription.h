@@ -33,7 +33,6 @@ public:
     double getHandAngleEstimated();
 
     //! \brief Returns the position of the center of the hand
-    std::pair <int, int> getCenterHand(cv:: Mat );
     std::pair <int, int> getCenterHand( );
     std::pair <int, int> getCenterHandPredicted();
     std::pair <int, int> getCenterHandEstimated();
