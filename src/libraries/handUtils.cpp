@@ -108,17 +108,16 @@ double getAngle( cv::RotatedRect boundingRect)
    return atan2( -vector_y , vector_x)*180/3.1415;
 }
 
-void filteredContour( cv::Mat& src, std::vector< std::vector<cv::Point> >& handContour, const int min, const int max)
+void filterContours( std::vector< std::vector<cv::Point> >& srcContours, std::vector< std::vector<cv::Point> >& handContour, const int min, const int max)
 {
-    std::vector<std::vector<cv::Point> > contours;
-    cv::findContours(src, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cv::Point(0,0) );
+
 
     std::vector<std::vector<cv::Point> > filteredContours;
-    for (int i = 0; i < contours.size(); i++)
-	if ( (int) contours[i].size() > min && (int) contours[i].size() < max )
-	    filteredContours.push_back( contours[i] );
+    for (int i = 0; i <srcContours.size(); i++)
+	if ( (int) srcContours[i].size() > min && (int) srcContours[i].size() < max )
+	    filteredContours.push_back( srcContours[i] );
 
-    std::cout << "[Debug] Contours before: " << contours.size() << " Contours after: " << filteredContours.size() << std::endl;
+    std::cout << "[Debug] Contours before: " << srcContours.size() << " Contours after: " << filteredContours.size() << std::endl;
 
 
     //-- Find largest contour:
@@ -133,7 +132,7 @@ void filteredContour( cv::Mat& src, std::vector< std::vector<cv::Point> >& handC
 	    largestId = i;
 	    largestValue = (int) filteredContours[i].size();
 	}
-    std::cout << "[Debug] Number of contours: " << (int) contours.size() << " Largest contour: " << (int) largestValue << std::endl;
+    std::cout << "[Debug] Number of contours: " << (int) srcContours.size() << " Largest contour: " << (int) largestValue << std::endl;
     }
     else
 	std::cerr << "All filtered!" << std::endl;
@@ -142,4 +141,16 @@ void filteredContour( cv::Mat& src, std::vector< std::vector<cv::Point> >& handC
     handContour.clear();
     if ( (int) filteredContours.size() > 0)
 	handContour.push_back( filteredContours[largestId]);
+}
+
+
+
+cv:: Mat sBackgroundSubs(cv::Mat frame)
+{
+	cv:: Mat final; 
+	
+	
+	frame.copyTo(final);
+
+	return final; 
 }

@@ -16,6 +16,9 @@ HandDetector::HandDetector()
     upper_limit = cv::Scalar( 25, 173, 229);
     hue_invert = false;
 
+    //-- Initialize cascade classifier:
+    initCascadeClassifier();
+
 }
 
 HandDetector::HandDetector( cv::Mat& ROI)
@@ -27,12 +30,62 @@ HandDetector::HandDetector( cv::Mat& ROI)
 
     //-- Skin color limits
     calibrate( ROI );
+
+    //-- Initialize cascade classifier:
+    initCascadeClassifier();
 }
+
 
 
 //--------------------------------------------------------------------------------------------------------
 //-- Calibration functions
 //--------------------------------------------------------------------------------------------------------
+
+void HandDetector::calibrationLoop(cv::VideoCapture cap)
+{
+    cv::namedWindow( "Calibrating skin", cv::WINDOW_AUTOSIZE);
+    bool stop = false;
+
+    int delay=24;
+
+    while( !stop)
+    {
+		//-- Get current frame
+		cv::Mat frame, cal_screen;
+		if (! cap.read( frame ) )
+			break;
+		cv::flip(frame,frame,1);
+
+		//-- Add calibration frame
+		drawCalibrationMarks(frame, cal_screen, halfSide);
+
+		//-- Show calibration screen
+		cv::imshow( "Calibrating skin", cal_screen);
+
+		//-- Wait for user confirmation
+		char key =  cv::waitKey(delay);
+		if ( key == 10 || key == 13 )
+		{
+			//-- Get region of interest data:
+			int image_rows = frame.rows;
+			int image_cols = frame.cols;
+
+			cv::Mat ROI = frame( cv::Rect( cv::Point( image_cols / 2 - halfSide,  image_rows/2 - halfSide ),
+						   cv::Point( image_cols / 2 + halfSide,  image_rows/2 + halfSide)));
+			//cv::imshow( "Test", ROI);
+
+			HandDetector::calibrate( ROI );
+			HandDetector::getCalibration( lower, upper);
+
+			//drawHistogramHSV( ROI );
+
+			//-- Close window
+			cvDestroyWindow( "Calibrating skin");
+			break;
+		}
+    }
+}
+
 
 void HandDetector::calibrate(cv::Mat &ROI)
 {
@@ -111,6 +164,7 @@ void HandDetector::getCalibration(cv::Scalar &lower_limit, cv::Scalar &upper_lim
     upper_limit = this->upper_limit;
 }
 
+
 //--------------------------------------------------------------------------------------------------------
 //-- Hand-detection
 //--------------------------------------------------------------------------------------------------------
@@ -123,31 +177,154 @@ void HandDetector::operator ()( const cv::Mat& src, cv::Mat& dst)
 
 void HandDetector::filter_hand(const cv::Mat &src, cv::Mat &dst)
 {
-    //-- HSV thresholding
-    //----------------------------------------------------------------------------------------------------
-    //-- Convert to HSV
-    cv::Mat hsv;
-    cv::cvtColor( src, hsv, CV_BGR2HSV);
+    //-- Background substraction:
+    //------------------------------------------------
+    cv::Mat withoutBackground;
+    backgroundSubstraction( src, withoutBackground );
 
-    //-- Threshold
+    //-- Skin thresholding
+    //------------------------------------------------
     cv::Mat thresholdedHand;
-    cv::inRange(hsv, lower_limit, upper_limit, thresholdedHand);
+    threshold( withoutBackground, thresholdedHand );
 
-    //-- If color limit is arround 0, hue channel needs to be inverted
-    if (hue_invert)
-    {
-		std::vector< cv::Mat > hsv;
-		cv::split( thresholdedHand, hsv);
-		cv::bitwise_not( hsv[0], hsv[0] );
-    }
+    //-- Filter out small blobs:
+    //------------------------------------------------
+    cv::Mat withoutBlobs;
+    filterBlobs( thresholdedHand, withoutBlobs );
 
-    //-- Filtering
-    //----------------------------------------------------------------------------------------------------
-    //-- Filter out blobs:
-    cv::Mat kernel = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5) );
-    cv::morphologyEx( thresholdedHand, dst, cv::MORPH_CLOSE, kernel);
+
+    //-- Filter out head:
+    //------------------------------------------------
+    //-- Get mask
+    cv::Mat headTrackingMask;
+    filterFace( src, headTrackingMask );
+
+    //-- Apply mask
+    cv::bitwise_and( withoutBlobs, headTrackingMask, dst );
+
+    //-- Show result (optional)
+    //------------------------------------------------
+    cv::imshow("[Debug] Filtered hand", dst );
 
 }
+
+
+
+//--------------------------------------------------------------------------------------------------------
+//-- Face detection
+//--------------------------------------------------------------------------------------------------------
+
+//-- Initialize the cascade classifier:
+void HandDetector::initCascadeClassifier( )
+{
+    //-- Load file with the classifier features:
+    if ( ! faceDetector.load( "/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml" ) )
+    {
+	std::cerr << "[Error] Could not load cascade classifier features file." << std::endl;
+    }
+
+    //-- Factors to resize the face-detection
+    factorX = 1.25;
+    factorY = 1.25;
+
+}
+
+//-- Filter out faces:
+void HandDetector::filterFace(const cv::Mat &src, cv::Mat &dstMask )
+{
+    //-- Create variables to store faces
+    std::vector< cv::Rect > detectedFaces;
+
+    //-- Convert the source image to a greyscale image:
+    cv::Mat srcGrey;
+    cv::cvtColor( src, srcGrey, CV_BGR2GRAY );
+
+    cv::Mat srcGreySmall;
+    cv::resize( srcGrey, srcGreySmall, cv::Size(0, 0), 0.25, 0.25 );
+
+    //-- Detect face:
+    faceDetector.detectMultiScale( srcGreySmall, detectedFaces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, cv::Size( 30, 30) );
+
+    dstMask = cv::Mat(  srcGrey.size() , CV_8UC1,  cv::Scalar( 255, 255, 255) );
+
+    //-- Clear detected faces:
+    lastFacesPos.clear();
+
+    //-- Show detected faces:
+    if ( ! detectedFaces.empty() )
+    {
+	for (int i = 0; i < detectedFaces.size(); i++)
+	{
+	    cv::Rect resizedRect;
+
+	    if ( factorX == 1 && factorY == 1 )
+	    {
+		//-- Do not resize:
+		resizedRect = cv::Rect( detectedFaces[i].x * 4,
+					detectedFaces[i].y * 4,
+					detectedFaces[i].width  * 4,
+					detectedFaces[i].height * 4 );
+	    }
+	    else
+	    {
+		//-- Resize:
+		//-- Calculate original center:
+		double cx = detectedFaces[i].x * 4 + detectedFaces[i].width * 2;
+		double cy = detectedFaces[i].y * 4 + detectedFaces[i].height * 2;
+
+		//-- Calculate new size:
+		double newW = detectedFaces[i].width * 4 * factorX;
+		double newH = detectedFaces[i].width * 4 * factorY;
+
+		//-- Calculate new center:
+		double newX = cx - newW / 2;
+		double newY = cy - newH / 2;
+
+		resizedRect = cv::Rect( newX, newY, newW, newH );
+	    }
+
+	    cv::rectangle( dstMask, resizedRect, cv::Scalar( 0, 0, 0), CV_FILLED );
+
+	    //-- Save rectancle
+	    lastFacesPos.push_back( resizedRect );
+	}
+    }
+}
+
+
+//-- Return last faces found
+std::vector< cv::Rect >& HandDetector::getLastFacesPos()
+{
+    return lastFacesPos;
+}
+
+
+//-- Plot the last faces found marks
+void HandDetector::drawFaceMarks(const cv::Mat &src, cv::Mat &dst, cv::Scalar color, int thickness )
+{
+    //-- Allocate the dst matrix if empty:
+    if ( dst.total() == 0)
+	    dst = src.clone();
+
+    //-- Plot the bounding rectangles:
+    if ( !lastFacesPos.empty() )
+    {
+	std::cout << "[Debug] Detected " << lastFacesPos.size() << " face(s)." << std::endl;
+	for ( int i = 0; i < lastFacesPos.size(); i++)
+	    cv::rectangle( dst, lastFacesPos[i], color, thickness );
+    }
+
+}
+
+cv::Scalar HandDetector::getLower()
+{
+	return lower;
+}
+cv::Scalar HandDetector:: getUpper()
+{
+	return upper;
+}
+
 
 
 //--------------------------------------------------------------------------------------------------------
@@ -166,19 +343,6 @@ int HandDetector::average(cv::Mat &ROI)
 
     average /= (double) (ROI.cols * ROI.rows);
     return ceil(average);
-}
-
-int HandDetector::stdDeviation(cv::Mat &ROI)
-{
-    //-- Calculates the std deviation of the pixel values
-    double stddev = 0;
-
-    for (int i = 0; i < ROI.cols; i++ )
-	for( int j = 0; j < ROI.rows; j++)
-	    stddev +=  pow( (int) ROI.at<unsigned char>(i, j), 2);
-
-    stddev = sqrt( stddev ) / (ROI.cols * ROI.rows);
-    return ceil(stddev);
 }
 
 int HandDetector::median(cv::Mat &ROI)
@@ -208,6 +372,53 @@ int HandDetector::median(cv::Mat &ROI)
     }
 }
 
+int HandDetector::stdDeviation(cv::Mat &ROI)
+{
+    //-- Calculates the std deviation of the pixel values
+    double stddev = 0;
 
+    for (int i = 0; i < ROI.cols; i++ )
+	for( int j = 0; j < ROI.rows; j++)
+	    stddev +=  pow( (int) ROI.at<unsigned char>(i, j), 2);
+
+    stddev = sqrt( stddev ) / (ROI.cols * ROI.rows);
+    return ceil(stddev);
+}
+
+
+//-------------------------------------------------------------------------------------------------------------
+//-- Hand-filtering functions
+//-------------------------------------------------------------------------------------------------------------
+void HandDetector::backgroundSubstraction(const cv::Mat &src, cv::Mat &dst)
+{
+    //! \todo Add here the background substractor
+    dst = src.clone();
+}
+
+
+void HandDetector::threshold(const cv::Mat &src, cv::Mat &dst)
+{
+    //-- Convert to HSV
+    cv::Mat hsv;
+    cv::cvtColor( src, hsv, CV_BGR2HSV);
+
+    //-- Threshold
+    cv::inRange(hsv, lower_limit, upper_limit, dst);
+
+    //-- If color limit is arround 0, hue channel needs to be inverted
+    if (hue_invert)
+    {
+		std::vector< cv::Mat > hsv;
+		cv::split( dst, hsv);
+		cv::bitwise_not( hsv[0], hsv[0] );
+		//! \todo Join them again?
+    }
+}
+
+void HandDetector::filterBlobs(const cv::Mat &src, cv::Mat &dst)
+{
+    cv::Mat kernel = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5) );
+    cv::morphologyEx( src, dst, cv::MORPH_CLOSE, kernel);
+}
 
 
