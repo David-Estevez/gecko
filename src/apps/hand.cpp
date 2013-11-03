@@ -33,9 +33,9 @@ int main( int argc, char * argv[] )
     }
 
     //-- Get frame rate
-//    double rate = cap.get( CV_CAP_PROP_FPS);
-//    int delay = 1000/rate;
-    int delay = 24; //-- Force 24 s delay
+    //double rate = cap.get( CV_CAP_PROP_FPS);
+    //int delay = 1000/rate;
+    int delay = 24; //-- Force 24 ms delay
 
 
     //-- Declare variables
@@ -47,15 +47,12 @@ int main( int argc, char * argv[] )
     //-- To find the hand
     HandDetector handDetector;
 
+    //-- Object that will store the parameters of the hand
+    HandDescription hand_descriptor;
 
+    //-- Calibration loop
+    handDetector.calibrationLoop(cap);
 
-	//-- Object that will store the parameters of the hand
-	HandDescription hand_descriptor;
-
-
-	//-- Calibration loop
-	
-	handDetector.calibrationLoop(cap);
 
     //-- Main loop
     //--------------------------------------------------------------------
@@ -74,7 +71,7 @@ int main( int argc, char * argv[] )
 	//-- Remove the background
 	frame = sBackgroundSubs(frame);
 	
-	
+
 	//------------------------------------------------------------------------------------------------------
 	//-- Process it
 	//------------------------------------------------------------------------------------------------------
@@ -97,14 +94,24 @@ int main( int argc, char * argv[] )
 	   }
 
 
-//-- Contour extraction
-	hand_descriptor.contourExtraction(frame, processed); 
+	//-- Contour extraction
+	//hand_descriptor.contourExtraction(frame, processed);
 
 
-//-- Hand's angle
+	//-- Hand's angle
 	std::cout << "[" << hand_descriptor.getHandAngle() << "]" << std::endl;
 
 
+	//--------------------------------------------------------------------------------------------------
+	//-- Plot things on the image
+	//--------------------------------------------------------------------------------------------------
+	if ( display.total() == 0)
+	    display = frame.clone();
+
+	//--------------------------------------------------------------------------------------------------
+	//-- Plot contours on image
+	//--------------------------------------------------------------------------------------------------
+	//! \todo This
 
 	//--------------------------------------------------------------------------------------------------
 	//-- Adding text:
@@ -133,14 +140,24 @@ int main( int argc, char * argv[] )
 		     cv::FONT_HERSHEY_SIMPLEX, 0.33, cv::Scalar(0, 0, 255));
  
 
-//--	Move Cursor 
+	//--Move Cursor
 
 	if ( debugValue == 2)
 	{
-		moveMouse(hand_descriptor.centerHand(frame)); 
+		moveMouse(hand_descriptor.getCenterHand(frame));
 	}
 
 	hand_descriptor.angleControl();
+
+	//-----------------------------------------------------------------------------------------------------
+	//-- Show detected faces
+	//-----------------------------------------------------------------------------------------------------
+	handDetector.drawFaceMarks( display, display );
+
+	//-----------------------------------------------------------------------------------------------------
+	//-- Show processed image
+	//-----------------------------------------------------------------------------------------------------
+	cv::imshow( "Processed Stream", display);
 
 	//-----------------------------------------------------------------------------------------------------
 	//-- Decide what to do next depending on key pressed

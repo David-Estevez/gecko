@@ -21,6 +21,10 @@ class HandDetector {
 	//-- Hand-detection
 	void operator()(const cv::Mat& src, cv::Mat& dst);
 	void filter_hand(const cv::Mat& src, cv::Mat& dst);
+
+	//-- Face-tracking
+	std::vector< cv::Rect >& getLastFacesPos();
+	void drawFaceMarks( const cv::Mat& src, cv::Mat& dst , cv::Scalar color = cv::Scalar( 0, 0, 255), int thickness = 1  );
 	
 	//-- Get lower and upper level (calibration)
 	cv::Scalar getLower(); 
@@ -29,9 +33,15 @@ class HandDetector {
 
     private:
 	//-- Statistical functions:
+	//! \todo OpenCV already has this functions, so use then instead.
 	int average( cv::Mat& ROI);
 	int median( cv::Mat& ROI);
 	int stdDeviation( cv::Mat& ROI);
+
+	//-- Hand filtering functions:
+	void backgroundSubstraction( const cv::Mat& src, cv::Mat& dst);
+	void threshold( const cv::Mat& src, cv::Mat& dst);
+	void filterBlobs( const cv::Mat& src, cv::Mat& dst);
 
 	//-- Filter contours:
 	void filterContours( std::vector< std::vector < cv::Point > >& contours , std::vector< std::vector < cv::Point > >& filteredContours);
@@ -40,6 +50,12 @@ class HandDetector {
 	//----------------------------------------------------------------------------------
 	//! -- \brief Cascade classifier to detect faces:
 	cv::CascadeClassifier faceDetector;
+
+	//! -- \brief Position of the last faces found:
+	std::vector< cv::Rect > lastFacesPos;
+
+	//! -- \brief Resize the rectangles.
+	double factorX, factorY;
 
 	//! -- \brief Initializes the face detector
 	void initCascadeClassifier();
@@ -62,6 +78,7 @@ class HandDetector {
 
 	cv::Scalar lower, upper;
 
+	//-- Calibration box size
 	static const int halfSide=40;
 };
 

@@ -3,21 +3,23 @@
 //-- Initialization of the private parameters in the constructor
 HandDescription:: HandDescription()
 {
-	_hand_angle=0; 
-	
-	//-- Kalman filter setup for estimating hand angle:
+    //-- Initalize hand angle
     //-----------------------------------------------------------------------
+    _hand_angle=0;
+	
+
+
+    //-- Kalman filter setup for estimating hand angle:
+    //-----------------------------------------------------------------------
+
     //-- Create filter:
     kalmanFilterAngle.init( 2, 1, 0);
     kalmanFilterAngle.transitionMatrix = *( cv::Mat_<float>(2, 2) << 1, 1,
 								     0, 1);
-
     //-- Initial state:
     kalmanFilterAngle.statePre.at<float>(0) = 90; //-- initial angle
     kalmanFilterAngle.statePre.at<float>(1) = 0;  //-- initial angular velocity
     
-    
-
     //-- Set the rest of the matrices:
     cv::setIdentity( kalmanFilterAngle.measurementMatrix );
     cv::setIdentity( kalmanFilterAngle.processNoiseCov, cv::Scalar::all(0.0001));
@@ -26,7 +28,7 @@ HandDescription:: HandDescription()
 
 
 
-	//-- Kalman filter mouse setup
+    //-- Kalman filter mouse setup
     //---------------------------------------------------------------------
 
     //-- Create filter:
@@ -35,7 +37,6 @@ HandDescription:: HandDescription()
 								0, 1, 0, 1,
 								0, 0, 1, 0,
 								0, 0, 0, 1);
-
     //-- Get mouse position:
     //! \todo Change this for screen center?
     int initial_mouse_x, initial_mouse_y;
@@ -55,21 +56,17 @@ HandDescription:: HandDescription()
 }
 
 
-//-- Set - get functions for private parameters
-void HandDescription:: setHandAngle (double & value)
-{
-	_hand_angle=value; 
-}
-
 double HandDescription:: getHandAngle ()
 {
 	return _hand_angle; 
 }
 
+
 std::vector< std::vector<cv::Point> > HandDescription:: getContours()
 {
 	return _hand_contour; 
 }
+
 
 //-- Draws the bounding rectangle of the ROI
 void HandDescription::boundingRectangle(cv::Mat display)
@@ -86,14 +83,12 @@ void HandDescription::boundingRectangle(cv::Mat display)
 
 
 //-- Extracts the contour of the ROI and stores the hand's parameters in the private variables
-void HandDescription :: contourExtraction(cv::Mat frame, cv::Mat processed)
+void HandDescription::contourExtraction(cv::Mat frame, cv::Mat processed)
 {
 	filteredContour( processed, _hand_contour);
 
 	cv::Mat display; 
 	
-	if ( display.total() == 0)
-	    display = frame.clone();
 
 	if ( (int) _hand_contour.size() > 0 )
 	{
@@ -111,15 +106,15 @@ void HandDescription :: contourExtraction(cv::Mat frame, cv::Mat processed)
 	}
 	else
 	    std::cerr << "No contours found!" << std::endl; 
-	    
+
 	//-----------------------------------------------------------------------------------------------------
 	//-- Show processed image
 	//-----------------------------------------------------------------------------------------------------
-	cv::imshow( "Processed Stream", display);
+	//cv::imshow( "Processed Stream", display);
 }
 
 
-void HandDescription:: angleControl()
+void HandDescription::angleControl()
 {
 	//-----------------------------------------------------------------------------------------------------
 	//-- Print "Angle control"
@@ -129,13 +124,12 @@ void HandDescription:: angleControl()
 	cv::Mat gauge = cv::Mat::zeros( 100, 200, CV_8UC3);
 	
 	//-- Create matrix for storing the measurement (measured position of hand)
-    cv::Mat_<float> angleMeasurement(1, 1);
-    angleMeasurement.setTo( cv::Scalar(0));
+	cv::Mat_<float> angleMeasurement(1, 1);
+	angleMeasurement.setTo( cv::Scalar(0));
 
 
 	//-- Predict angle with Kalman filter:
 	cv::Mat anglePrediction = kalmanFilterAngle.predict();
-
 
 	//-- Measure:
 	angleMeasurement(0) = _hand_angle;
@@ -174,7 +168,7 @@ void HandDescription:: angleControl()
 	
 }
 
-std::pair <int, int> HandDescription::centerHand (cv:: Mat frame)
+std::pair <int, int> HandDescription::getCenterHand (cv:: Mat frame)
 {
 	//-----------------------------------------------------------------------------------------------------
 	//-- Move cursor
