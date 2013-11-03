@@ -38,7 +38,9 @@ int main (int argc, char * argv[])
 	cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
 	matchLoc = minLoc; 
 	
-	std::cout <<"Matching: "<<matchLoc.x<<" "<<matchLoc.y<<std::endl;
+	std::cout <<"Matching: "<<matchLoc.x<<" "<<matchLoc.y<<std::endl
+	<<"Minimum value: "<<minVal<<std::endl
+	<<"Maximum value: "<<maxVal<<std::endl;
 	
 
 	/// Show me what you got

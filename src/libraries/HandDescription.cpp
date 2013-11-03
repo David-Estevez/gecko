@@ -76,25 +76,83 @@ void HandDescription::update(const cv::Mat& src, const cv::Mat& skinMask )
     //-- Check if some hand was found:
     if ( _hand_found )
     {
-	boundingBoxExtraction(src);
+		boundingBoxExtraction(src);
 
-	angleExtraction();
-	centerExtraction();
+		angleExtraction();
+		centerExtraction();
 
-//	gestureExtraction(src);
-//	numFingersExtraction();
+		gestureExtraction(skinMask);
+	//	numFingersExtraction();
     }
 }
 
 void HandDescription::gestureExtraction(const cv::Mat & src)
 {
-	//C++: void matchTemplate(InputArray image, InputArray templ, OutputArray result, int method)
-	cv::Mat result; 
-	cv::Mat templ=cv::imread("../data/hand1.jpg");
+//	//C++: void matchTemplate(InputArray image, InputArray templ, OutputArray result, int method)
+//	cv::Mat result; 
+//	cv::Mat templ=cv::imread("../data/hand1.jpg");
 
-	matchTemplate (src,templ, result,0);
-	std::string name="MatchTemplate";
-	cv::imshow(name, result);	
+//	matchTemplate (src,templ, result,0);
+//	std::string name="MatchTemplate";
+//	cv::imshow(name, result);	
+
+	cv:: Mat display;
+	src.copyTo(display);
+	
+	std::vector<std::vector<cv::Point> > hulls(1);
+	std::vector<std::vector<int> > hullsI(1);
+	std::vector<cv::Vec4i> defects;
+	
+	int n_fingers=0;
+
+	for(int i=0;i< _hand_contour.size();i++)
+	{		
+		//-- Convex Hull
+		convexHull(cv:: Mat(_hand_contour[0]),hulls[0],false);
+		convexHull(cv:: Mat(_hand_contour[0]),hullsI[0],false);
+//				drawContours(ROI,hulls,-1,cv::Scalar(0,255,0),2);
+
+		//-- Convex Defects
+                  
+        std::vector<std::vector<cv::Point> > defect_points(_hand_contour.size());
+        
+		if(hullsI[0].size()>0)
+		{
+
+			convexityDefects(_hand_contour[0], hullsI[0], defects);
+//					if(defects.size()>=3)
+//					{}
+
+			for (int cDefIt = 0; cDefIt < defects.size(); cDefIt++) 
+			{
+
+		        int startIdx = defects[cDefIt].val[0];
+
+		        int endIdx = defects[cDefIt].val[1];
+
+		        int defectPtIdx = defects[cDefIt].val[2];
+
+		        double depth = static_cast<double>(defects[cDefIt].val[3]) / 256.0;
+
+		        std::cout << startIdx << ' ' << endIdx << ' ' << defectPtIdx << ' ' << depth << '\n' << '\n' << std::endl;
+
+		        cv::Point2f p(defectPtIdx, defectPtIdx);
+		        circle(display, p , 10, cv::Scalar(0,0,255), 2, 8, 0 );
+		    }
+
+		
+		
+//			for (int i=0; i<hulls.size(); i++)
+//				circle (display,hulls[0][i], 10,  cv::Scalar(255,255,255) );
+			
+			//-- Catch possible aliens
+			if (n_fingers>5)
+				n_fingers=5; 
+
+		}
+	}
+	
+	imshow ("DEFECTS IMAGE", display);
 
 }
 
