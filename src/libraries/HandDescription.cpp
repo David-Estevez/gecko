@@ -81,7 +81,7 @@ void HandDescription::update(const cv::Mat& src, const cv::Mat& skinMask )
 		angleExtraction();
 		centerExtraction();
 
-		gestureExtraction(skinMask);
+		gestureExtraction(_hand_ROI);
 	//	numFingersExtraction();
     }
 }
