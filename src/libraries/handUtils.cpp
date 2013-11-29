@@ -144,13 +144,17 @@ void filterContours( std::vector< std::vector<cv::Point> >& srcContours, std::ve
 }
 
 
-
-cv:: Mat sBackgroundSubs(cv::Mat frame)
+void backgroundSubs(cv::Mat & frame, cv::BackgroundSubtractorMOG2 & bg)
 {
-	cv:: Mat final; 
-	
-	
-	frame.copyTo(final);
+    cv::Mat back;
+    cv::Mat fore;
+    bg(frame,fore);
+    bg.getBackgroundImage(back);
+    cv::erode(fore,fore,cv::Mat());
+    cv::dilate(fore,fore,cv::Mat());
+    frame.copyTo(fore,fore);
 
-	return final; 
+//    imshow("FORE", fore);
+
+    fore.copyTo(frame);
 }

@@ -19,6 +19,6 @@ double getAngle( cv::RotatedRect boundingRect);
 
 //-- Static background substractor
 
-cv:: Mat sBackgroundSubs(cv::Mat );	
+void backgroundSubs(cv::Mat &, cv::BackgroundSubtractorMOG2 & bg);
 
 #endif // HANDUTILS_H
