@@ -150,8 +150,29 @@ void backgroundSubs(cv::Mat & frame, cv::BackgroundSubtractorMOG2 & bg)
     cv::Mat fore;
     bg(frame,fore);
     bg.getBackgroundImage(back);
-    cv::erode(fore,fore,cv::Mat());
-    cv::dilate(fore,fore,cv::Mat());
+
+
+
+//    Rectangular box: MORPH_RECT
+//    Cross: MORPH_CROSS
+//    Ellipse: MORPH_ELLIPSE
+
+    int erosion_size=0.5;
+    cv::Mat eroding_element = getStructuringElement(cv::MORPH_ELLIPSE,
+                                            cv::Size( 2*erosion_size + 1, 2*erosion_size+1 ),
+                                            cv::Point( erosion_size, erosion_size ) );
+
+    int dilation_size=200;
+    cv::Mat dilating_element = getStructuringElement(cv::MORPH_ELLIPSE,
+                                            cv::Size( 2*erosion_size + 1, 2*erosion_size+1 ),
+                                            cv::Point( erosion_size, erosion_size ) );
+
+    cv::erode(fore,fore,eroding_element);
+    cv::dilate(fore,fore,dilating_element);
+
+//    cv::erode(fore,fore,cv::Mat());
+//    cv::dilate(fore,fore,cv::Mat());
+
     frame.copyTo(fore,fore);
 
 //    imshow("FORE", fore);
