@@ -77,6 +77,7 @@ private:
     //--------------------------------------------------------------------------
     void contourExtraction(const cv::Mat& skinMask);
     void boundingBoxExtraction( const cv::Mat& src);
+    void handPalmExtraction(const cv::Mat& src );
     void angleExtraction();
     void centerExtraction();
     void gestureExtraction(const cv::Mat &);
@@ -124,6 +125,14 @@ private:
 
     //! \brief Number of fingers (visible)
     int _hand_num_fingers;
+
+    //-- Describe hand palm:
+    //-------------------------------------------------------------------------
+    //! \brief Radius of the max. inscribed circle
+    double _max_circle_inscribed_radius;
+
+    //! \brief Center of the max. incribed circle
+    cv::Point _max_circle_incribed_center;
 
 
     //-- ROI of the hand, for gesture analysis:
