@@ -18,6 +18,7 @@ HandDetector::HandDetector()
 
     //-- Initialize cascade classifier:
     initCascadeClassifier();
+    initBackgroundSubstractor();
 
 }
 
@@ -33,6 +34,7 @@ HandDetector::HandDetector( cv::Mat& ROI)
 
     //-- Initialize cascade classifier:
     initCascadeClassifier();
+    initBackgroundSubstractor();
 }
 
 
@@ -169,14 +171,21 @@ void HandDetector::getCalibration(cv::Scalar &lower_limit, cv::Scalar &upper_lim
 //-- Hand-detection
 //--------------------------------------------------------------------------------------------------------
 
-void HandDetector::operator ()( const cv::Mat& src, cv::Mat& dst)
+void HandDetector::operator ()(cv::Mat& src, cv::Mat& dst)
 {
     filter_hand( src, dst);
 }
 
 
-void HandDetector::filter_hand(const cv::Mat &src, cv::Mat &dst)
+void HandDetector::filter_hand(cv::Mat &src, cv::Mat &dst)
 {
+    //-- Filter out head:
+    //------------------------------------------------
+    //-- Get mask
+    cv::Mat headTrackingMask;
+    filterFace( src, headTrackingMask );
+    cv::imshow("[Debug] Face", src);
+
     //-- Background substraction:
     //------------------------------------------------
     cv::Mat withoutBackground;
@@ -193,13 +202,7 @@ void HandDetector::filter_hand(const cv::Mat &src, cv::Mat &dst)
     filterBlobs( thresholdedHand, withoutBlobs );
 
 
-    //-- Filter out head:
-    //------------------------------------------------
-    //-- Get mask
-    cv::Mat headTrackingMask;
-    filterFace( src, headTrackingMask );
-
-    //-- Apply mask
+    //-- Apply mask for head
     cv::bitwise_and( withoutBlobs, headTrackingMask, dst );
 
     //-- Show result (optional)
@@ -389,10 +392,16 @@ int HandDetector::stdDeviation(cv::Mat &ROI)
 //-------------------------------------------------------------------------------------------------------------
 //-- Hand-filtering functions
 //-------------------------------------------------------------------------------------------------------------
-void HandDetector::backgroundSubstraction(const cv::Mat &src, cv::Mat &dst)
+void HandDetector::initBackgroundSubstractor()
 {
-    //! \todo Add here the background substractor
+    bg.set("nmixtures",3);// set number of gaussian mixtures
+    bg.set("detectShadows", true); //if false: turn shadow detection off
+}
+
+void HandDetector::backgroundSubstraction(cv::Mat &src, cv::Mat &dst)
+{
     dst = src.clone();
+    backgroundSubs(dst, bg);
 }
 
 

@@ -14,9 +14,9 @@ int main( int argc, char * argv[] )
     cv::VideoCapture cap;
 
     //-- Setup backgoundSubstractor
-    cv::BackgroundSubtractorMOG2 bg ;
-    bg.set("nmixtures",3);// set number of gaussian mixtures
-    bg.set("detectShadows", true); //if false: turn shadow detection off
+    //cv::BackgroundSubtractorMOG2 bg ;
+    //bg.set("nmixtures",3);// set number of gaussian mixtures
+    //bg.set("detectShadows", true); //if false: turn shadow detection off
 
     //-- Open video source
     if ( argc > 1)
@@ -73,7 +73,7 @@ int main( int argc, char * argv[] )
         cv::flip(frame,frame,1);
 
         //-- Remove the background
-        backgroundSubs(frame, bg);
+        //backgroundSubs(frame, bg);
 
 
         //------------------------------------------------------------------------------------------------------

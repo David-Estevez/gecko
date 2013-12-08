@@ -19,8 +19,8 @@ class HandDetector {
 	void getCalibration( cv::Scalar& lower_limit, cv::Scalar& upper_limit);
 
 	//-- Hand-detection
-	void operator()(const cv::Mat& src, cv::Mat& dst);
-	void filter_hand(const cv::Mat& src, cv::Mat& dst);
+    void operator()(cv::Mat& src, cv::Mat& dst);
+    void filter_hand(cv::Mat& src, cv::Mat& dst);
 
 	//-- Face-tracking
 	std::vector< cv::Rect >& getLastFacesPos();
@@ -39,12 +39,17 @@ class HandDetector {
 	int stdDeviation( cv::Mat& ROI);
 
 	//-- Hand filtering functions:
-	void backgroundSubstraction( const cv::Mat& src, cv::Mat& dst);
+    void backgroundSubstraction(cv::Mat& src, cv::Mat& dst);
 	void threshold( const cv::Mat& src, cv::Mat& dst);
 	void filterBlobs( const cv::Mat& src, cv::Mat& dst);
 
 	//-- Filter contours:
 	void filterContours( std::vector< std::vector < cv::Point > >& contours , std::vector< std::vector < cv::Point > >& filteredContours);
+
+    //-- Background substractor:
+    //---------------------------------------------------------------------------------
+    cv::BackgroundSubtractorMOG2 bg;
+    void initBackgroundSubstractor();
 
 	//-- Filter face:
 	//----------------------------------------------------------------------------------
