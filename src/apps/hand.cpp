@@ -64,7 +64,8 @@ int main( int argc, char * argv[] )
         cv::Mat frame, display;
         if ( ! cap.read( frame ) )
             //break;
-            frame = cv::imread("../data/hand1.jpg");
+            //frame = cv::imread("../data/hand1.jpg");
+            frame = cv::imread( "../data/3dedos.jpg");
 
         cv::flip(frame,frame,1);
 
@@ -113,6 +114,7 @@ int main( int argc, char * argv[] )
         //--------------------------------------------
         hand_descriptor.plotBoundingRectangle( display, display );
         hand_descriptor.plotContours(display, display);
+        hand_descriptor.plotMaxInscribedCircle(display, display );
 
         //-- Adding text:
         //--------------------------------------------

@@ -64,6 +64,8 @@ public:
     //! \brief Prints the angle gauge on a separate window
     void angleControl( bool show_corrected = true,  bool show_actual = true, bool show_predicted = true );
 
+    //! \brief Prints the maximum inscribed circle:
+    void plotMaxInscribedCircle( cv::Mat& src, cv::Mat& dst);
 
     //-- List of available gestures
     //---------------------------------------------------------------------------
@@ -77,7 +79,8 @@ private:
     //--------------------------------------------------------------------------
     void contourExtraction(const cv::Mat& skinMask);
     void boundingBoxExtraction( const cv::Mat& src);
-    void handPalmExtraction(const cv::Mat& src );
+    void handPalmExtraction(const cv::Mat& src ); //! \todo This shouldn't recieve any mat
+    void ROIExtraction( const cv::Mat& src);
     void angleExtraction();
     void centerExtraction();
     void gestureExtraction(const cv::Mat &);

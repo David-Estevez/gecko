@@ -82,6 +82,10 @@ void HandDescription::update(const cv::Mat& src, const cv::Mat& skinMask )
         //-- Find hand palm
         handPalmExtraction(src);
 
+        //-- Second roi and contourExtraction (optional right now)
+        //! \todo Second ROI and contourExtraction on HandDescriptor
+        ROIExtraction( src);
+
         angleExtraction();
         centerExtraction();
 
@@ -244,7 +248,15 @@ void HandDescription::plotCenter(const cv::Mat& src, cv::Mat& dst, bool show_cor
 
 }
 
+void HandDescription::plotMaxInscribedCircle( cv::Mat& src, cv::Mat& dst)
+{
+    if ( dst.empty() )
+        dst = src.clone();
 
+    cv::circle( dst, _max_circle_incribed_center, _max_circle_inscribed_radius, cv::Scalar(0, 255, 0));
+    cv::circle( dst, _max_circle_incribed_center, 3, cv::Scalar( 0, 255, 0));
+
+}
 
 void HandDescription::angleControl(bool show_corrected, bool show_actual, bool show_predicted)
 {
@@ -298,7 +310,7 @@ void HandDescription::angleControl(bool show_corrected, bool show_actual, bool s
 
 void HandDescription::contourExtraction(const cv::Mat& skinMask)
 {
-    const int epsilon = 5; //-- Max error for polygon approximation
+    const int epsilon = 3; //-- Max error for polygon approximation
 
     //-- Extract skin contours:
     std::vector<std::vector<cv::Point> > raw_contours;
@@ -327,9 +339,6 @@ void HandDescription::boundingBoxExtraction(const cv::Mat& src)
     //-- Extract bounding box:
     _hand_bounding_box  =  cv::boundingRect( _hand_contour[0] );
 
-    //-- Extract hand ROI:
-    _hand_ROI = src( _hand_bounding_box ).clone();
-    cv::imshow("[Debug] Hand", _hand_ROI);
 }
 
 void HandDescription::handPalmExtraction(const cv::Mat& src )
@@ -341,7 +350,7 @@ void HandDescription::handPalmExtraction(const cv::Mat& src )
     const int y_ratio = 3; //-- Section of the bounding box used for finding center (along Y)
 
     const int step_contour = 1; //-- Test each 'step' points of the contour for easier calculations
-    const int step_points_inside = 20; //-- Test each 'step' points inside the contour
+    const int step_points_inside = 1;//-- Test each 'step' points inside the contour
 
     //-- Find initial and ending points of the area to look for
     std::pair<int,int> x_limits, y_limits;
@@ -355,49 +364,77 @@ void HandDescription::handPalmExtraction(const cv::Mat& src )
 
     //-- Look for center and radius
     std::pair<int, int> best_center = std::pair<int, int>( x_limits.first, y_limits.first);
-    unsigned int best_distance = -1; //-- Highest possible value for a uint
+    double best_distance = -1;
+
+    std::cout << "(" << x_limits.first << ", " << x_limits.second << ")" << std::endl;
+    std::cout << "(" << x_limits.first << ", " << x_limits.second << ")" << std::endl;
 
     for (int j = y_limits.first; j < y_limits.second; j += step_points_inside )
         for (int i = x_limits.first; i < x_limits.second; i += step_points_inside )
-            if ( cv::pointPolygonTest( _hand_contour[0], cv::Point(i, j), false) > -1 )
+        {
+            double current_distance = cv::pointPolygonTest( _hand_contour[0], cv::Point(i, j), true );
+
+            if (current_distance > 0 && current_distance > best_distance)
             {
-                cv::circle(toPlot, cv::Point(i, j), 5, cv::Scalar( 255, 255, 0));
-
-                //-- Calculate distance
-                int current_distance = 0;
-                for (int k = 0; k < _hand_contour[0].size(); k += step_contour)
-                {
-                    current_distance += abs( _hand_contour[0].at(k).x - i) +
-                                        abs( _hand_contour[0].at(k).y - j);
-                }
-
-                if ( current_distance < best_distance )
-                {
-                    best_distance = current_distance;
-                    best_center.first = i;
-                    best_center.second = j;
-                }
+                best_distance = current_distance;
+                best_center.first = i;
+                best_center.second = j;
             }
+        }
 
-    //-- Once best distance is found, we get the center and calculate the actual radius:
-    _max_circle_incribed_center = cv::Point( best_center.first, best_center.second );
 
-    _max_circle_inscribed_radius = 0;
-    for (int k = 0; k < _hand_contour[0].size(); k += step_contour)
+    //-- Once best distance is found, we get the center and calculate the actual radius (only if something is found)
+    if ( best_distance > -1 )
     {
-        _max_circle_inscribed_radius += sqrt( pow( _hand_contour[0].at(k).x - best_center.first, 2) +
-                               pow( _hand_contour[0].at(k).y - best_center.second, 2) );
+        _max_circle_incribed_center = cv::Point( best_center.first, best_center.second );
+        _max_circle_inscribed_radius = best_distance;
+        std::cout << "[Debug] Inscribed circle: " << _max_circle_incribed_center << " -> r =" << _max_circle_inscribed_radius << std::endl;
     }
+    else
+    {
+        std::cerr << "[Error]: Inscribed circle could not be found!" << std::endl;
+    }
+
 
     //--Plot circle for debugging
     plotContours(toPlot, toPlot);
     plotBoundingRectangle(toPlot, toPlot, false);
-    cv::circle( toPlot, cv::Point(_hand_bounding_box.x, _hand_bounding_box.y), 10, cv::Scalar(255, 0, 255));
-    cv::circle( toPlot, cv::Point(_hand_bounding_box.x + (int) (_hand_bounding_box.width * (1 - 1/ (float) x_ratio)), _hand_bounding_box.y), 10, cv::Scalar(255, 0, 255));
-    cv::circle( toPlot, _max_circle_incribed_center, _max_circle_inscribed_radius, cv::Scalar(0, 255, 0));
-    cv::circle(toPlot, _max_circle_incribed_center, 5, cv::Scalar( 0, 255, 0));
+    plotMaxInscribedCircle( toPlot, toPlot);
     cv::imshow( "[Debug] Inscribed circle", toPlot);
+}
 
+void HandDescription::ROIExtraction( const cv::Mat& src)
+{
+    //-- Pointers for writting less (and better reading)
+    int * x = &(_max_circle_incribed_center.x);
+    int * y = &(_max_circle_incribed_center.y);
+    double * r = &(_max_circle_inscribed_radius);
+
+    std::cout << "[Debug] (" << *x << ", " << *y << ") R = " << *r << std::endl;
+
+    //-- Extract hand ROI:
+    int ROI_corner_x = (*x) - 3.5*(*r);
+    int ROI_corner_y = (*y) - 3.5*(*r);
+    int ROI_width, ROI_height;
+    ROI_width = ROI_height = 7*(*r);
+
+    //-- Check for limits:
+    if (ROI_corner_x + ROI_width > src.cols)
+        ROI_width = src.cols - ROI_corner_x;
+
+    if (ROI_corner_y + ROI_height > src.rows)
+        ROI_height = src.rows - ROI_corner_y;
+
+    cv::Rect ROI_rectangle = cv::Rect( ROI_corner_x, ROI_corner_y, ROI_width, ROI_height );
+    try {
+    _hand_ROI = src( ROI_rectangle ).clone();
+    }
+    catch( std::exception& e)
+    {
+        std::cerr << "An exception ocurred, but we are crossing fingers and ignoring it..." << std::endl;
+    }
+
+    cv::imshow("[Debug] Hand", _hand_ROI);
 }
 
 void HandDescription::angleExtraction()
