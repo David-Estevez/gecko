@@ -115,6 +115,9 @@ int main( int argc, char * argv[] )
         hand_descriptor.plotBoundingRectangle( display, display );
         hand_descriptor.plotContours(display, display);
         hand_descriptor.plotMaxInscribedCircle(display, display );
+        hand_descriptor.plotMinEnclosingCircle(display, display);
+        //hand_descriptor.plotComplexHull( display, display, true);
+
 
         //-- Adding text:
         //--------------------------------------------

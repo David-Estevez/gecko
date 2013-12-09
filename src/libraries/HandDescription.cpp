@@ -84,10 +84,25 @@ void HandDescription::update(const cv::Mat& src, const cv::Mat& skinMask )
 
         //-- Second roi and contourExtraction (optional right now)
         //! \todo Second ROI and contourExtraction on HandDescriptor
-        ROIExtraction( src);
+        ROIExtraction( skinMask );
+
+        cv::Mat remaskedHand;
+        cv::bitwise_and( skinMask, _hand_ROI, remaskedHand );
+        contourExtraction( remaskedHand );
+
+        //-- Find the min enclosing circle of the latest contour:
+        cv::minEnclosingCircle( _hand_contour[0], _min_enclosing_circle_center, _min_enclosing_circle_radius );
+
+        //-- Find the complex hull
+        cv::convexHull( _hand_contour[0], _hand_hull );
+
+        //-- Find convexity defects:
+
+        //cv::convexityDefects( _hand_contour[0], _hand_hull, _hand_convexity_defects );
 
         angleExtraction();
         centerExtraction();
+
 
 //	gestureExtraction(src);
 //	numFingersExtraction();
@@ -181,18 +196,18 @@ void HandDescription::plotBoundingRectangle(const cv::Mat& src, cv::Mat& dst, bo
 
     if ( _hand_found )
     {
-	//-- Choose between rotated or std box:
-	if ( rotated )
-	{
-	    //-- Draw rotated rectangle:
-	    cv::Point2f rect_points[4]; _hand_rotated_bounding_box.points( rect_points );
-	    for( int j = 0; j < 4; j++ )
-		cv::line( dst, rect_points[j], rect_points[(j+1)%4], cv::Scalar(255, 0, 0) , 2 );
-	}
-	else
-	{
-	    cv::rectangle( dst, _hand_bounding_box, cv::Scalar( 255, 0, 0), 2 );
-	}
+        //-- Choose between rotated or std box:
+        if ( rotated )
+        {
+            //-- Draw rotated rectangle:
+            cv::Point2f rect_points[4]; _hand_rotated_bounding_box.points( rect_points );
+            for( int j = 0; j < 4; j++ )
+            cv::line( dst, rect_points[j], rect_points[(j+1)%4], cv::Scalar(255, 0, 0) , 2 );
+        }
+        else
+        {
+            cv::rectangle( dst, _hand_bounding_box, cv::Scalar( 255, 0, 0), 2 );
+        }
     }
 }
 
@@ -253,9 +268,55 @@ void HandDescription::plotMaxInscribedCircle( cv::Mat& src, cv::Mat& dst)
     if ( dst.empty() )
         dst = src.clone();
 
-    cv::circle( dst, _max_circle_incribed_center, _max_circle_inscribed_radius, cv::Scalar(0, 255, 0));
-    cv::circle( dst, _max_circle_incribed_center, 3, cv::Scalar( 0, 255, 0));
+    if ( _hand_found )
+    {
+        cv::circle( dst, _max_circle_incribed_center, _max_circle_inscribed_radius, cv::Scalar(0, 255, 0));
+        cv::circle( dst, _max_circle_incribed_center, 2, cv::Scalar( 0, 255, 0));
+    }
+}
 
+void HandDescription::plotMinEnclosingCircle( cv::Mat& src, cv::Mat& dst)
+{
+    if ( dst.empty() )
+        dst = src.clone();
+
+    if ( _hand_found)
+    {
+        cv::circle( dst, _min_enclosing_circle_center, _min_enclosing_circle_radius, cv::Scalar(255, 0, 255));
+        cv::circle( dst, _min_enclosing_circle_center, 2, cv::Scalar( 255, 0, 255));
+    }
+}
+
+void HandDescription::plotComplexHull( cv::Mat& src, cv::Mat& dst, bool show_points)
+{
+    if ( dst.empty() )
+        dst = src.clone();
+
+    if ( _hand_found )
+    {
+        std::vector< std::vector < cv::Point > > points_to_show;
+        points_to_show.push_back( _hand_hull);
+
+        cv::drawContours( dst, points_to_show, 0, cv::Scalar( 0, 255, 255), 1, 8);
+
+        if ( show_points )
+            for (int i = 0; i < points_to_show[0].size(); i++)
+                cv::circle( dst, points_to_show[0].at(i), 2, cv::Scalar( 0, 255, 255));
+
+    }
+}
+
+
+void HandDescription::plotConvexityDefects(cv::Mat &src, cv::Mat &dst)
+{
+    if ( dst.empty() )
+        dst = src.clone();
+
+    if ( _hand_found )
+    {
+       /* for (int i = 0; i < _hand_convexity_defects.size(); i++)
+            cv::circle( dst, _hand_convexity_defects.at(i), 2, cv::Scalar( 0, 140, 255));*/
+    }
 }
 
 void HandDescription::angleControl(bool show_corrected, bool show_actual, bool show_predicted)
@@ -352,6 +413,20 @@ void HandDescription::handPalmExtraction(const cv::Mat& src )
     const int step_contour = 1; //-- Test each 'step' points of the contour for easier calculations
     const int step_points_inside = 1;//-- Test each 'step' points inside the contour
 
+
+    //-- Extract points to use
+    std::vector< cv::Point > points_to_use;
+
+    if ( step_contour == 1)
+    {
+        points_to_use = _hand_contour[0];
+    }
+    else
+    {
+        for (int i = 0; i < (int) ( _hand_contour[0].size() / (float) step_contour); i++)
+            points_to_use.push_back( _hand_contour[0][i]);
+    }
+
     //-- Find initial and ending points of the area to look for
     std::pair<int,int> x_limits, y_limits;
 
@@ -372,7 +447,7 @@ void HandDescription::handPalmExtraction(const cv::Mat& src )
     for (int j = y_limits.first; j < y_limits.second; j += step_points_inside )
         for (int i = x_limits.first; i < x_limits.second; i += step_points_inside )
         {
-            double current_distance = cv::pointPolygonTest( _hand_contour[0], cv::Point(i, j), true );
+            double current_distance = cv::pointPolygonTest( points_to_use, cv::Point(i, j), true );
 
             if (current_distance > 0 && current_distance > best_distance)
             {
@@ -388,7 +463,7 @@ void HandDescription::handPalmExtraction(const cv::Mat& src )
     {
         _max_circle_incribed_center = cv::Point( best_center.first, best_center.second );
         _max_circle_inscribed_radius = best_distance;
-        std::cout << "[Debug] Inscribed circle: " << _max_circle_incribed_center << " -> r =" << _max_circle_inscribed_radius << std::endl;
+       // std::cout << "[Debug] Inscribed circle: " << _max_circle_incribed_center << " -> r =" << _max_circle_inscribed_radius << std::endl;
     }
     else
     {
@@ -400,7 +475,7 @@ void HandDescription::handPalmExtraction(const cv::Mat& src )
     plotContours(toPlot, toPlot);
     plotBoundingRectangle(toPlot, toPlot, false);
     plotMaxInscribedCircle( toPlot, toPlot);
-    cv::imshow( "[Debug] Inscribed circle", toPlot);
+    //cv::imshow( "[Debug] Inscribed circle", toPlot);
 }
 
 void HandDescription::ROIExtraction( const cv::Mat& src)
@@ -426,12 +501,15 @@ void HandDescription::ROIExtraction( const cv::Mat& src)
         ROI_height = src.rows - ROI_corner_y;
 
     cv::Rect ROI_rectangle = cv::Rect( ROI_corner_x, ROI_corner_y, ROI_width, ROI_height );
-    try {
-    _hand_ROI = src( ROI_rectangle ).clone();
+    try
+    {
+        //_hand_ROI = src( ROI_rectangle ).clone();
+        _hand_ROI = cv::Mat::zeros( src.size(), CV_8UC1);
+        cv::rectangle( _hand_ROI, ROI_rectangle, cv::Scalar( 255, 255, 255), CV_FILLED);
     }
     catch( std::exception& e)
     {
-        std::cerr << "An exception ocurred, but we are crossing fingers and ignoring it..." << std::endl;
+        std::cerr << "An exception ocurred, but we are crossing fingers and ignoring it... :)" << std::endl;
     }
 
     cv::imshow("[Debug] Hand", _hand_ROI);

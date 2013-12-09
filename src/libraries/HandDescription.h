@@ -67,6 +67,15 @@ public:
     //! \brief Prints the maximum inscribed circle:
     void plotMaxInscribedCircle( cv::Mat& src, cv::Mat& dst);
 
+    //! \brief Prints the minimum enclosing circle:
+    void plotMinEnclosingCircle( cv::Mat& src, cv::Mat& dst);
+
+    //! \brief Plot the hand complex hull:
+    void plotComplexHull( cv::Mat& src, cv::Mat& dst, bool show_points = false);
+
+    //! \brief Plot convexity defects:
+    void plotConvexityDefects( cv::Mat& src, cv::Mat& dst);
+
     //-- List of available gestures
     //---------------------------------------------------------------------------
     //! \note Edit/add more as you wish.
@@ -137,6 +146,17 @@ private:
     //! \brief Center of the max. incribed circle
     cv::Point _max_circle_incribed_center;
 
+    //! \brief Radius of the min. enclosing circle
+    float _min_enclosing_circle_radius;
+
+    //! \brief Center of the min. enclosing circle
+    cv::Point2f _min_enclosing_circle_center;
+
+    //! \brief Complex hull of the hand
+    std::vector< cv::Point > _hand_hull;
+
+    //! \brief Convexity defects of the hand
+    std::vector< cv::Vec4i > _hand_convexity_defects;
 
     //-- ROI of the hand, for gesture analysis:
     //-------------------------------------------------------------------------
