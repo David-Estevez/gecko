@@ -179,6 +179,9 @@ void HandDetector::operator ()(cv::Mat& src, cv::Mat& dst)
 
 void HandDetector::filter_hand(cv::Mat &src, cv::Mat &dst)
 {
+    static int it=0;
+
+
     //-- Filter out head:
     //------------------------------------------------
     //-- Get mask
@@ -198,18 +201,30 @@ void HandDetector::filter_hand(cv::Mat &src, cv::Mat &dst)
 
     //-- Filter out small blobs:
     //------------------------------------------------
-//    cv::Mat withoutBlobs;
-//    filterBlobs( thresholdedHand, withoutBlobs );
+    cv::Mat withoutBlobs;
+    filterBlobs( thresholdedHand, withoutBlobs );
 
+    cv::bitwise_and( withoutBlobs, headTrackingMask, dst );
 
-    withoutBackground.copyTo(dst, headTrackingMask);
-    cv::cvtColor(dst, dst, CV_BGR2GRAY);
-    //-- Apply mask for head
-//    cv::bitwise_and( withoutBlobs, headTrackingMask, dst );
+//    static cv::Mat sum(dst.rows, dst.cols,dst.type());
 
-    //-- Show result (optional)
-    //------------------------------------------------
+//    if (it <4)
+//    {
+//        cv::bitwise_and(sum, dst, sum);
+//    }
+//    else
+//    {
+//        sum.copyTo(dst);
+//        //-- Show result (optional)
+//        //------------------------------------------------
+//        it==0;
+//        sum.release();
+
+//     }
+
+//    cv::imshow("[Debug] Filtered hand", sum );
     cv::imshow("[Debug] Filtered hand", dst );
+
 
 }
 
@@ -430,8 +445,15 @@ void HandDetector::threshold(const cv::Mat &src, cv::Mat &dst)
 
 void HandDetector::filterBlobs(const cv::Mat &src, cv::Mat &dst)
 {
-    cv::Mat kernel = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5) );
-    cv::morphologyEx( src, dst, cv::MORPH_CLOSE, kernel);
+//    cv::Mat kernel = cv::getStructuringElement( cv::MORPH_ELLIPSE, cv::Size( 5, 5) );
+//    cv::morphologyEx( src, dst, cv::MORPH_CLOSE, kernel);
+
+    cv::GaussianBlur(src, dst,cv::Size(0,0),5);
+//    cv::adaptiveThreshold(dst, dst, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 21, 5);
+
+//    cv::threshold(dst, dst, 40, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+    cv::inRange(dst,cv::Scalar(40,40,40) , cv::Scalar(255,255,255), dst);
+
 }
 
 

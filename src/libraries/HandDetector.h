@@ -83,6 +83,8 @@ class HandDetector {
 
 	cv::Scalar lower, upper;
 
+
+
 	//-- Calibration box size
     static const int halfSide=40;
 };
