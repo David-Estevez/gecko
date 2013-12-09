@@ -198,12 +198,14 @@ void HandDetector::filter_hand(cv::Mat &src, cv::Mat &dst)
 
     //-- Filter out small blobs:
     //------------------------------------------------
-    cv::Mat withoutBlobs;
-    filterBlobs( thresholdedHand, withoutBlobs );
+//    cv::Mat withoutBlobs;
+//    filterBlobs( thresholdedHand, withoutBlobs );
 
 
+    withoutBackground.copyTo(dst, headTrackingMask);
+    cv::cvtColor(dst, dst, CV_BGR2GRAY);
     //-- Apply mask for head
-    cv::bitwise_and( withoutBlobs, headTrackingMask, dst );
+//    cv::bitwise_and( withoutBlobs, headTrackingMask, dst );
 
     //-- Show result (optional)
     //------------------------------------------------
@@ -396,6 +398,8 @@ void HandDetector::initBackgroundSubstractor()
 {
     bg.set("nmixtures",3);// set number of gaussian mixtures
     bg.set("detectShadows", true); //if false: turn shadow detection off
+    bg.setbackgroundRatio(0.000000000000001);
+
 }
 
 void HandDetector::backgroundSubstraction(cv::Mat &src, cv::Mat &dst)

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include "backgroundSubstractor.h"
 
 void drawCalibrationMarks(cv::Mat& input, cv::Mat& output, int halfSide = 20,  cv::Scalar color  = cv::Scalar( 0, 255, 0 ) );
 
@@ -19,6 +20,6 @@ double getAngle( cv::RotatedRect boundingRect);
 
 //-- Static background substractor
 
-void backgroundSubs(cv::Mat &, cv::BackgroundSubtractorMOG2 & bg);
+void backgroundSubs(cv::Mat &, backgroundSubstractor & bg);
 
 #endif // HANDUTILS_H

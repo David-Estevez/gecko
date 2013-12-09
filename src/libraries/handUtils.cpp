@@ -144,7 +144,7 @@ void filterContours( std::vector< std::vector<cv::Point> >& srcContours, std::ve
 }
 
 
-void backgroundSubs(cv::Mat & frame, cv::BackgroundSubtractorMOG2 & bg)
+void backgroundSubs(cv::Mat & frame, backgroundSubstractor & bg)
 {
     cv::Mat back;
     cv::Mat fore;

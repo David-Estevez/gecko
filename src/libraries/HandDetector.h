@@ -48,7 +48,7 @@ class HandDetector {
 
     //-- Background substractor:
     //---------------------------------------------------------------------------------
-    cv::BackgroundSubtractorMOG2 bg;
+    backgroundSubstractor bg ;
     void initBackgroundSubstractor();
 
 	//-- Filter face:
