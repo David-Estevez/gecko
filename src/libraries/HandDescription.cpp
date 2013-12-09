@@ -97,8 +97,9 @@ void HandDescription::update(const cv::Mat& src, const cv::Mat& skinMask )
         cv::convexHull( _hand_contour[0], _hand_hull );
 
         //-- Find convexity defects:
-
-        //cv::convexityDefects( _hand_contour[0], _hand_hull, _hand_convexity_defects );
+        std::vector<int> hull_indices;
+        cv::convexHull( _hand_contour[0], hull_indices, CV_CLOCKWISE);
+        cv::convexityDefects( _hand_contour[0], hull_indices, _hand_convexity_defects );
 
         angleExtraction();
         centerExtraction();
@@ -441,8 +442,10 @@ void HandDescription::handPalmExtraction(const cv::Mat& src )
     std::pair<int, int> best_center = std::pair<int, int>( x_limits.first, y_limits.first);
     double best_distance = -1;
 
+    /*
     std::cout << "(" << x_limits.first << ", " << x_limits.second << ")" << std::endl;
-    std::cout << "(" << x_limits.first << ", " << x_limits.second << ")" << std::endl;
+    std::cout << "(" << y_limits.first << ", " << y_limits.second << ")" << std::endl;
+    */
 
     for (int j = y_limits.first; j < y_limits.second; j += step_points_inside )
         for (int i = x_limits.first; i < x_limits.second; i += step_points_inside )
@@ -485,7 +488,7 @@ void HandDescription::ROIExtraction( const cv::Mat& src)
     int * y = &(_max_circle_incribed_center.y);
     double * r = &(_max_circle_inscribed_radius);
 
-    std::cout << "[Debug] (" << *x << ", " << *y << ") R = " << *r << std::endl;
+    std::cout << "[Debug] ROI circle: Center at (" << *x << ", " << *y << ") R = " << *r << std::endl;
 
     //-- Extract hand ROI:
     int ROI_corner_x = (*x) - 3.5*(*r);
@@ -512,7 +515,7 @@ void HandDescription::ROIExtraction( const cv::Mat& src)
         std::cerr << "An exception ocurred, but we are crossing fingers and ignoring it... :)" << std::endl;
     }
 
-    cv::imshow("[Debug] Hand", _hand_ROI);
+    //cv::imshow("[Debug] Hand", _hand_ROI);
 }
 
 void HandDescription::angleExtraction()

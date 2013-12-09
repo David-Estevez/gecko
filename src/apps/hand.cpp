@@ -112,11 +112,11 @@ int main( int argc, char * argv[] )
 
         //-- Plot contours on image
         //--------------------------------------------
-        hand_descriptor.plotBoundingRectangle( display, display );
+        //hand_descriptor.plotBoundingRectangle( display, display );
         hand_descriptor.plotContours(display, display);
         hand_descriptor.plotMaxInscribedCircle(display, display );
         hand_descriptor.plotMinEnclosingCircle(display, display);
-        //hand_descriptor.plotComplexHull( display, display, true);
+        hand_descriptor.plotComplexHull( display, display, true);
 
 
         //-- Adding text:
