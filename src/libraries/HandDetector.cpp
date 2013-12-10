@@ -491,7 +491,7 @@ void HandDetector::filterBlobs(const cv::Mat &src, cv::Mat &dst)
 //    cv::threshold(dst, dst, 40, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 
 
-    int min=30;
+    int min=50;
     cv::inRange(dst,cv::Scalar(min,min,min) , cv::Scalar(255,255,255), dst);
 
 }
