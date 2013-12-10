@@ -13,11 +13,6 @@ int main( int argc, char * argv[] )
     //--------------------------------------------------------------
     cv::VideoCapture cap;
 
-    //-- Setup backgoundSubstractor
-    //cv::BackgroundSubtractorMOG2 bg ;
-    //bg.set("nmixtures",3);// set number of gaussian mixtures
-    //bg.set("detectShadows", true); //if false: turn shadow detection off
-
     //-- Open video source
     if ( argc > 1)
     {
@@ -54,8 +49,42 @@ int main( int argc, char * argv[] )
     //-- Object that will store the parameters of the hand
     HandDescription hand_descriptor;
 
+    //-- Initial screen
+
+
+
+
+    //-- Menu
+
+    int selection;
+    while (1)
+    {
+        //-- Get current frame
+        cv::Mat frame=cv::Mat::zeros(480, 640,CV_8UC1);
+        cv::putText(frame, "SQUARE MODE", cv::Point(0,50), 0, 2, cv::Scalar(255,255,255), 7);
+        cv::putText(frame, "PRESS 1", cv::Point(0,150), 0, 2, cv::Scalar(255,255,255), 7);
+        cv::putText(frame, "HSV MODE", cv::Point(0,250), 0, 2, cv::Scalar(255,255,255), 7);
+        cv::putText(frame, "PRESS 2", cv::Point(0,350), 0, 2, cv::Scalar(255,255,255), 7);
+
+        cv::imshow("MENU", frame);
+        //-- Wait for user confirmation
+        char key =  cv::waitKey(delay);
+        if ( key == '1' || key == '2' )
+        {
+            if (key=='1')
+             selection =1;
+            if (key=='2')
+             selection =2;
+            cv::destroyWindow("MENU");
+            break;
+        }
+        else if (key==27 || key=='q')
+            exit(0);
+    }
+
+
     //-- Calibration loop
-    handDetector.calibrationLoop(cap);
+    handDetector.calibrationLoop(cap, selection);
 
 
     //-- Main loop
@@ -72,31 +101,28 @@ int main( int argc, char * argv[] )
 
         cv::flip(frame,frame,1);
 
-        //-- Remove the background
-        //backgroundSubs(frame, bg);
-
-
         //------------------------------------------------------------------------------------------------------
         //-- Process it
         //------------------------------------------------------------------------------------------------------
         cv::Mat processed;
-        switch( debugValue )
-        {
-        case 0: case 2:
-            handDetector.calibrate();
-            handDetector( frame, processed);
-            break;
+//        switch( debugValue )
+//        {
+//        case 0: case 2:
+//            handDetector.calibrate();
+//            handDetector( frame, processed);
+//            break;
 
-        case 1:
-            handDetector.calibrate( handDetector.getLower(), handDetector.getUpper());
-            handDetector( frame, processed);
-            break;
+//        case 1:
+//            handDetector.calibrate( handDetector.getLower(), handDetector.getUpper());
+//            handDetector( frame, processed);
+//            break;
 
-        default:
-            processed = frame;
-            break;
-        }
+//        default:
+//            processed = frame;
+//            break;
+//        }
 
+        handDetector(frame, processed);
 
         //-- Contour extraction
         hand_descriptor( frame, processed );
@@ -185,11 +211,11 @@ int main( int argc, char * argv[] )
         char key = (char) cv::waitKey( delay);
         switch( key)
         {
-        case 'f': //-- Filtered frame
-            debugValue = 0;
-            break;
-        case 'd': //-- hardcoded filter
-            debugValue = 1;
+//        case 'f': //-- Filtered frame
+//            debugValue = 0;
+//            break;
+//        case 'd': //-- hardcoded filter
+//            debugValue = 1;
             break;
         case 'k': //-- Move mouse
             debugValue = 2;

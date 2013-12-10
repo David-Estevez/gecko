@@ -14,7 +14,7 @@ class HandDetector {
     ~HandDetector();
 
 	//-- Calibration loop
-	void calibrationLoop(cv::VideoCapture); 
+    void calibrationLoop(cv::VideoCapture, int selection);
 
 	//-- Calibration functions
 	void calibrate( cv::Mat& ROI);

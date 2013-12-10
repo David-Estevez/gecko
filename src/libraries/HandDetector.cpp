@@ -47,35 +47,9 @@ HandDetector::~HandDetector()
 //-- Calibration functions
 //--------------------------------------------------------------------------------------------------------
 
-void HandDetector::calibrationLoop(cv::VideoCapture cap)
+void HandDetector::calibrationLoop(cv::VideoCapture cap, int selection )
 {
     int delay=24;
-    int selection;
-    //MENU
-    while (1)
-    {
-        //-- Get current frame
-        cv::Mat frame=cv::Mat::zeros(480, 640,CV_8UC1);
-        cv::putText(frame, "SQUARE MODE", cv::Point(0,50), 0, 2, cv::Scalar(255,255,255), 7);
-        cv::putText(frame, "PRESS 1", cv::Point(0,150), 0, 2, cv::Scalar(255,255,255), 7);
-        cv::putText(frame, "HSV MODE", cv::Point(0,250), 0, 2, cv::Scalar(255,255,255), 7);
-        cv::putText(frame, "PRESS 2", cv::Point(0,350), 0, 2, cv::Scalar(255,255,255), 7);
-
-        cv::imshow("MENU", frame);
-        //-- Wait for user confirmation
-        char key =  cv::waitKey(delay);
-        if ( key == '1' || key == '2' )
-        {
-            if (key=='1')
-             selection =1;
-            if (key=='2')
-             selection =2;
-            cv::destroyWindow("MENU");
-            break;
-        }
-        else if (key==27 || key=='q')
-            exit(0);
-    }
 
 
     int h[2]={0,25};
