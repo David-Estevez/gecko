@@ -80,7 +80,7 @@ void HandDescription::update(const cv::Mat& src, const cv::Mat& skinMask )
         boundingBoxExtraction(src);
 
         //-- Find hand palm
-        handPalmExtraction(src);
+        handPalmExtraction();
 
         //-- Second roi and contourExtraction (optional right now)
         //! \todo Second ROI and contourExtraction on HandDescriptor
@@ -93,13 +93,10 @@ void HandDescription::update(const cv::Mat& src, const cv::Mat& skinMask )
         //-- Find the min enclosing circle of the latest contour:
         cv::minEnclosingCircle( _hand_contour[0], _min_enclosing_circle_center, _min_enclosing_circle_radius );
 
-        //-- Find the complex hull
-        cv::convexHull( _hand_contour[0], _hand_hull );
+        //-- Find convexity defects
+        defectsExtraction();
 
-        //-- Find convexity defects:
-        std::vector<int> hull_indices;
-        cv::convexHull( _hand_contour[0], hull_indices, CV_CLOCKWISE);
-        cv::convexityDefects( _hand_contour[0], hull_indices, _hand_convexity_defects );
+        fingerExtraction(src);
 
         angleExtraction();
         centerExtraction();
@@ -308,17 +305,33 @@ void HandDescription::plotComplexHull( cv::Mat& src, cv::Mat& dst, bool show_poi
 }
 
 
-void HandDescription::plotConvexityDefects(cv::Mat &src, cv::Mat &dst)
+void HandDescription::plotConvexityDefects(cv::Mat &src, cv::Mat &dst, bool draw_points)
 {
     if ( dst.empty() )
         dst = src.clone();
 
     if ( _hand_found )
     {
-       /* for (int i = 0; i < _hand_convexity_defects.size(); i++)
-            cv::circle( dst, _hand_convexity_defects.at(i), 2, cv::Scalar( 0, 140, 255));*/
+       for (int i = 0; i < _hand_convexity_defects.size(); i++)
+       {
+           const cv::Scalar orange = cv::Scalar(18, 153, 255);
+
+           //-- Draw them
+           if ( draw_points )
+           {
+                cv::circle( dst, _hand_convexity_defects[i].start, 5, orange);
+                cv::circle( dst, _hand_convexity_defects[i].end, 5, orange);
+                cv::circle( dst, _hand_convexity_defects[i].depth_point, 5, orange);
+           }
+
+           cv::line(dst, _hand_convexity_defects[i].start, _hand_convexity_defects[i].depth_point, cv::Scalar(18, 153, 255));
+           cv::line(dst, _hand_convexity_defects[i].depth_point, _hand_convexity_defects[i].end, cv::Scalar(18, 153, 255));
+        }
+
     }
 }
+
+
 
 void HandDescription::angleControl(bool show_corrected, bool show_actual, bool show_predicted)
 {
@@ -403,10 +416,8 @@ void HandDescription::boundingBoxExtraction(const cv::Mat& src)
 
 }
 
-void HandDescription::handPalmExtraction(const cv::Mat& src )
+void HandDescription::handPalmExtraction()
 {
-    cv::Mat toPlot = src.clone();
-
     //-- Parameters describing this hand palm procedure:
     const int x_ratio = 3; //-- Section of the bounding box used for finding center (along X)
     const int y_ratio = 3; //-- Section of the bounding box used for finding center (along Y)
@@ -473,12 +484,6 @@ void HandDescription::handPalmExtraction(const cv::Mat& src )
         std::cerr << "[Error]: Inscribed circle could not be found!" << std::endl;
     }
 
-
-    //--Plot circle for debugging
-    plotContours(toPlot, toPlot);
-    plotBoundingRectangle(toPlot, toPlot, false);
-    plotMaxInscribedCircle( toPlot, toPlot);
-    //cv::imshow( "[Debug] Inscribed circle", toPlot);
 }
 
 void HandDescription::ROIExtraction( const cv::Mat& src)
@@ -516,6 +521,83 @@ void HandDescription::ROIExtraction( const cv::Mat& src)
     }
 
     //cv::imshow("[Debug] Hand", _hand_ROI);
+}
+
+void HandDescription::defectsExtraction()
+{
+    std::vector< cv::Vec4i > convexity_defects;
+
+    //-- Find the complex hull
+    cv::convexHull( _hand_contour[0], _hand_hull, CV_CLOCKWISE);
+
+    //-- Find convexity defects:
+    std::vector<int> hull_indices;
+    cv::convexHull( _hand_contour[0], hull_indices, CV_CLOCKWISE);
+    cv::convexityDefects( _hand_contour[0], hull_indices, convexity_defects );
+
+    //-- Convert the found defects to a more convenient format:
+    _hand_convexity_defects.clear();
+    for (int i = 0; i < convexity_defects.size(); i++)
+    {
+        ConvexityDefect newDefect;
+
+        newDefect.start_index = convexity_defects[i][0];
+        newDefect.start = _hand_contour[0].at( newDefect.start_index );
+
+        newDefect.end_index = convexity_defects[i][1];
+        newDefect.end = _hand_contour[0].at( newDefect.end_index );
+
+        newDefect.depth_point_index = convexity_defects[i][2];
+        newDefect.depth_point = _hand_contour[0].at( newDefect.depth_point_index );
+
+        newDefect.depth = convexity_defects[i][3] / 256.0;
+
+        _hand_convexity_defects.push_back( newDefect );
+    }
+
+
+}
+
+void HandDescription::fingerExtraction(const cv::Mat &src)
+{
+    std::vector< ConvexityDefect > passed_first_condition; //-- At this point, I lost all imagination available for variable naming
+    std::vector< ConvexityDefect > passed_second_condition;
+    std::vector< cv::Point > fingertips;
+
+    //-- Check first assumption: min_inscribed_radius < depth_defect < max_enclosing_radius
+    for(int i = 0; i < _hand_convexity_defects.size(); i++)
+    {
+        if ( _hand_convexity_defects[i].depth < _min_enclosing_circle_radius && _hand_convexity_defects[i].depth > _max_circle_inscribed_radius )
+            passed_first_condition.push_back( _hand_convexity_defects[i] );
+    }
+
+
+
+
+    //-- Check second assumption: angle between convex is less than 90º
+    for (int i = 0; i < passed_first_condition.size(); i++)
+        if ( findAngle(passed_first_condition[i].start, passed_first_condition[i].end, passed_first_condition[i].depth_point) < 90 )
+            passed_second_condition.push_back( passed_first_condition[i]);
+
+    //-- Plot (only for debugging)
+    cv::Mat dst = src.clone();
+    for (int i = 0; i < passed_second_condition.size(); i++)
+    {
+        const cv::Scalar orange = cv::Scalar(18, 153, 255);
+
+        //-- Draw them
+        cv::circle( dst, passed_second_condition[i].start, 5, orange);
+        cv::circle( dst, passed_second_condition[i].end, 5, orange);
+        cv::circle( dst, passed_second_condition[i].depth_point, 5, orange);
+
+        cv::line(dst, passed_second_condition[i].start, passed_second_condition[i].depth_point, orange);
+        cv::line(dst, passed_second_condition[i].depth_point, passed_second_condition[i].end, orange);
+
+     }
+    cv::imshow("[Defects 1st & 2nd test]", dst);
+
+    //-- Find fingertips using k-curvature
+
 }
 
 void HandDescription::angleExtraction()

@@ -18,7 +18,24 @@ void filterContours(std::vector< std::vector<cv::Point> >& srcContours, std::vec
 double getAngle( cv::RotatedRect boundingRect);
 
 //-- Static background substractor
+cv:: Mat sBackgroundSubs(cv::Mat );
 
-cv:: Mat sBackgroundSubs(cv::Mat );	
+//-- More useful way of storing convexity defects:
+typedef struct
+{
+    cv::Point start;
+    cv::Point end;
+    cv::Point depth_point;
+    double depth;
+
+    int start_index;
+    int end_index;
+    int depth_point_index;
+}  ConvexityDefect;
+
+//-- Find the angle between two lines (using three points)
+//-- Note:
+//-- The angle obtained here is the angle going from start-vertex segment to end-vertex segment
+float findAngle( cv::Point start, cv::Point end, cv::Point vertex);
 
 #endif // HANDUTILS_H

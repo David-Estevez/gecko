@@ -74,7 +74,7 @@ public:
     void plotComplexHull( cv::Mat& src, cv::Mat& dst, bool show_points = false);
 
     //! \brief Plot convexity defects:
-    void plotConvexityDefects( cv::Mat& src, cv::Mat& dst);
+    void plotConvexityDefects(cv::Mat& src, cv::Mat& dst, bool draw_points = true);
 
     //-- List of available gestures
     //---------------------------------------------------------------------------
@@ -88,8 +88,10 @@ private:
     //--------------------------------------------------------------------------
     void contourExtraction(const cv::Mat& skinMask);
     void boundingBoxExtraction( const cv::Mat& src);
-    void handPalmExtraction(const cv::Mat& src ); //! \todo This shouldn't recieve any mat
+    void handPalmExtraction();
     void ROIExtraction( const cv::Mat& src);
+    void defectsExtraction();
+    void fingerExtraction(const cv::Mat &src);
     void angleExtraction();
     void centerExtraction();
     void gestureExtraction(const cv::Mat &);
@@ -156,7 +158,10 @@ private:
     std::vector< cv::Point > _hand_hull;
 
     //! \brief Convexity defects of the hand
-    std::vector< cv::Vec4i > _hand_convexity_defects;
+    //std::vector< cv::Vec4i > _hand_convexity_defects;
+    std::vector< ConvexityDefect > _hand_convexity_defects;
+
+    //-- Describe fingers:
 
     //-- ROI of the hand, for gesture analysis:
     //-------------------------------------------------------------------------

@@ -117,6 +117,7 @@ int main( int argc, char * argv[] )
         hand_descriptor.plotMaxInscribedCircle(display, display );
         hand_descriptor.plotMinEnclosingCircle(display, display);
         hand_descriptor.plotComplexHull( display, display, true);
+        hand_descriptor.plotConvexityDefects(display, display);
 
 
         //-- Adding text:
