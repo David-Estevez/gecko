@@ -204,26 +204,32 @@ void HandDetector::filter_hand(cv::Mat &src, cv::Mat &dst)
     cv::Mat withoutBlobs;
     filterBlobs( thresholdedHand, withoutBlobs );
 
-    cv::bitwise_and( withoutBlobs, headTrackingMask, dst );
+    cv::Mat dummy;
+    cv::bitwise_and( withoutBlobs, headTrackingMask, dummy );
 
-//    static cv::Mat sum(dst.rows, dst.cols,dst.type());
+    static cv::Mat sum=cv::Mat::zeros(dummy.rows, dummy.cols,dummy.type());
 
-//    if (it <4)
-//    {
-//        cv::bitwise_and(sum, dst, sum);
-//    }
-//    else
-//    {
-//        sum.copyTo(dst);
-//        //-- Show result (optional)
-//        //------------------------------------------------
-//        it==0;
-//        sum.release();
+    if (it <3)
+    {
+        sum+=dummy;
+        it++;
 
-//     }
+    }
+    else
+    {
+        it=0;
+        dummy.copyTo(sum);
+    }
 
-//    cv::imshow("[Debug] Filtered hand", sum );
-    cv::imshow("[Debug] Filtered hand", dst );
+    sum.copyTo(dst);
+
+    //    std::cerr<<"Iterator number: "<<it<<std::endl;
+
+    //-- Show result (optional)
+    //------------------------------------------------
+
+    if(!dst.empty())
+        cv::imshow("[Debug] Filtered hand -> DST", dst );
 
 
 }
