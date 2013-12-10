@@ -118,6 +118,7 @@ int main( int argc, char * argv[] )
         hand_descriptor.plotMinEnclosingCircle(display, display);
         hand_descriptor.plotComplexHull( display, display, true);
         hand_descriptor.plotConvexityDefects(display, display);
+        hand_descriptor.plotFingertips(display, display);
 
 
         //-- Adding text:
@@ -184,7 +185,7 @@ int main( int argc, char * argv[] )
         //-----------------------------------------------------------------------------------------------------
         //-- Decide what to do next depending on key pressed
         //-----------------------------------------------------------------------------------------------------
-        char key = (char) cv::waitKey( delay);
+        char key = (char) cv::waitKey(delay);
         switch( key)
         {
         case 'f': //-- Filtered frame

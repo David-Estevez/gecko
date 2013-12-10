@@ -76,6 +76,9 @@ public:
     //! \brief Plot convexity defects:
     void plotConvexityDefects(cv::Mat& src, cv::Mat& dst, bool draw_points = true);
 
+    //! \brief Plot fingertip markers:
+    void plotFingertips( cv::Mat& src, cv::Mat& dst, bool draw_lines = true);
+
     //-- List of available gestures
     //---------------------------------------------------------------------------
     //! \note Edit/add more as you wish.
@@ -126,6 +129,7 @@ private:
 
     //! \brief Contours of the candidates to be a hand
     std::vector< std::vector<cv::Point> > _hand_contour;
+    std::vector< std::vector<cv::Point> > _hand_contour_raw;
 
 
     //! \brief Box enclosing the hand
@@ -137,8 +141,15 @@ private:
     int _hand_gesture;
 
 
+    //-- Describe fingers:
     //! \brief Number of fingers (visible)
     int _hand_num_fingers;
+
+    //! \brief Position of the fingertips
+    std::vector< cv::Point > _hand_fingertips;
+
+    //! \brief Position of the finger line origin points
+    std::vector< cv::Point > _hand_finger_line_origin;
 
     //-- Describe hand palm:
     //-------------------------------------------------------------------------
@@ -161,7 +172,7 @@ private:
     //std::vector< cv::Vec4i > _hand_convexity_defects;
     std::vector< ConvexityDefect > _hand_convexity_defects;
 
-    //-- Describe fingers:
+
 
     //-- ROI of the hand, for gesture analysis:
     //-------------------------------------------------------------------------

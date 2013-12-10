@@ -324,11 +324,27 @@ void HandDescription::plotConvexityDefects(cv::Mat &src, cv::Mat &dst, bool draw
                 cv::circle( dst, _hand_convexity_defects[i].depth_point, 5, orange);
            }
 
-           cv::line(dst, _hand_convexity_defects[i].start, _hand_convexity_defects[i].depth_point, cv::Scalar(18, 153, 255));
-           cv::line(dst, _hand_convexity_defects[i].depth_point, _hand_convexity_defects[i].end, cv::Scalar(18, 153, 255));
+           cv::line(dst, _hand_convexity_defects[i].start, _hand_convexity_defects[i].depth_point, orange);
+           cv::line(dst, _hand_convexity_defects[i].depth_point, _hand_convexity_defects[i].end, orange);
         }
 
     }
+}
+
+void HandDescription::plotFingertips(cv::Mat &src, cv::Mat &dst, bool draw_lines)
+{
+    if ( dst.empty() )
+        dst = src.clone();
+
+    if ( _hand_found )
+        for( int i = 0; i < _hand_fingertips.size(); i++)
+        {
+            cv::circle( dst, _hand_fingertips[i], 10, cv::Scalar( 255, 0, 0), 2 );
+
+            if ( draw_lines )
+                cv::line( dst, _hand_finger_line_origin[i], _hand_fingertips[i], cv::Scalar( 255, 0, 0), 2);
+        }
+
 }
 
 
@@ -385,7 +401,7 @@ void HandDescription::angleControl(bool show_corrected, bool show_actual, bool s
 
 void HandDescription::contourExtraction(const cv::Mat& skinMask)
 {
-    const int epsilon = 3; //-- Max error for polygon approximation
+    const int epsilon = 1; //-- Max error for polygon approximation
 
     //-- Extract skin contours:
     std::vector<std::vector<cv::Point> > raw_contours;
@@ -400,6 +416,9 @@ void HandDescription::contourExtraction(const cv::Mat& skinMask)
 
     //-- If contour was found, make a aproximation of them:
     _hand_contour = std::vector<std::vector<cv::Point > >( filtered_hand_contours.size() );
+
+    //-- Save hand raw contours:
+    _hand_contour_raw = filtered_hand_contours;
 
     if ( _hand_found )
         for( int i = 0; i < filtered_hand_contours.size(); i++)
@@ -537,6 +556,7 @@ void HandDescription::defectsExtraction()
 
     //-- Convert the found defects to a more convenient format:
     _hand_convexity_defects.clear();
+    std::cout << "[Debug] Found " << convexity_defects.size() << " defects:" << std::endl;
     for (int i = 0; i < convexity_defects.size(); i++)
     {
         ConvexityDefect newDefect;
@@ -553,6 +573,8 @@ void HandDescription::defectsExtraction()
         newDefect.depth = convexity_defects[i][3] / 256.0;
 
         _hand_convexity_defects.push_back( newDefect );
+
+        std::cout << "\t" << i << "-> (" << newDefect.start_index << ", " << newDefect.end_index << ", " << newDefect.depth_point_index << ")" << std::endl;
     }
 
 
@@ -563,6 +585,7 @@ void HandDescription::fingerExtraction(const cv::Mat &src)
     std::vector< ConvexityDefect > passed_first_condition; //-- At this point, I lost all imagination available for variable naming
     std::vector< ConvexityDefect > passed_second_condition;
     std::vector< cv::Point > fingertips;
+    std::vector< int > fingertips_indexes;
 
     //-- Check first assumption: min_inscribed_radius < depth_defect < max_enclosing_radius
     for(int i = 0; i < _hand_convexity_defects.size(); i++)
@@ -572,32 +595,117 @@ void HandDescription::fingerExtraction(const cv::Mat &src)
     }
 
 
-
-
     //-- Check second assumption: angle between convex is less than 90º
     for (int i = 0; i < passed_first_condition.size(); i++)
         if ( findAngle(passed_first_condition[i].start, passed_first_condition[i].end, passed_first_condition[i].depth_point) < 90 )
             passed_second_condition.push_back( passed_first_condition[i]);
 
-    //-- Plot (only for debugging)
-    cv::Mat dst = src.clone();
-    for (int i = 0; i < passed_second_condition.size(); i++)
-    {
-        const cv::Scalar orange = cv::Scalar(18, 153, 255);
+    std::cout << "[Debug:] Fingertips candidates: " << passed_second_condition.size() << std::endl; std::cout.flush();
 
-        //-- Draw them
-        cv::circle( dst, passed_second_condition[i].start, 5, orange);
-        cv::circle( dst, passed_second_condition[i].end, 5, orange);
-        cv::circle( dst, passed_second_condition[i].depth_point, 5, orange);
-
-        cv::line(dst, passed_second_condition[i].start, passed_second_condition[i].depth_point, orange);
-        cv::line(dst, passed_second_condition[i].depth_point, passed_second_condition[i].end, orange);
-
-     }
-    cv::imshow("[Defects 1st & 2nd test]", dst);
 
     //-- Find fingertips using k-curvature
+    const int k =9;
+    const int distance = 2;
+    const int max_angle = 60;
+    const int fingertip_threshold = 50;
 
+    for (int i = 0; i < passed_second_condition.size(); i++)
+        for (int ending = 0; ending < 2; ending++)
+        {
+
+//            if ( ending == 0)
+//                std::cout << i << "-> Starting points: " << std::endl;
+//            else
+//                std::cout << i << "-> Ending points: " << std::endl;
+
+            float best_angle = max_angle;
+            int best = -10;
+
+            for( int j = -distance; j < distance; j++)
+            {
+                int index_c;
+                if ( ending == 0)
+                    index_c = passed_second_condition[i].start_index + j;
+                else
+                    index_c = passed_second_condition[i].end_index + j;
+
+                if (index_c < 0 )
+                    index_c += _hand_contour[0].size();
+                if (index_c >= _hand_contour[0].size())
+                    index_c -= _hand_contour[0].size();
+
+                int index_l = index_c - k;
+                if (index_l < 0 ) index_l = index_l + _hand_contour[0].size();
+
+                int index_h = index_c + k;
+                if (index_h >= _hand_contour[0].size() ) index_h = index_h - _hand_contour[0].size();
+
+                cv::Point center = _hand_contour[0].at(  index_c );
+                cv::Point start = _hand_contour[0].at( index_l);
+                cv::Point end = _hand_contour[0].at( index_h );
+
+
+//                cv::circle(dst, center, 2, cv::Scalar( 128, 180, 30) );
+//                cv::circle(dst, start, 2, cv::Scalar( 30, 180, 128));
+//                cv::circle(dst, end, 2, cv::Scalar( 30, 128, 180));
+
+
+                float current_angle = findAngle( start, end, center);
+                //std::cout << "\tIt works! " << current_angle << std::endl;
+                if ( current_angle < max_angle && current_angle < best_angle )
+                {
+                    best_angle = current_angle;
+                    best = index_c;
+                }
+
+            }
+
+            //std::cout << "\tBest angle: " << best_angle << std::endl; std::cout.flush();
+            if ( best_angle != max_angle )
+            {
+                //-- Check that the point you are about to include is not close to any point already detected
+                bool detected = false;
+                for (int n = 0; n < fingertips.size(); n++)
+                {
+                    float distance = sqrt( pow( _hand_contour[0].at(best).x - fingertips.at(n).x, 2) +
+                                           pow( _hand_contour[0].at(best).y - fingertips.at(n).y, 2) );
+
+                    if ( distance < fingertip_threshold )
+                    {
+                        detected = true;
+                        break;
+                    }
+                }
+
+                if ( !detected )
+                {
+                    fingertips_indexes.push_back(  best );
+                    fingertips.push_back( _hand_contour[0].at( fingertips_indexes.back()));
+                }
+            }
+
+        }
+
+    _hand_num_fingers = fingertips.size();
+    _hand_fingertips = fingertips;
+    std::cout << "[Debug] Found " << _hand_num_fingers << " fingers." << std::endl;
+
+    //-- Find a second point to draw the finger lines:
+    _hand_finger_line_origin.clear();
+    for(int i = 0; i < fingertips.size(); i++)
+    {
+        int index_l = fingertips_indexes[i] - k;
+        if (index_l < 0 ) index_l = index_l + _hand_contour[0].size();
+
+        int index_h =  fingertips_indexes[i] + k;
+        if (index_h >= _hand_contour[0].size() ) index_h = index_h - _hand_contour[0].size();
+
+        cv::Point start = _hand_contour[0].at( index_l );
+        cv::Point end = _hand_contour[0].at( index_h );
+        cv::Point half_point = cv::Point( (start.x + end.x) /2, (start.y + end.y) / 2 );
+
+        _hand_finger_line_origin.push_back( half_point);
+    }
 }
 
 void HandDescription::angleExtraction()
