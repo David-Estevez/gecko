@@ -20,6 +20,25 @@ HandDetector::HandDetector()
     initCascadeClassifier();
     initBackgroundSubstractor();
 
+    cv::namedWindow("ADJUST HSV");
+    int h[2]={0,25};
+    int s[2]={58,173};
+    int v[2]={89,229};
+
+    cv::createTrackbar("H min", "ADJUST HSV", &h[0], 255);
+    cv::createTrackbar("H max", "ADJUST HSV", &h[1], 255);
+
+    cv::createTrackbar("S min", "ADJUST HSV", &s[0], 255);
+    cv::createTrackbar("S max", "ADJUST HSV", &s[1], 255);
+
+    cv::createTrackbar("V min", "ADJUST HSV", &v[0], 255);
+    cv::createTrackbar("V max", "ADJUST HSV", &v[1], 255);
+
+
+
+
+
+
 }
 
 HandDetector::HandDetector( cv::Mat& ROI)
@@ -38,6 +57,11 @@ HandDetector::HandDetector( cv::Mat& ROI)
 }
 
 
+
+HandDetector::~HandDetector()
+{
+    cv::destroyWindow("ADJUST HSV");
+}
 
 //--------------------------------------------------------------------------------------------------------
 //-- Calibration functions
@@ -181,6 +205,9 @@ void HandDetector::filter_hand(cv::Mat &src, cv::Mat &dst)
 {
     static int it=0;
 
+    //change the skin thresholding limits using the trackbars
+    lower_limit=cv::Scalar(cv::getTrackbarPos("H min", "ADJUST HSV"), cv::getTrackbarPos("S min", "ADJUST HSV"), cv::getTrackbarPos("V min", "ADJUST HSV"));
+    upper_limit=cv::Scalar(cv::getTrackbarPos("H max", "ADJUST HSV"), cv::getTrackbarPos("S max", "ADJUST HSV"), cv::getTrackbarPos("V max", "ADJUST HSV"));
 
     //-- Filter out head:
     //------------------------------------------------
@@ -233,7 +260,7 @@ void HandDetector::filter_hand(cv::Mat &src, cv::Mat &dst)
     //------------------------------------------------
 
     if(!dst.empty())
-        cv::imshow("[Debug] Filtered hand -> DST", dst );
+        cv::imshow("ADJUST HSV", dst );
 
 
 }
@@ -462,7 +489,10 @@ void HandDetector::filterBlobs(const cv::Mat &src, cv::Mat &dst)
 //    cv::adaptiveThreshold(dst, dst, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 21, 5);
 
 //    cv::threshold(dst, dst, 40, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
-    cv::inRange(dst,cv::Scalar(40,40,40) , cv::Scalar(255,255,255), dst);
+
+
+    int min=30;
+    cv::inRange(dst,cv::Scalar(min,min,min) , cv::Scalar(255,255,255), dst);
 
 }
 

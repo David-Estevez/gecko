@@ -10,6 +10,9 @@ class HandDetector {
 	HandDetector();
 	HandDetector( cv::Mat& ROI);
 
+    //-- Destructors
+    ~HandDetector();
+
 	//-- Calibration loop
 	void calibrationLoop(cv::VideoCapture); 
 
