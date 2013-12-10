@@ -49,24 +49,28 @@ HandDetector::~HandDetector()
 
 void HandDetector::calibrationLoop(cv::VideoCapture cap)
 {
-
     int delay=24;
-
+    int selection;
+    //MENU
     while (1)
     {
         //-- Get current frame
         cv::Mat frame=cv::Mat::zeros(480, 640,CV_8UC1);
-        cv::putText(frame, "PUT THE CAMERA IN ", cv::Point(0,50), 0, 2, cv::Scalar(255,255,255), 7);
-        cv::putText(frame, "THE WORKING", cv::Point(0,150), 0, 2, cv::Scalar(255,255,255), 7);
-        cv::putText(frame, "POSITION AND", cv::Point(0,250), 0, 2, cv::Scalar(255,255,255), 7);
-        cv::putText(frame, "PRESS ENTER", cv::Point(0,350), 0, 2, cv::Scalar(255,255,255), 7);
+        cv::putText(frame, "SQUARE MODE", cv::Point(0,50), 0, 2, cv::Scalar(255,255,255), 7);
+        cv::putText(frame, "PRESS 1", cv::Point(0,150), 0, 2, cv::Scalar(255,255,255), 7);
+        cv::putText(frame, "HSV MODE", cv::Point(0,250), 0, 2, cv::Scalar(255,255,255), 7);
+        cv::putText(frame, "PRESS 2", cv::Point(0,350), 0, 2, cv::Scalar(255,255,255), 7);
 
-        cv::imshow("GECKO", frame);
+        cv::imshow("MENU", frame);
         //-- Wait for user confirmation
         char key =  cv::waitKey(delay);
-        if ( key == 10 || key == 13 )
+        if ( key == '1' || key == '2' )
         {
-            cv::destroyWindow("GECKO");
+            if (key=='1')
+             selection =1;
+            if (key=='2')
+             selection =2;
+            cv::destroyWindow("MENU");
             break;
         }
         else if (key==27 || key=='q')
@@ -74,88 +78,123 @@ void HandDetector::calibrationLoop(cv::VideoCapture cap)
     }
 
 
-    cv::namedWindow("Calibrating skin");
     int h[2]={0,25};
     int s[2]={58,173};
     int v[2]={89,229};
 
-    cv::createTrackbar("H min", "Calibrating skin", &h[0], 255);
-    cv::createTrackbar("H max", "Calibrating skin", &h[1], 255);
 
-    cv::createTrackbar("S min", "Calibrating skin", &s[0], 255);
-    cv::createTrackbar("S max", "Calibrating skin", &s[1], 255);
-
-    cv::createTrackbar("V min", "Calibrating skin", &v[0], 255);
-    cv::createTrackbar("V max", "Calibrating skin", &v[1], 255);
-    while (1)
+    switch (selection)
     {
-        //-- Get current frame
-        cv::Mat frame, dst;
-        if (! cap.read( frame ) )
+        case (2):
+            while (1)
+            {
+                //-- Get current frame
+                cv::Mat frame=cv::Mat::zeros(480, 640,CV_8UC1);
+                cv::putText(frame, "PUT THE CAMERA IN ", cv::Point(0,50), 0, 2, cv::Scalar(255,255,255), 7);
+                cv::putText(frame, "THE WORKING", cv::Point(0,150), 0, 2, cv::Scalar(255,255,255), 7);
+                cv::putText(frame, "POSITION AND", cv::Point(0,250), 0, 2, cv::Scalar(255,255,255), 7);
+                cv::putText(frame, "PRESS ENTER", cv::Point(0,350), 0, 2, cv::Scalar(255,255,255), 7);
+
+                cv::imshow("PRESS ENTER", frame);
+                //-- Wait for user confirmation
+                char key =  cv::waitKey(delay);
+                if ( key == 10 || key == 13 )
+                {
+                    cv::destroyWindow("PRESS ENTER");
+                    break;
+                }
+                else if (key==27 || key=='q')
+                    exit(0);
+            }
+
+
+            cv::namedWindow("Calibrating skin");
+            cv::createTrackbar("H min", "Calibrating skin", &h[0], 255);
+            cv::createTrackbar("H max", "Calibrating skin", &h[1], 255);
+
+            cv::createTrackbar("S min", "Calibrating skin", &s[0], 255);
+            cv::createTrackbar("S max", "Calibrating skin", &s[1], 255);
+
+            cv::createTrackbar("V min", "Calibrating skin", &v[0], 255);
+            cv::createTrackbar("V max", "Calibrating skin", &v[1], 255);
+
+            while (1)
+            {
+                //-- Get current frame
+                cv::Mat frame, dst;
+                if (! cap.read( frame ) )
+                    break;
+                cv::flip(frame,frame,1);
+
+                //change the skin thresholding limits using the trackbars
+                lower_limit=cv::Scalar(cv::getTrackbarPos("H min", "Calibrating skin"), cv::getTrackbarPos("S min", "Calibrating skin"), cv::getTrackbarPos("V min", "Calibrating skin"));
+                upper_limit=cv::Scalar(cv::getTrackbarPos("H max", "Calibrating skin"), cv::getTrackbarPos("S max", "Calibrating skin"), cv::getTrackbarPos("V max", "Calibrating skin"));
+                HandDetector::filter_hand(frame, dst);
+
+                cv::imshow("Calibrating skin", dst);
+                //-- Wait for user confirmation
+                char key =  cv::waitKey(delay);
+                if ( key == 10 || key == 13 )
+                {
+                    cv::destroyWindow("Calibrating skin");
+                    break;
+                }
+                else if (key==27 || key=='q')
+                    exit(0);
+
+            }
             break;
-        cv::flip(frame,frame,1);
 
-        //change the skin thresholding limits using the trackbars
-        lower_limit=cv::Scalar(cv::getTrackbarPos("H min", "Calibrating skin"), cv::getTrackbarPos("S min", "Calibrating skin"), cv::getTrackbarPos("V min", "Calibrating skin"));
-        upper_limit=cv::Scalar(cv::getTrackbarPos("H max", "Calibrating skin"), cv::getTrackbarPos("S max", "Calibrating skin"), cv::getTrackbarPos("V max", "Calibrating skin"));
-        HandDetector::filter_hand(frame, dst);
+    case 1:
+        cv::namedWindow( "Calibrating skin", cv::WINDOW_AUTOSIZE);
 
-        cv::imshow("Calibrating skin", dst);
-        //-- Wait for user confirmation
-        char key =  cv::waitKey(delay);
-        if ( key == 10 || key == 13 )
+        bool stop = false;
+
+        int delay=24;
+
+        while( !stop)
         {
-            cv::destroyWindow("Calibrating skin");
-            break;
-        }
-        else if (key==27 || key=='q')
-            exit(0);
+            //-- Get current frame
+            cv::Mat frame, cal_screen;
+            if (! cap.read( frame ) )
+                break;
+            cv::flip(frame,frame,1);
 
+
+            //-- Add calibration frame
+            drawCalibrationMarks(frame, cal_screen, halfSide);
+
+            //-- Show calibration screen
+            cv::imshow( "Calibrating skin", cal_screen);
+
+            //-- Wait for user confirmation
+            char key =  cv::waitKey(delay);
+            if ( key == 10 || key == 13 )
+            {
+                //-- Get region of interest data:
+                int image_rows = frame.rows;
+                int image_cols = frame.cols;
+
+                cv::Mat ROI = frame( cv::Rect( cv::Point( image_cols / 2 - halfSide,  image_rows/2 - halfSide ),
+                               cv::Point( image_cols / 2 + halfSide,  image_rows/2 + halfSide)));
+                //cv::imshow( "Test", ROI);
+
+                HandDetector::calibrate( ROI );
+                HandDetector::getCalibration( lower, upper);
+
+                //drawHistogramHSV( ROI );
+
+                //-- Close window
+                cvDestroyWindow( "Calibrating skin");
+                break;
+            }
+        }
+        break;
     }
 
-        //    cv::namedWindow( "Calibrating skin", cv::WINDOW_AUTOSIZE);
-
-//    bool stop = false;
-
-//    int delay=24;
-
-//    while( !stop)
-//    {
-//		//-- Get current frame
-//		cv::Mat frame, cal_screen;
-//		if (! cap.read( frame ) )
-//			break;
-//		cv::flip(frame,frame,1);
 
 
-//		//-- Add calibration frame
-//		drawCalibrationMarks(frame, cal_screen, halfSide);
 
-//		//-- Show calibration screen
-//        cv::imshow( "Calibrating skin", cal_screen);
-
-//		//-- Wait for user confirmation
-//		char key =  cv::waitKey(delay);
-//		if ( key == 10 || key == 13 )
-//		{
-//			//-- Get region of interest data:
-//			int image_rows = frame.rows;
-//			int image_cols = frame.cols;
-
-//			cv::Mat ROI = frame( cv::Rect( cv::Point( image_cols / 2 - halfSide,  image_rows/2 - halfSide ),
-//						   cv::Point( image_cols / 2 + halfSide,  image_rows/2 + halfSide)));
-//			//cv::imshow( "Test", ROI);
-
-//			HandDetector::calibrate( ROI );
-//			HandDetector::getCalibration( lower, upper);
-
-//			//drawHistogramHSV( ROI );
-
-//			//-- Close window
-//			cvDestroyWindow( "Calibrating skin");
-//			break;
-//        }
-//    }
 }
 
 
@@ -262,7 +301,7 @@ void HandDetector::filter_hand(cv::Mat &src, cv::Mat &dst)
     //-- Get mask
     cv::Mat headTrackingMask;
     filterFace( src, headTrackingMask );
-    cv::imshow("[Debug] Face", src);
+//    cv::imshow("[Debug] Face", src);
 
     //-- Background substraction:
     //------------------------------------------------
