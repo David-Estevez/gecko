@@ -96,14 +96,19 @@ void HandDescription::update(const cv::Mat& src, const cv::Mat& skinMask )
         //-- Find convexity defects
         defectsExtraction();
 
+    }
+
+    if (_hand_found)
+    {
         fingerExtraction(src);
 
         angleExtraction();
         centerExtraction();
 
+    }
     //	gestureExtraction(_hand_ROI);
 	//	numFingersExtraction();
-    }
+
 }
 
 void HandDescription::gestureExtraction(const cv::Mat & src)
@@ -609,6 +614,12 @@ void HandDescription::defectsExtraction()
     //-- Find convexity defects:
     std::vector<int> hull_indices;
     cv::convexHull( _hand_contour[0], hull_indices, CV_CLOCKWISE);
+
+    if ( _hand_hull.size() < 3)
+    {
+        _hand_found = false;
+        return;
+    }
     cv::convexityDefects( _hand_contour[0], hull_indices, convexity_defects );
 
     //-- Convert the found defects to a more convenient format:

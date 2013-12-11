@@ -29,7 +29,7 @@ int main( int argc, char * argv[] )
     if ( !cap.isOpened() )
     {
         std::cerr << "Device could not be opened." << std::endl;
-        //return(1);
+        return(1);
     }
 
     //-- Get frame rate
@@ -102,9 +102,9 @@ int main( int argc, char * argv[] )
         //-------------------------------------------------------------------------------------------------------
         cv::Mat frame, display;
         if ( ! cap.read( frame ) )
-            //break;
+            break;
             //frame = cv::imread("../data/hand1.jpg");
-            frame = cv::imread( "../data/3dedos.jpg");
+            //frame = cv::imread( "../data/3dedos.jpg");
 
         cv::flip(frame,frame,1);
 

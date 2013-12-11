@@ -114,7 +114,7 @@ void filterContours( std::vector< std::vector<cv::Point> >& srcContours, std::ve
 
     std::vector<std::vector<cv::Point> > filteredContours;
     for (int i = 0; i <srcContours.size(); i++)
-	if ( (int) srcContours[i].size() > min && (int) srcContours[i].size() < max )
+    if ( (int) srcContours[i].size() > min )//&& (int) srcContours[i].size() < max )
 	    filteredContours.push_back( srcContours[i] );
 
     std::cout << "[Debug] Contours before: " << srcContours.size() << " Contours after: " << filteredContours.size() << std::endl;
