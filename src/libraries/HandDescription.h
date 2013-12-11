@@ -72,20 +72,22 @@ public:
     void angleControl( bool show_corrected = true,  bool show_actual = true, bool show_predicted = true );
 
     //! \brief Prints the maximum inscribed circle:
-    void plotMaxInscribedCircle( cv::Mat& src, cv::Mat& dst);
+    void plotMaxInscribedCircle( cv::Mat& src, cv::Mat& dst, bool show_center = true, cv::Scalar color = cv::Scalar(0, 255, 0), int thickness = 1 );
 
     //! \brief Prints the minimum enclosing circle:
-    void plotMinEnclosingCircle( cv::Mat& src, cv::Mat& dst);
+    void plotMinEnclosingCircle(cv::Mat& src, cv::Mat& dst, bool show_center = true, cv::Scalar color = cv::Scalar(255,0,255), int thickness = 1);
 
     //! \brief Plot the hand complex hull:
-    void plotComplexHull( cv::Mat& src, cv::Mat& dst, bool show_points = false);
+    void plotComplexHull(cv::Mat& src, cv::Mat& dst, bool show_points = false, cv::Scalar color = cv::Scalar( 0, 255, 255), int thickness = 1);
 
     //! \brief Plot convexity defects:
     void plotConvexityDefects(cv::Mat& src, cv::Mat& dst, bool draw_points = true);
 
     //! \brief Plot fingertip markers:
-    void plotFingertips( cv::Mat& src, cv::Mat& dst, bool draw_lines = true);
+    void plotFingertips( cv::Mat& src, cv::Mat& dst, bool draw_lines = true, cv::Scalar color = cv::Scalar( 255, 0, 0) , int thickness = 2);
 
+    //! \brief Plot hand interface:
+    void plotHandInterface( cv::Mat& src, cv::Mat& dst );
 
 private:
     //-- Functions that extract characteristics:

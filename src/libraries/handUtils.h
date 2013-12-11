@@ -39,4 +39,7 @@ typedef struct
 //-- The angle obtained here is the angle going from start-vertex segment to end-vertex segment
 float findAngle( cv::Point start, cv::Point end, cv::Point vertex);
 
+
+//-- Prints a progress bar on the bottom of the screen
+void printProgressBar( cv::Mat& src, cv::Mat& dst, float percentage, cv::Scalar color, int thickness = 25 );
 #endif // HANDUTILS_H

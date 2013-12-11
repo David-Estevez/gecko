@@ -6,6 +6,7 @@
 #include "../libraries/handUtils.h"
 #include "../libraries/FingerDetector.h"
 #include "../libraries/mouse.h"
+#include "../libraries/StateMachine.h"
 #include <unistd.h>
 
 int main( int argc, char * argv[] )
@@ -49,6 +50,9 @@ int main( int argc, char * argv[] )
 
     //-- Object that will store the parameters of the hand
     HandDescription hand_descriptor;
+
+    //-- State machine for tracking the cursor
+    StateMachine cursor_SM( GECKO_GESTURE_OPEN_PALM, 3, 5);
 
     //-- Initial screen
     cv::Mat init_screen=cv::imread("../img/init.png");
@@ -146,26 +150,22 @@ int main( int argc, char * argv[] )
             display = frame.clone();
 
 
-        //-- Plot contours on image
+        //-- Plot hand interface
         //--------------------------------------------
-        //hand_descriptor.plotBoundingRectangle( display, display );
-        hand_descriptor.plotContours(display, display);
-        hand_descriptor.plotMaxInscribedCircle(display, display );
-        hand_descriptor.plotMinEnclosingCircle(display, display);
-        hand_descriptor.plotComplexHull( display, display, true);
-        hand_descriptor.plotConvexityDefects(display, display);
-        hand_descriptor.plotFingertips(display, display);
+        hand_descriptor.plotHandInterface(display, display);
 
-        //-- Show gesture
+
+        //-- Show gesture marker
+        //-------------------------------------------
         cv::Scalar color;
         int fill = CV_FILLED;
         switch( hand_descriptor.getGesture() )
         {
-        case GECKO_GESTURE_OPEN_PALM: color = cv::Scalar( 255, 0, 0); break;
-        case GECKO_GESTURE_VICTORY: color = cv::Scalar( 0, 255, 0); break;
-        case GECKO_GESTURE_GUN: color = cv::Scalar( 0, 0, 255); break;
-        case GECKO_GESTURE_CLOSED_PALM: color = cv::Scalar(255, 255, 255); break;
-        default: color = cv::Scalar( 255, 255, 255); fill = 1;
+            case GECKO_GESTURE_OPEN_PALM: color = cv::Scalar( 255, 0, 0); break;
+            case GECKO_GESTURE_VICTORY: color = cv::Scalar( 0, 255, 0); break;
+            case GECKO_GESTURE_GUN: color = cv::Scalar( 0, 0, 255); break;
+            case GECKO_GESTURE_CLOSED_PALM: color = cv::Scalar(255, 255, 255); break;
+            default: color = cv::Scalar( 255, 255, 255); fill = 1;
         }
 
         if ( hand_descriptor.handFound() )
@@ -190,7 +190,7 @@ int main( int argc, char * argv[] )
             break;
 
         case 2:
-            ss << "Tracking hand";
+            ss << "Commands enabled";
             break;
 
         }
@@ -210,17 +210,30 @@ int main( int argc, char * argv[] )
         //-----------------------------------------------------------------------------------------------------
         if ( debugValue == 2)
         {
-            //-- Show hand center of screen
-            hand_descriptor.plotCenter( display, display );
+            if ( hand_descriptor.handFound() )
+            {
+                //-- Check the state machine
+                cursor_SM.update( hand_descriptor.getGesture() );
 
-            //-- Calculate relative position and move there:
-            cv::Point hand_center = hand_descriptor.getCenterHandEstimated();
+                if ( cursor_SM.getFound() )
+                {
+                    //-- Show hand center of screen
+                    hand_descriptor.plotCenter( display, display );
 
-            std::pair< float, float> relativeCoordinates;
-            relativeCoordinates.first = hand_center.x /  (double) frame.cols;
-            relativeCoordinates.second= hand_center.y / (double) frame.rows;
+                    //-- Calculate relative position and move there:
+                    cv::Point hand_center = hand_descriptor.getCenterHandEstimated();
 
-            moveMousePercentage( relativeCoordinates );
+                    std::pair< float, float> relativeCoordinates;
+                    relativeCoordinates.first = hand_center.x /  (double) frame.cols;
+                    relativeCoordinates.second= hand_center.y / (double) frame.rows;
+
+                    moveMousePercentage( relativeCoordinates );
+                }
+                else
+                {
+                    printProgressBar( display, display, cursor_SM.getPercentageMatches(), cv::Scalar( 255, 0, 0) );
+                }
+            }
         }
 
 
@@ -233,7 +246,7 @@ int main( int argc, char * argv[] )
         //-----------------------------------------------------------------------------------------------------
         //-- Show feedback image
         //-----------------------------------------------------------------------------------------------------
-        cv::imshow( "Processed Stream", display);
+        cv::imshow( "Gecko", display);
 
         //-----------------------------------------------------------------------------------------------------
         //-- Decide what to do next depending on key pressed

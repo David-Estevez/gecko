@@ -293,31 +293,36 @@ void HandDescription::plotCenter(const cv::Mat& src, cv::Mat& dst, bool show_cor
 
 }
 
-void HandDescription::plotMaxInscribedCircle( cv::Mat& src, cv::Mat& dst)
+void HandDescription::plotMaxInscribedCircle(cv::Mat& src, cv::Mat& dst, bool show_center, cv::Scalar color, int thickness)
 {
     if ( dst.empty() )
         dst = src.clone();
 
     if ( _hand_found )
     {
-        cv::circle( dst, _max_circle_incribed_center, _max_circle_inscribed_radius, cv::Scalar(0, 255, 0));
-        cv::circle( dst, _max_circle_incribed_center, 2, cv::Scalar( 0, 255, 0));
+        cv::circle( dst, _max_circle_incribed_center, _max_circle_inscribed_radius, color, thickness);
+
+        if (show_center)
+            cv::circle( dst, _max_circle_incribed_center, 2, thickness);
     }
 }
 
-void HandDescription::plotMinEnclosingCircle( cv::Mat& src, cv::Mat& dst)
+void HandDescription::plotMinEnclosingCircle( cv::Mat& src, cv::Mat& dst, bool show_center, cv::Scalar color, int thickness)
+
 {
     if ( dst.empty() )
         dst = src.clone();
 
     if ( _hand_found)
     {
-        cv::circle( dst, _min_enclosing_circle_center, _min_enclosing_circle_radius, cv::Scalar(255, 0, 255));
-        cv::circle( dst, _min_enclosing_circle_center, 2, cv::Scalar( 255, 0, 255));
+        cv::circle( dst, _min_enclosing_circle_center, _min_enclosing_circle_radius, color , thickness);
+
+        if (show_center)
+            cv::circle( dst, _min_enclosing_circle_center, 2, cv::Scalar( 255, 0, 0));
     }
 }
 
-void HandDescription::plotComplexHull( cv::Mat& src, cv::Mat& dst, bool show_points)
+void HandDescription::plotComplexHull( cv::Mat& src, cv::Mat& dst, bool show_points, cv::Scalar color, int thickness)
 {
     if ( dst.empty() )
         dst = src.clone();
@@ -327,11 +332,11 @@ void HandDescription::plotComplexHull( cv::Mat& src, cv::Mat& dst, bool show_poi
         std::vector< std::vector < cv::Point > > points_to_show;
         points_to_show.push_back( _hand_hull);
 
-        cv::drawContours( dst, points_to_show, 0, cv::Scalar( 0, 255, 255), 1, 8);
+        cv::drawContours( dst, points_to_show, 0, color, thickness);
 
         if ( show_points )
             for (int i = 0; i < points_to_show[0].size(); i++)
-                cv::circle( dst, points_to_show[0].at(i), 2, cv::Scalar( 0, 255, 255));
+                cv::circle( dst, points_to_show[0].at(i), 2, color, thickness);
 
     }
 }
@@ -363,7 +368,7 @@ void HandDescription::plotConvexityDefects(cv::Mat &src, cv::Mat &dst, bool draw
     }
 }
 
-void HandDescription::plotFingertips(cv::Mat &src, cv::Mat &dst, bool draw_lines)
+void HandDescription::plotFingertips(cv::Mat &src, cv::Mat &dst, bool draw_lines, cv::Scalar color, int thickness)
 {
     if ( dst.empty() )
         dst = src.clone();
@@ -371,12 +376,28 @@ void HandDescription::plotFingertips(cv::Mat &src, cv::Mat &dst, bool draw_lines
     if ( _hand_found )
         for( int i = 0; i < _hand_fingertips.size(); i++)
         {
-            cv::circle( dst, _hand_fingertips[i], 10, cv::Scalar( 255, 0, 0), 2 );
+            cv::circle( dst, _hand_fingertips[i], 10, color, thickness );
 
             if ( draw_lines )
-                cv::line( dst, _hand_finger_line_origin[i], _hand_fingertips[i], cv::Scalar( 255, 0, 0), 2);
+                cv::line( dst, _hand_finger_line_origin[i], _hand_fingertips[i], color, thickness);
         }
 
+}
+
+void HandDescription::plotHandInterface(cv::Mat &src, cv::Mat &dst)
+{
+    if ( dst.empty() )
+        dst = src.clone();
+
+    if ( _hand_found )
+    {
+        plotContours(dst, dst);
+        plotMaxInscribedCircle(dst, dst, false);
+        plotMinEnclosingCircle(dst, dst, false);
+        plotConvexityDefects(dst, dst);
+        plotComplexHull(dst, dst);
+        plotFingertips(dst, dst);
+    }
 }
 
 

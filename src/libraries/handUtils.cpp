@@ -199,3 +199,16 @@ float findAngle(cv::Point start, cv::Point end, cv::Point vertex)
 
     return angle_rad*180/M_PI;
 }
+
+
+void printProgressBar(cv::Mat &src, cv::Mat &dst, float percentage, cv::Scalar color, int thickness)
+{
+    if ( dst.empty() )
+        dst = src.clone();
+
+    //-- Print progress on screen
+    cv::Point start( 50, dst.rows - thickness );
+    cv::Point end( (dst.cols - 100)  * percentage + 50, dst.rows );
+    cv::rectangle( dst, start, end, color, CV_FILLED );
+}
+
