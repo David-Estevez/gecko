@@ -7,6 +7,7 @@
 #include "../libraries/FingerDetector.h"
 #include "../libraries/mouse.h"
 #include "../libraries/StateMachine.h"
+#include "../libraries/AppLauncher.h"
 #include <unistd.h>
 
 int main( int argc, char * argv[] )
@@ -53,6 +54,9 @@ int main( int argc, char * argv[] )
 
     //-- State machine for tracking the cursor
     StateMachine cursor_SM( GECKO_GESTURE_OPEN_PALM, 3, 5);
+
+    //-- AppLauncher for launching programs
+    AppLauncher launcher( "../data/apps.config", 20, 5);
 
     //-- Initial screen
     cv::Mat init_screen=cv::imread("../img/init.png");
@@ -234,6 +238,30 @@ int main( int argc, char * argv[] )
                     printProgressBar( display, display, cursor_SM.getPercentageMatches(), cv::Scalar( 255, 0, 0) );
                 }
             }
+        }
+
+
+        //----------------------------------------------------------------------------------------------------
+        //-- Run apps
+        //----------------------------------------------------------------------------------------------------
+        if( hand_descriptor.handFound() )
+        {
+            //-- Update the launcher state machines
+            launcher.update( hand_descriptor.getGesture() );
+
+            for (int i = 0; i < launcher.getNumberOfCommands(); i++)
+                if ( !launcher.getFound(i) && launcher.getPercentageMatches(i) != 0)
+                {
+                    cv::Scalar bar_color;
+                    switch( launcher.getValueToTrackAt(i) )
+                    {
+                        case GECKO_GESTURE_VICTORY: bar_color = cv::Scalar( 0, 255, 0); break;
+                        case GECKO_GESTURE_GUN: bar_color = cv::Scalar( 0, 0, 255); break;
+                        case GECKO_GESTURE_CLOSED_PALM: bar_color = cv::Scalar(255, 255, 255); break;
+                    }
+
+                    printProgressBar( display, display, launcher.getPercentageMatches(i), bar_color );
+                }
         }
 
 

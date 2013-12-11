@@ -392,8 +392,8 @@ void HandDescription::plotHandInterface(cv::Mat &src, cv::Mat &dst)
     if ( _hand_found )
     {
         plotContours(dst, dst);
-        plotMaxInscribedCircle(dst, dst, false);
-        plotMinEnclosingCircle(dst, dst, false);
+        plotMaxInscribedCircle(dst, dst);
+        plotMinEnclosingCircle(dst, dst);
         plotConvexityDefects(dst, dst);
         plotComplexHull(dst, dst);
         plotFingertips(dst, dst);

@@ -41,5 +41,5 @@ float findAngle( cv::Point start, cv::Point end, cv::Point vertex);
 
 
 //-- Prints a progress bar on the bottom of the screen
-void printProgressBar( cv::Mat& src, cv::Mat& dst, float percentage, cv::Scalar color, int thickness = 25 );
+void printProgressBar( cv::Mat& src, cv::Mat& dst, float percentage, cv::Scalar color, int thickness = 15 );
 #endif // HANDUTILS_H
