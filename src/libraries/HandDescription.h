@@ -64,6 +64,20 @@ public:
     //! \brief Prints the angle gauge on a separate window
     void angleControl( bool show_corrected = true,  bool show_actual = true, bool show_predicted = true );
 
+    //! \brief Prints the maximum inscribed circle:
+    void plotMaxInscribedCircle( cv::Mat& src, cv::Mat& dst);
+
+    //! \brief Prints the minimum enclosing circle:
+    void plotMinEnclosingCircle( cv::Mat& src, cv::Mat& dst);
+
+    //! \brief Plot the hand complex hull:
+    void plotComplexHull( cv::Mat& src, cv::Mat& dst, bool show_points = false);
+
+    //! \brief Plot convexity defects:
+    void plotConvexityDefects(cv::Mat& src, cv::Mat& dst, bool draw_points = true);
+
+    //! \brief Plot fingertip markers:
+    void plotFingertips( cv::Mat& src, cv::Mat& dst, bool draw_lines = true);
 
     //-- List of available gestures
     //---------------------------------------------------------------------------
@@ -77,6 +91,10 @@ private:
     //--------------------------------------------------------------------------
     void contourExtraction(const cv::Mat& skinMask);
     void boundingBoxExtraction( const cv::Mat& src);
+    void handPalmExtraction();
+    void ROIExtraction( const cv::Mat& src);
+    void defectsExtraction();
+    void fingerExtraction(const cv::Mat &src);
     void angleExtraction();
     void centerExtraction();
     void gestureExtraction(const cv::Mat &);
@@ -111,6 +129,7 @@ private:
 
     //! \brief Contours of the candidates to be a hand
     std::vector< std::vector<cv::Point> > _hand_contour;
+    std::vector< std::vector<cv::Point> > _hand_contour_raw;
 
 
     //! \brief Box enclosing the hand
@@ -122,8 +141,37 @@ private:
     int _hand_gesture;
 
 
+    //-- Describe fingers:
     //! \brief Number of fingers (visible)
     int _hand_num_fingers;
+
+    //! \brief Position of the fingertips
+    std::vector< cv::Point > _hand_fingertips;
+
+    //! \brief Position of the finger line origin points
+    std::vector< cv::Point > _hand_finger_line_origin;
+
+    //-- Describe hand palm:
+    //-------------------------------------------------------------------------
+    //! \brief Radius of the max. inscribed circle
+    double _max_circle_inscribed_radius;
+
+    //! \brief Center of the max. incribed circle
+    cv::Point _max_circle_incribed_center;
+
+    //! \brief Radius of the min. enclosing circle
+    float _min_enclosing_circle_radius;
+
+    //! \brief Center of the min. enclosing circle
+    cv::Point2f _min_enclosing_circle_center;
+
+    //! \brief Complex hull of the hand
+    std::vector< cv::Point > _hand_hull;
+
+    //! \brief Convexity defects of the hand
+    //std::vector< cv::Vec4i > _hand_convexity_defects;
+    std::vector< ConvexityDefect > _hand_convexity_defects;
+
 
 
     //-- ROI of the hand, for gesture analysis:

@@ -179,3 +179,23 @@ void backgroundSubs(cv::Mat & frame, backgroundSubstractor & bg)
 
     fore.copyTo(frame);
 }
+
+
+float findAngle(cv::Point start, cv::Point end, cv::Point vertex)
+{
+    //-- Note:
+    //-- The angle obtained here is the angle going from start-vertex segment to end-vertex segment
+
+    //-- Find both vectors:
+    cv::Vec2i u, v;
+    u[0] = start.x - vertex.x;
+    u[1] = start.y - vertex.y;
+
+    v[0] = end.x - vertex.x;
+    v[1] = end.y - vertex.y;
+
+    //-- Find the angle [ acos( u · v / ( |u| · |v| )) ]
+    float angle_rad = acos( (u[0]*v[0]+u[1]*v[1]) / ( norm(u) * norm(v) ) );
+
+    return angle_rad*180/M_PI;
+}

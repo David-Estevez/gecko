@@ -29,7 +29,7 @@ int main( int argc, char * argv[] )
     if ( !cap.isOpened() )
     {
         std::cerr << "Device could not be opened." << std::endl;
-        return(1);
+        //return(1);
     }
 
     //-- Get frame rate
@@ -102,7 +102,9 @@ int main( int argc, char * argv[] )
         //-------------------------------------------------------------------------------------------------------
         cv::Mat frame, display;
         if ( ! cap.read( frame ) )
-            break;
+            //break;
+            //frame = cv::imread("../data/hand1.jpg");
+            frame = cv::imread( "../data/3dedos.jpg");
 
         cv::flip(frame,frame,1);
 
@@ -146,8 +148,14 @@ int main( int argc, char * argv[] )
 
         //-- Plot contours on image
         //--------------------------------------------
-        hand_descriptor.plotBoundingRectangle( display, display );
+        //hand_descriptor.plotBoundingRectangle( display, display );
         hand_descriptor.plotContours(display, display);
+        hand_descriptor.plotMaxInscribedCircle(display, display );
+        hand_descriptor.plotMinEnclosingCircle(display, display);
+        hand_descriptor.plotComplexHull( display, display, true);
+        hand_descriptor.plotConvexityDefects(display, display);
+        hand_descriptor.plotFingertips(display, display);
+
 
         //-- Adding text:
         //--------------------------------------------
@@ -213,7 +221,7 @@ int main( int argc, char * argv[] )
         //-----------------------------------------------------------------------------------------------------
         //-- Decide what to do next depending on key pressed
         //-----------------------------------------------------------------------------------------------------
-        char key = (char) cv::waitKey( delay);
+        char key = (char) cv::waitKey(delay);
         switch( key)
         {
 //        case 'f': //-- Filtered frame
