@@ -79,9 +79,9 @@ int main( int argc, char * argv[] )
         {
             cv::destroyWindow("MENU");
             if (key=='1')
-                handDetector.calibrationLoop(cap, 1);
+                handDetector.defaultValues(cap);
             else if (key=='2')
-                handDetector.calibrationLoop(cap, 2);
+                handDetector.customValues(cap);
 
             break;
         }
