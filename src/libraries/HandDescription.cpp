@@ -556,7 +556,7 @@ void HandDescription::defectsExtraction()
 
     //-- Convert the found defects to a more convenient format:
     _hand_convexity_defects.clear();
-    std::cout << "[Debug] Found " << convexity_defects.size() << " defects:" << std::endl;
+    //std::cout << "[Debug] Found " << convexity_defects.size() << " defects:" << std::endl;
     for (int i = 0; i < convexity_defects.size(); i++)
     {
         ConvexityDefect newDefect;
@@ -574,7 +574,7 @@ void HandDescription::defectsExtraction()
 
         _hand_convexity_defects.push_back( newDefect );
 
-        std::cout << "\t" << i << "-> (" << newDefect.start_index << ", " << newDefect.end_index << ", " << newDefect.depth_point_index << ")" << std::endl;
+        //std::cout << "\t" << i << "-> (" << newDefect.start_index << ", " << newDefect.end_index << ", " << newDefect.depth_point_index << ")" << std::endl;
     }
 
 
@@ -600,7 +600,7 @@ void HandDescription::fingerExtraction(const cv::Mat &src)
         if ( findAngle(passed_first_condition[i].start, passed_first_condition[i].end, passed_first_condition[i].depth_point) < 90 )
             passed_second_condition.push_back( passed_first_condition[i]);
 
-    std::cout << "[Debug:] Fingertips candidates: " << passed_second_condition.size() << std::endl; std::cout.flush();
+    //std::cout << "[Debug] Fingertips candidates: " << passed_second_condition.size() << std::endl;
 
 
     //-- Find fingertips using k-curvature
@@ -688,7 +688,14 @@ void HandDescription::fingerExtraction(const cv::Mat &src)
 
     _hand_num_fingers = fingertips.size();
     _hand_fingertips = fingertips;
-    std::cout << "[Debug] Found " << _hand_num_fingers << " fingers." << std::endl;
+    std::cout << "[Debug] Found " << _hand_num_fingers << " fingers." ;
+
+    if (_hand_num_fingers > 5)
+    {
+        std::cout << "Not a (human) hand";
+        _hand_found = false;
+    }
+    std::cout << std::endl;
 
     //-- Find a second point to draw the finger lines:
     _hand_finger_line_origin.clear();
