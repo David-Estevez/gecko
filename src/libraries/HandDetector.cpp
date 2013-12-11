@@ -322,25 +322,28 @@ void HandDetector::filter_hand(cv::Mat &src, cv::Mat &dst)
     cv::Mat dummy;
     cv::bitwise_and( withoutBlobs, headTrackingMask, dummy );
 
-    static cv::Mat sum=cv::Mat::zeros(dummy.rows, dummy.cols,dummy.type());
-    static cv::Mat last_sum=cv::Mat::zeros(dummy.rows, dummy.cols,dummy.type());
+//    static cv::Mat sum=cv::Mat::zeros(dummy.rows, dummy.cols,dummy.type());
+//    static cv::Mat last_sum=cv::Mat::zeros(dummy.rows, dummy.cols,dummy.type());
 
 
-    if (it <3)
-    {
-        sum+=dummy;
-        it++;
+//    if (it <3)
+//    {
+//        sum+=dummy;
+//        it++;
 
-    }
-    else
-    {
-        it=0;
-        sum.copyTo(last_sum);
-        dummy.copyTo(sum);
+//    }
+//    else
+//    {
+//        it=0;
+//        sum.copyTo(last_sum);
+//        dummy.copyTo(sum);
 
-    }
+//    }
 
-    last_sum.copyTo(dst);
+//    last_sum.copyTo(dst);
+
+
+    dummy.copyTo(dst);
 
     //    std::cerr<<"Iterator number: "<<it<<std::endl;
 
