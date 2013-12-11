@@ -156,6 +156,23 @@ int main( int argc, char * argv[] )
         hand_descriptor.plotConvexityDefects(display, display);
         hand_descriptor.plotFingertips(display, display);
 
+        //-- Show gesture
+        cv::Scalar color;
+        int fill = CV_FILLED;
+        switch( hand_descriptor.getGesture() )
+        {
+        case GECKO_GESTURE_OPEN_PALM: color = cv::Scalar( 255, 0, 0); break;
+        case GECKO_GESTURE_VICTORY: color = cv::Scalar( 0, 255, 0); break;
+        case GECKO_GESTURE_GUN: color = cv::Scalar( 0, 0, 255); break;
+        case GECKO_GESTURE_CLOSED_PALM: color = cv::Scalar(255, 255, 255); break;
+        default: color = cv::Scalar( 255, 255, 255); fill = 1;
+        }
+
+        if ( hand_descriptor.handFound() )
+        {
+            cv::circle( display, cv::Point( display.cols - 50, display.rows - 50 ), 25, color, fill );
+        }
+
 
         //-- Adding text:
         //--------------------------------------------
@@ -197,11 +214,11 @@ int main( int argc, char * argv[] )
             hand_descriptor.plotCenter( display, display );
 
             //-- Calculate relative position and move there:
-            std::pair< int, int> hand_center = hand_descriptor.getCenterHandEstimated();
+            cv::Point hand_center = hand_descriptor.getCenterHandEstimated();
 
             std::pair< float, float> relativeCoordinates;
-            relativeCoordinates.first = hand_center.first /  (double) frame.cols;
-            relativeCoordinates.second= hand_center.second / (double) frame.rows;
+            relativeCoordinates.first = hand_center.x /  (double) frame.cols;
+            relativeCoordinates.second= hand_center.y / (double) frame.rows;
 
             moveMousePercentage( relativeCoordinates );
         }

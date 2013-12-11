@@ -6,9 +6,8 @@ HandDescription:: HandDescription()
     //-- Initalize hand parameters
     //-----------------------------------------------------------------------
     _hand_angle=0;
-    _hand_center = std::pair <int, int> (0, 0);
-    _hand_bounding_box = cv::Rect();
-    _hand_gesture = HAND_GESTURE_NONE;
+    _hand_center = cv::Point(0,0);
+    _hand_gesture = GECKO_GESTURE_NONE;
     _hand_num_fingers = -1;
     _hand_found = false;
 
@@ -106,78 +105,58 @@ void HandDescription::update(const cv::Mat& src, const cv::Mat& skinMask )
         centerExtraction();
 
     }
-    //	gestureExtraction(_hand_ROI);
-	//	numFingersExtraction();
+        gestureExtraction();
 
 }
 
-void HandDescription::gestureExtraction(const cv::Mat & src)
+void HandDescription::gestureExtraction()
 {
-//	//C++: void matchTemplate(InputArray image, InputArray templ, OutputArray result, int method)
-//	cv::Mat result; 
-//	cv::Mat templ=cv::imread("../data/hand1.jpg");
+    const int closed_hand_threshold = 10;
 
-//	matchTemplate (src,templ, result,0);
-//	std::string name="MatchTemplate";
-//	cv::imshow(name, result);	
+    if ( _hand_found)
+    {
+        //-- Open palm
+        if (_hand_num_fingers == 5 || _hand_num_fingers == 4 )
+        {
+            _hand_gesture = GECKO_GESTURE_OPEN_PALM;
+        }
+        //-- 2-finger signs
+        else if ( _hand_num_fingers == 2 )
+        {
+            //-- Find angle between fingers:
+            float angle_between_fingers = findAngle( _hand_fingertips[0], _hand_fingertips[1], _max_circle_incribed_center);
+            //-- Victory sign
+            if ( angle_between_fingers < 60 )
+                _hand_gesture = GECKO_GESTURE_VICTORY;
+            //- Gun sign
+            else if ( angle_between_fingers < 90 )
+                _hand_gesture = GECKO_GESTURE_GUN;
+        }
+        //-- Closed hand
+        else if (_hand_num_fingers == 0)
+        {
+            if ( _min_enclosing_circle_radius - _max_circle_inscribed_radius < closed_hand_threshold )
+                _hand_gesture = GECKO_GESTURE_CLOSED_PALM;
+            else
+                _hand_gesture = GECKO_GESTURE_NONE;
+        }
+        else
+        {
+            _hand_gesture = GECKO_GESTURE_NONE;
+        }
 
-	cv:: Mat display;
-	src.copyTo(display);
-	
-	std::vector<std::vector<cv::Point> > hulls(1);
-	std::vector<std::vector<int> > hullsI(1);
-	std::vector<cv::Vec4i> defects;
-	
-	int n_fingers=0;
+        std::cout << "[Debug] Gesture: ";
+        switch ( _hand_gesture )
+        {
+            case GECKO_GESTURE_OPEN_PALM:   std::cout << "Open Palm";    break;
+            case GECKO_GESTURE_VICTORY:     std::cout << "Victory sign"; break;
+            case GECKO_GESTURE_GUN:         std::cout << "Gun sign";     break;
+            case GECKO_GESTURE_CLOSED_PALM: std::cout << "Closed hand";  break;
+            default:                        std::cout << "No sign";
+        }
+        std::cout << std::endl;
 
-	for(int i=0;i< _hand_contour.size();i++)
-	{		
-		//-- Convex Hull
-		convexHull(cv:: Mat(_hand_contour[0]),hulls[0],false);
-		convexHull(cv:: Mat(_hand_contour[0]),hullsI[0],false);
-//				drawContours(ROI,hulls,-1,cv::Scalar(0,255,0),2);
-
-		//-- Convex Defects
-                  
-        std::vector<std::vector<cv::Point> > defect_points(_hand_contour.size());
-        
-		if(hullsI[0].size()>0)
-		{
-
-			convexityDefects(_hand_contour[0], hullsI[0], defects);
-//					if(defects.size()>=3)
-//					{}
-
-			for (int cDefIt = 0; cDefIt < defects.size(); cDefIt++) 
-			{
-
-		        int startIdx = defects[cDefIt].val[0];
-
-		        int endIdx = defects[cDefIt].val[1];
-
-		        int defectPtIdx = defects[cDefIt].val[2];
-
-		        double depth = static_cast<double>(defects[cDefIt].val[3]) / 256.0;
-
-		        std::cout << startIdx << ' ' << endIdx << ' ' << defectPtIdx << ' ' << depth << '\n' << '\n' << std::endl;
-
-		        cv::Point2f p(defectPtIdx, defectPtIdx);
-		        circle(display, p , 10, cv::Scalar(0,0,255), 2, 8, 0 );
-		    }
-
-		
-		
-//			for (int i=0; i<hulls.size(); i++)
-//				circle (display,hulls[0][i], 10,  cv::Scalar(255,255,255) );
-			
-			//-- Catch possible aliens
-			if (n_fingers>5)
-				n_fingers=5; 
-
-		}
-	}
-	
-	imshow ("DEFECTS IMAGE", display);
+    }
 
 }
 
@@ -206,17 +185,17 @@ double HandDescription::getHandAngleEstimated()
     return _hand_angle_estimation;
 }
 
-std::pair <int, int> HandDescription::getCenterHand ()
+cv::Point HandDescription::getCenterHand ()
 {
     return _hand_center;
 }
 
-std::pair <int, int> HandDescription::getCenterHandPredicted()
+cv::Point HandDescription::getCenterHandPredicted()
 {
     return _hand_center_prediction;
 }
 
-std::pair <int, int> HandDescription::getCenterHandEstimated()
+cv::Point HandDescription::getCenterHandEstimated()
 {
     return _hand_center_estimation;
 }
@@ -299,26 +278,17 @@ void HandDescription::plotCenter(const cv::Mat& src, cv::Mat& dst, bool show_cor
     //-- Plot center
     if ( _hand_found )
     {
-	if ( show_predicted )
-	{
-	    //-- Print predicted point on screen:
-	    cv::Point predictedPoint( _hand_center_prediction.first, _hand_center_prediction.second );
-	    cv::circle( dst, predictedPoint, 4, cv::Scalar( 0, 255, 0), 2 );
-	}
+        if ( show_predicted )
+            //-- Print predicted point on screen:
+            cv::circle( dst, _hand_center_prediction, 4, cv::Scalar( 0, 255, 0), 2 );
 
-	if ( show_actual )
-	{
-	    //-- Print cog on screen:
-	    cv::Point cog( _hand_center.first, _hand_center.second );
-	    cv::circle( dst, cog, 5, cv::Scalar( 255, 0, 0), 2 );
-	}
+        if ( show_actual )
+            //-- Print cog on screen:
+            cv::circle( dst, _hand_center, 5, cv::Scalar( 255, 0, 0), 2 );
 
-	if ( show_corrected )
-	{
-	    //-- Print estimation on screen:
-	    cv::Point estimationPoint( _hand_center_estimation.first, _hand_center_estimation.second );
-	    cv::circle( dst, estimationPoint, 3, cv::Scalar( 0, 0, 255), 2 );
-	}
+        if ( show_corrected )
+            //-- Print estimation on screen:
+            cv::circle( dst, _hand_center_estimation, 3, cv::Scalar( 0, 0, 255), 2 );
     }
 
 }
@@ -615,12 +585,17 @@ void HandDescription::defectsExtraction()
     std::vector<int> hull_indices;
     cv::convexHull( _hand_contour[0], hull_indices, CV_CLOCKWISE);
 
-    if ( _hand_hull.size() < 3)
+    try
     {
+        cv::convexityDefects( _hand_contour[0], hull_indices, convexity_defects );
+    }
+    catch ( std::exception& e)
+    {
+        std::cerr << e.what() ;
         _hand_found = false;
         return;
     }
-    cv::convexityDefects( _hand_contour[0], hull_indices, convexity_defects );
+
 
     //-- Convert the found defects to a more convenient format:
     _hand_convexity_defects.clear();
@@ -674,7 +649,7 @@ void HandDescription::fingerExtraction(const cv::Mat &src)
     //-- Find fingertips using k-curvature
     const int k =9;
     const int distance = 2;
-    const int max_angle = 60;
+    const int max_angle = 70;
     const int fingertip_threshold = 50;
 
     for (int i = 0; i < passed_second_condition.size(); i++)
@@ -807,7 +782,7 @@ void HandDescription::centerExtraction()
 {
     //-- Predict next center position with kalman filter:
     cv::Mat prediction = kalmanFilterCenter.predict();
-    _hand_center_prediction = std::pair <int, int> ( prediction.at<float>(0), prediction.at<float>(1) );
+    _hand_center_prediction = cv::Point( prediction.at<float>(0), prediction.at<float>(1) );
 
     //-- Measure actual point (uncomment the selected method):
 
@@ -825,17 +800,20 @@ void HandDescription::centerExtraction()
 
     //-------------------- With Bounding Rectangle --------------------------------
     //-- (This is more stable than the rotated rectangle)
-    _hand_center.first  = _hand_bounding_box.x + _hand_bounding_box.width  / 2;
-    _hand_center.second = _hand_bounding_box.y + _hand_bounding_box.height / 2;
+//    _hand_center.first  = _hand_bounding_box.x + _hand_bounding_box.width  / 2;
+//    _hand_center.second = _hand_bounding_box.y + _hand_bounding_box.height / 2;
+
+    //-------------------- Using Max. Inscribed Circle -----------------------------
+    _hand_center = _max_circle_incribed_center;
 
 
     //-- Create matrix for storing the measurement (measured position of hand)
     cv::Mat_<float> measurement(2, 1);
-    measurement(0) = _hand_center.first;
-    measurement(1) = _hand_center.second;
+    measurement(0) = _hand_center.x;
+    measurement(1) = _hand_center.y;
 
     //-- Correct estimation:
     cv::Mat estimation = kalmanFilterCenter.correct( measurement);
-    _hand_center_estimation = std::pair <int, int> ( estimation.at<float>(0), estimation.at<float>(1) );
+    _hand_center_estimation = cv::Point( estimation.at<float>(0), estimation.at<float>(1) );
 
 }

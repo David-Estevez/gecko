@@ -5,11 +5,18 @@
 #include "handUtils.h"
 #include "mouse.h"
 
+//-- Constants for the gesture recognition
+//-----------------------------------------------------------------------
+static const unsigned int GECKO_GESTURE_NONE = 0;
+static const unsigned int GECKO_GESTURE_OPEN_PALM = 1;
+static const unsigned int GECKO_GESTURE_CLOSED_PALM = 2;
+static const unsigned int GECKO_GESTURE_VICTORY = 3;
+static const unsigned int GECKO_GESTURE_GUN = 4;
+
 class HandDescription 
 {
 
 public:
-
     //-- Constructor
     //-----------------------------------------------------------------------
     //! \brief Default constructor
@@ -33,9 +40,9 @@ public:
     double getHandAngleEstimated();
 
     //! \brief Returns the position of the center of the hand
-    std::pair <int, int> getCenterHand( );
-    std::pair <int, int> getCenterHandPredicted();
-    std::pair <int, int> getCenterHandEstimated();
+    cv::Point getCenterHand( );
+    cv::Point getCenterHandPredicted();
+    cv::Point getCenterHandEstimated();
 
     //! \brief Returns the contours of the detected hand
     std::vector< std::vector<cv::Point> > getContours();
@@ -79,12 +86,6 @@ public:
     //! \brief Plot fingertip markers:
     void plotFingertips( cv::Mat& src, cv::Mat& dst, bool draw_lines = true);
 
-    //-- List of available gestures
-    //---------------------------------------------------------------------------
-    //! \note Edit/add more as you wish.
-    static const int HAND_GESTURE_NONE = 0;
-    static const int HAND_GESTURE_OPEN_PALM = 1;
-
 
 private:
     //-- Functions that extract characteristics:
@@ -97,9 +98,7 @@ private:
     void fingerExtraction(const cv::Mat &src);
     void angleExtraction();
     void centerExtraction();
-    void gestureExtraction(const cv::Mat &);
-    void numFingersExtraction();
-
+    void gestureExtraction();
 
     //-- Parameters that describe the hand:
     //--------------------------------------------------------------------------
@@ -118,13 +117,13 @@ private:
 
 
     //! \brief Actual center of the hand
-    std::pair<int, int> _hand_center;
+    cv::Point _hand_center;
 
     //! \brief Predicted center of the hand by the kalman filter
-    std::pair<int, int> _hand_center_prediction;
+    cv::Point _hand_center_prediction;
 
     //! \brief Corrected estimation by the kalman filter
-    std::pair<int, int> _hand_center_estimation;
+    cv::Point _hand_center_estimation;
 
 
     //! \brief Contours of the candidates to be a hand
