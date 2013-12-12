@@ -1,3 +1,29 @@
+//------------------------------------------------------------------------------
+//-- handUtils
+//------------------------------------------------------------------------------
+//--
+//-- A collection of useful functions for hand gesture recognition
+//--
+//------------------------------------------------------------------------------
+//--
+//-- This file belongs to the "Gecko - Gesture Recognition" project
+//-- (https://github.com/David-Estevez/gecko)
+//--
+//------------------------------------------------------------------------------
+//-- Authors: David Estevez Fernandez
+//--          Irene Sanz Nieto
+//--
+//-- Released under the GPL license (more info on LICENSE.txt file)
+//------------------------------------------------------------------------------
+
+/*! \file handUtils.h
+ *  \brief A collection of useful functions for hand gesture recognition
+ *
+ * \author David Estevez Fernandez ( http://github.com/David-Estevez )
+ * \author Irene Sanz Nieto ( https://github.com/irenesanznieto )
+ * \date Dec 12th, 2013
+ */
+
 #ifndef HANDUTILS_H
 #define HANDUTILS_H
 
