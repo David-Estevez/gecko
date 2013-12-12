@@ -99,6 +99,8 @@ int AppLauncher::getNumberOfCommands()
 
 void AppLauncher::configFileParser(std::string config_file)
 {
+    //! \todo This needs to be changed to be able to parse commands with spaces
+
     //-- Clear data:
     _commands_to_launch.clear();
     _values_to_track.clear();
