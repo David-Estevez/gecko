@@ -119,7 +119,7 @@ Afterwards, another contour extraction inside the extracted ROI is made in order
 
 Using the largest contour found in this last step, the minimum enclosing circle is obtained. This circle will be used as a hand's descriptor.
 
-The following step is to compute the convexity defects, that will be used when extracting the number of fingers present in the image. 
+The following step is to compute the convexity defects, that will be used to extract the number of fingers present in the image. 
 In order to assure that a certain part of the image is a finger, three conditions must be fulfilled: 
 \begin{itemize}
 \item The depth of the convexity defect must be in between the minimum inscribed radius and the maximum inscribed radius. 
@@ -127,9 +127,19 @@ In order to assure that a certain part of the image is a finger, three condition
 \item The fingertips must have a k-curvature inside a certain range.
 \end{itemize}
 
+In the next stage of the process, the angle of the hand is obtained measuring the angle of the minimum bounding box. A Kalman filter is placed in order to smooth the response of the system to sudden changes, that are assumed to be errors. 
+
+Then, the hand center location is extracted using the center of the maximum inscribed circle and another Kalman filter to predict the position and eliminate the noise. 
+
+Finally, the gesture made by the hand is extracted, taking as descriptors the number of fingers, the angle between fingers, and both the maximum and minimum inscribed circles. 
+
+The output of this part of the software is a number that encodes the type of gesture made by the user.
+
 
 \subsection{Gesture Recognition} 
+This section of the software has as an input the output of the previous, again. Hence, it will implement a state machine that, depending on the input (the gesture) will execute one function or other. 
 
+The configuration of the actions to be made when an opened or closed palm appears is hardcoded in the program, since those values will not be changeables. In order to obtain the action for each of the two other gestures that may be customized, the software will read the configuration file, and execute the action specified in there. 
 
 \section{User Guide}
 This code was developed using the following libraries: 
