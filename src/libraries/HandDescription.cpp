@@ -303,7 +303,7 @@ void HandDescription::plotMaxInscribedCircle(cv::Mat& src, cv::Mat& dst, bool sh
         cv::circle( dst, _max_circle_incribed_center, _max_circle_inscribed_radius, color, thickness);
 
         if (show_center)
-            cv::circle( dst, _max_circle_incribed_center, 2, thickness);
+            cv::circle( dst, _max_circle_incribed_center, 2, color,  thickness);
     }
 }
 
@@ -318,7 +318,7 @@ void HandDescription::plotMinEnclosingCircle( cv::Mat& src, cv::Mat& dst, bool s
         cv::circle( dst, _min_enclosing_circle_center, _min_enclosing_circle_radius, color , thickness);
 
         if (show_center)
-            cv::circle( dst, _min_enclosing_circle_center, 2, cv::Scalar( 255, 0, 0));
+            cv::circle( dst, _min_enclosing_circle_center, 2, color, thickness);
     }
 }
 
@@ -560,6 +560,8 @@ void HandDescription::handPalmExtraction()
 
 void HandDescription::ROIExtraction( const cv::Mat& src)
 {
+    //! \todo Change definition of ROI to avoid drawing a rectangle out of the image (and therefore getting a exception)
+
     //-- Pointers for writting less (and better reading)
     int * x = &(_max_circle_incribed_center.x);
     int * y = &(_max_circle_incribed_center.y);

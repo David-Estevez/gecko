@@ -4,7 +4,6 @@
 #include "../libraries/HandDetector.h"
 #include "../libraries/HandDescription.h"
 #include "../libraries/handUtils.h"
-#include "../libraries/FingerDetector.h"
 #include "../libraries/mouse.h"
 #include "../libraries/StateMachine.h"
 #include "../libraries/AppLauncher.h"
