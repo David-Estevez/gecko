@@ -40,7 +40,7 @@ void AppLauncher::update(int current_value)
         //-- Check state vector here and launch commands
         if ( _found[i] )
         {
-            if( system( _commands_to_launch[i].c_str() ) == -1)
+            if( system( (_commands_to_launch[i]+" &").c_str() ) == -1)
             {
                 std::cerr << "[AppLauncher] Error: could not run \"" << _commands_to_launch[i] << "\"" << std::endl;
             }
