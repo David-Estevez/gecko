@@ -70,7 +70,11 @@ ABDULLA HUSSEIN ABDULRAHM AL KAFF
 In this document a gesture recognition software named GECKO is presented. This software will allow the user to interact with a computer using just hand gestures. 
 
 \subsection{Motivation}
-The idea of implementing a gesture recognition software appeared ...
+The necessity of doing a software for this subject (Systems of perception) gave us the opportunity to have a deeper knowledge of the theory of the course and of the OpenCV libraries. The first thing that was clear was that the software developed should be useful, and not only implement the theoretical concepts but also have an utility afterwards. That is how the idea of developing a gesture recognition system appeared. 
+
+Also, the possibility of extending this software in the future to different machines (not only computers but also robots with webcams) was a great motivation in doing the whole project. 
+
+
 \subsection{First Steps}
 The first approach was to make a color segmentation (using the HSV color space) and select the hand using the size of the contour. Once the hand was detected, it was possible (after pressing a key) to move the mouse with the hand. The control was not very accurate due to the different problems present in the system such as illumination changes or having parts of the palm and fingers with a color outside the selected skin color range. In this first approach, it was possible to select between the theoretical values and the custom values obtained by placing the hand inside a square and getting automatically the skin HSV range. 
 
@@ -78,7 +82,9 @@ The theoretical skin range worked better than the custom range and as it was pre
 
 In order to better the hand's position and orientation estimation, two kalman filters were implemented. Those filters improved these features and allowed a moderatedly accurate mouse control, if the background did not interfere with the hand segmentation (i.e. the background had to be a plain color). 
 
-As it can be seen, the main problem this software had was the hand segmentation. Some research was made and different papers were found that allowed us to implement a better hand segmentation. 
+As it can be seen, the main problem this software had was the hand segmentation. Some research was made and different papers were found that allowed us to implement a better hand segmentation [1][2]. 
+
+
   
 \section{Software Explanation}
 
@@ -139,7 +145,13 @@ The output of this part of the software is a number that encodes the type of ges
 \subsection{Gesture Recognition} 
 This section of the software has as an input the output of the previous, again. Hence, it will implement a state machine that, depending on the input (the gesture) will execute one function or other. 
 
+\begin{center}
+\includegraphics[scale=0.6]{../gesture_recognition.jpeg} 
+\end{center}
+
 The configuration of the actions to be made when an opened or closed palm appears is hardcoded in the program, since those values will not be changeables. In order to obtain the action for each of the two other gestures that may be customized, the software will read the configuration file, and execute the action specified in there. 
+
+More information about the configuration file, the gestures and how to use the software in the following section "User Guide". 
 
 \section{User Guide}
 This code was developed using the following libraries: 
@@ -176,7 +188,7 @@ Once the code is compiled and started, a first window will appear with the infor
 \end{center}
 
 \vspace{1cm}
-The first option will take the theoretical HSV skin values proposed in \textbf{[CITE]}. Afterwards, the application will allow us to adjust those HSV ranges to adecuate them to the room's conditions. 
+The first option will take the theoretical HSV skin values proposed in [1]. Afterwards, the application will allow us to adjust those HSV ranges to adecuate them to the room's conditions. 
 Once all the adjustments are done, pressing ENTER will start the program. 
 
 The second option will pop up a window with a green square in the middle. Place the hand so that the square is in the middle of your palm and press ENTER. The program will automatically calculate the HSV range of your skin. Afterwards you will be able once more to manually adjust those ranges. Pressing ENTER one last time will start the program. 
@@ -200,8 +212,21 @@ That configuration file contains the following:
 \\[0.5cm]
 The three refers to the victory sign, and the 4 to the gun or L sign. To change the functionality the only thing needed is to change the programs written between the two dollar signs with the wanted one. 
 
-
+\newpage
 \section{Software Documentation}
 \textbf{[PASTE DOXYGEN OUTPUT]}
+
+\newpage
+\section{Bibliography}
+
+[1] H.-S. Yeo, B.-G. Lee, and H. Lim, “Hand tracking and gesture recognition system for human-computer interaction using low-cost hardware,” Multimed. Tools Appl., May 2013.
+\\[1cm]
+[2] A. Albiol, L. Torres, and E. J. Delp, “Optimum color spaces for skin detection,” no. 3, pp. 3–5.
+\\[1cm]
+[3] A. Argyros and M. Lourakis, “Tracking skin-colored objects in real-time,” Cut. Edge Robot., 2005.
+\\[1cm]
+[4] V. Vezhnevets, “A Survey on Pixel-Based Skin Color Detection Techniques,” 1994.
+
+
 
 \end{document}
