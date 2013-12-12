@@ -1,3 +1,29 @@
+//------------------------------------------------------------------------------
+//-- HandDetector
+//------------------------------------------------------------------------------
+//--
+//-- Extracts a binary image with the silouette of the candidates to be a hand
+//--
+//------------------------------------------------------------------------------
+//--
+//-- This file belongs to the "Gecko - Gesture Recognition" project
+//-- (https://github.com/David-Estevez/gecko)
+//--
+//------------------------------------------------------------------------------
+//-- Authors: David Estevez Fernandez
+//--          Irene Sanz Nieto
+//--
+//-- Released under the GPL license (more info on LICENSE.txt file)
+//------------------------------------------------------------------------------
+
+/*! \file HandDetector.cpp
+ *  \brief Extracts a binary image with the silouette of the candidates to be a hand
+ *
+ * \author David Estevez Fernandez ( http://github.com/David-Estevez )
+ * \author Irene Sanz Nieto ( https://github.com/irenesanznieto )
+ * \date Dec 12th, 2013
+ */
+
 #include "HandDetector.h"
 
 //--------------------------------------------------------------------------------------------------------

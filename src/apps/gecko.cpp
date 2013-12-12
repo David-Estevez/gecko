@@ -1,13 +1,42 @@
+//------------------------------------------------------------------------------
+//-- Gecko
+//------------------------------------------------------------------------------
+//--
+//-- Computer control with hand gestures recognition via webcam
+//--
+//------------------------------------------------------------------------------
+//--
+//-- This file belongs to the "Gecko - Gesture Recognition" project
+//-- (https://github.com/David-Estevez/gecko)
+//--
+//------------------------------------------------------------------------------
+//-- Authors: David Estevez Fernandez
+//--          Irene Sanz Nieto
+//--
+//-- Released under the GPL license (more info on LICENSE.txt file)
+//------------------------------------------------------------------------------
+
+/*! \file gecko.cpp
+ *  \brief Computer control with hand gestures recognition via webcam
+ *
+ * \author David Estevez Fernandez ( http://github.com/David-Estevez )
+ * \author Irene Sanz Nieto ( https://github.com/irenesanznieto )
+ * \date Dec 12th, 2013
+ */
+
+
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <unistd.h>
+
 #include "../libraries/HandDetector.h"
-#include "../libraries/HandDescription.h"
+#include "../libraries/HandDescriptor.h"
 #include "../libraries/handUtils.h"
 #include "../libraries/mouse.h"
 #include "../libraries/StateMachine.h"
 #include "../libraries/AppLauncher.h"
-#include <unistd.h>
+
 
 int main( int argc, char * argv[] )
 {
@@ -50,7 +79,7 @@ int main( int argc, char * argv[] )
     HandDetector handDetector;
 
     //-- Object that will store the parameters of the hand
-    HandDescription hand_descriptor;
+    HandDescriptor hand_descriptor;
 
     //-- State machine for tracking the cursor
     StateMachine cursor_SM( GECKO_GESTURE_OPEN_PALM, 3, 5);

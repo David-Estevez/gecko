@@ -1,8 +1,35 @@
+//------------------------------------------------------------------------------
+//-- Gecko_image_analyzer
+//------------------------------------------------------------------------------
+//--
+//-- Demonstration of the Gecko main program features by analyzing static images
+//--
+//------------------------------------------------------------------------------
+//--
+//-- This file belongs to the "Gecko - Gesture Recognition" project
+//-- (https://github.com/David-Estevez/gecko)
+//--
+//------------------------------------------------------------------------------
+//-- Authors: David Estevez Fernandez
+//--          Irene Sanz Nieto
+//--
+//-- Released under the GPL license (more info on LICENSE.txt file)
+//------------------------------------------------------------------------------
+
+/*! \file image_analyzer.cpp
+ *  \brief Demonstration of the Gecko main program features by analyzing static images
+ *
+ * \author David Estevez Fernandez ( http://github.com/David-Estevez )
+ * \author Irene Sanz Nieto ( https://github.com/irenesanznieto )
+ * \date Dec 12th, 2013
+ */
+
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
 #include "../libraries/HandDetector.h"
-#include "../libraries/HandDescription.h"
+#include "../libraries/HandDescriptor.h"
 
 int main( int argc, char * argv[] )
 {
@@ -19,7 +46,7 @@ int main( int argc, char * argv[] )
     cv::Mat display;
 
     HandDetector handDetector;           //-- To find the hand
-    HandDescription hand_descriptor;     //-- Object that will store the parameters of the hand
+    HandDescriptor hand_descriptor;     //-- Object that will store the parameters of the hand
 
 
 

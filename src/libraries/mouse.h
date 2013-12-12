@@ -1,8 +1,29 @@
-//--------------------------------------------------------------------------------------
-//-- mouse.h
-//--------------------------------------------------------------------------------------
-//-- Functions to control the mouse
-//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//-- mouse
+//------------------------------------------------------------------------------
+//--
+//-- Functions to control the mouse under linux
+//--
+//------------------------------------------------------------------------------
+//--
+//-- This file belongs to the "Gecko - Gesture Recognition" project
+//-- (https://github.com/David-Estevez/gecko)
+//--
+//------------------------------------------------------------------------------
+//-- Authors: David Estevez Fernandez
+//--          Irene Sanz Nieto
+//--
+//-- Released under the GPL license (more info on LICENSE.txt file)
+//------------------------------------------------------------------------------
+
+/*! \file mouse.h
+ *  \brief Functions to control the mouse under linux
+ *
+ * \author David Estevez Fernandez ( http://github.com/David-Estevez )
+ * \author Irene Sanz Nieto ( https://github.com/irenesanznieto )
+ * \date Dec 12th, 2013
+ */
+
 #ifndef MOUSE_H
 #define MOUSE_H
 
@@ -41,7 +62,16 @@ void moveMousePercentage( std::pair <double, double> coordinates );
  */
 void click();
 
+/*!
+ * \brief getDisplayDimensions
+ * \return Current Screen dimensions
+ */
 std::pair<int, int> getDisplayDimensions( );
+
+/*!
+ * \brief getMousePos
+ * \return Current mouse position
+ */
 std::pair<int, int> getMousePos();
 
 #endif	//MOUSE_H

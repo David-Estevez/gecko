@@ -1,5 +1,33 @@
-#ifndef HAND_DESCRIPTION
-#define HAND_DESCRIPTION
+//------------------------------------------------------------------------------
+//-- HandDescriptor
+//------------------------------------------------------------------------------
+//--
+//-- Finds the main characteristics of the hand from a binary image containing
+//-- a hand silouette.
+//--
+//------------------------------------------------------------------------------
+//--
+//-- This file belongs to the "Gecko - Gesture Recognition" project
+//-- (https://github.com/David-Estevez/gecko)
+//--
+//------------------------------------------------------------------------------
+//-- Authors: David Estevez Fernandez
+//--          Irene Sanz Nieto
+//--
+//-- Released under the GPL license (more info on LICENSE.txt file)
+//------------------------------------------------------------------------------
+
+/*! \file HandDescriptor.h
+ *  \brief Finds the main characteristics of the hand from a binary image containing a hand silouette.
+ *
+ * \author David Estevez Fernandez ( http://github.com/David-Estevez )
+ * \author Irene Sanz Nieto ( https://github.com/irenesanznieto )
+ * \date Dec 12th, 2013
+ */
+
+
+#ifndef HAND_DESCRIPTOR
+#define HAND_DESCRIPTOR
 
 #include <opencv2/opencv.hpp>
 #include "handUtils.h"
@@ -13,14 +41,14 @@ static const unsigned int GECKO_GESTURE_CLOSED_PALM = 2;
 static const unsigned int GECKO_GESTURE_VICTORY = 3;
 static const unsigned int GECKO_GESTURE_GUN = 4;
 
-class HandDescription 
+class HandDescriptor
 {
 
 public:
     //-- Constructor
     //-----------------------------------------------------------------------
     //! \brief Default constructor
-    HandDescription();
+    HandDescriptor();
 
 
     //-- Refresh the detected hand characteristics
@@ -193,4 +221,4 @@ private:
 };
 
 
-#endif // HAND_DESCRIPTION
+#endif // HAND_DESCRIPTOR

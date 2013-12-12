@@ -1,7 +1,35 @@
-#include "HandDescription.h"
+//------------------------------------------------------------------------------
+//-- HandDescriptor
+//------------------------------------------------------------------------------
+//--
+//-- Finds the main characteristics of the hand from a binary image containing
+//-- a hand silouette.
+//--
+//------------------------------------------------------------------------------
+//--
+//-- This file belongs to the "Gecko - Gesture Recognition" project
+//-- (https://github.com/David-Estevez/gecko)
+//--
+//------------------------------------------------------------------------------
+//-- Authors: David Estevez Fernandez
+//--          Irene Sanz Nieto
+//--
+//-- Released under the GPL license (more info on LICENSE.txt file)
+//------------------------------------------------------------------------------
+
+/*! \file HandDescriptor.cpp
+ *  \brief Finds the main characteristics of the hand from a binary image containing a hand silouette.
+ *
+ * \author David Estevez Fernandez ( http://github.com/David-Estevez )
+ * \author Irene Sanz Nieto ( https://github.com/irenesanznieto )
+ * \date Dec 12th, 2013
+ */
+
+
+#include "HandDescriptor.h"
 
 //-- Initialization of the private parameters in the constructor
-HandDescription:: HandDescription()
+HandDescriptor:: HandDescriptor()
 {
     //-- Initalize hand parameters
     //-----------------------------------------------------------------------
@@ -62,12 +90,12 @@ HandDescription:: HandDescription()
 //-----------------------------------------------------------------------------------------------------------------------
 //-- Refresh the detected hand characteristics
 //-----------------------------------------------------------------------------------------------------------------------
-void HandDescription::operator ()(const cv::Mat& src, const cv::Mat& skinMask )
+void HandDescriptor::operator ()(const cv::Mat& src, const cv::Mat& skinMask )
 {
     update ( src, skinMask );
 }
 
-void HandDescription::update(const cv::Mat& src, const cv::Mat& skinMask )
+void HandDescriptor::update(const cv::Mat& src, const cv::Mat& skinMask )
 {
     //-- Do things to update each parameter
     contourExtraction( skinMask );
@@ -109,7 +137,7 @@ void HandDescription::update(const cv::Mat& src, const cv::Mat& skinMask )
 
 }
 
-void HandDescription::gestureExtraction()
+void HandDescriptor::gestureExtraction()
 {
     const float closed_hand_threshold = 2; //-- Ratio between the outer circle and the inner circle
 
@@ -165,57 +193,57 @@ void HandDescription::gestureExtraction()
 //-- Get the characteristics of the hand
 //-----------------------------------------------------------------------------------------------------------------------
 
-bool HandDescription::handFound()
+bool HandDescriptor::handFound()
 {
     return _hand_found;
 }
 
-double HandDescription::getHandAngle ()
+double HandDescriptor::getHandAngle ()
 {
     return _hand_angle;
 }
 
-double HandDescription::getHandAnglePredicted()
+double HandDescriptor::getHandAnglePredicted()
 {
     return _hand_angle_prediction;
 }
 
-double HandDescription::getHandAngleEstimated()
+double HandDescriptor::getHandAngleEstimated()
 {
     return _hand_angle_estimation;
 }
 
-cv::Point HandDescription::getCenterHand ()
+cv::Point HandDescriptor::getCenterHand ()
 {
     return _hand_center;
 }
 
-cv::Point HandDescription::getCenterHandPredicted()
+cv::Point HandDescriptor::getCenterHandPredicted()
 {
     return _hand_center_prediction;
 }
 
-cv::Point HandDescription::getCenterHandEstimated()
+cv::Point HandDescriptor::getCenterHandEstimated()
 {
     return _hand_center_estimation;
 }
 
-std::vector< std::vector<cv::Point> > HandDescription::getContours()
+std::vector< std::vector<cv::Point> > HandDescriptor::getContours()
 {
     return _hand_contour;
 }
 
-cv::Rect HandDescription::getBoundingBox()
+cv::Rect HandDescriptor::getBoundingBox()
 {
     return _hand_bounding_box;
 }
 
-int HandDescription::getGesture()
+int HandDescriptor::getGesture()
 {
     return _hand_gesture;
 }
 
-int HandDescription::getNumFingers()
+int HandDescriptor::getNumFingers()
 {
     return _hand_num_fingers;
 }
@@ -227,7 +255,7 @@ int HandDescription::getNumFingers()
 //-----------------------------------------------------------------------------------------------------------------------
 
 //-- Draws the bounding rectangle of the ROI
-void HandDescription::plotBoundingRectangle(const cv::Mat& src, cv::Mat& dst, bool rotated )
+void HandDescriptor::plotBoundingRectangle(const cv::Mat& src, cv::Mat& dst, bool rotated )
 {
     //-- Allocate the display matrix if needed:
     if ( dst.total() == 0 )
@@ -251,7 +279,7 @@ void HandDescription::plotBoundingRectangle(const cv::Mat& src, cv::Mat& dst, bo
 }
 
 
-void HandDescription::plotContours(const cv::Mat& src, cv::Mat& dst)
+void HandDescriptor::plotContours(const cv::Mat& src, cv::Mat& dst)
 {
     //-- Allocate the display matrix if needed:
     if ( dst.total() == 0 )
@@ -269,7 +297,7 @@ void HandDescription::plotContours(const cv::Mat& src, cv::Mat& dst)
 }
 
 
-void HandDescription::plotCenter(const cv::Mat& src, cv::Mat& dst, bool show_corrected, bool show_actual, bool show_predicted)
+void HandDescriptor::plotCenter(const cv::Mat& src, cv::Mat& dst, bool show_corrected, bool show_actual, bool show_predicted)
 {
     //-- Allocate the display matrix if needed:
     if ( dst.total() == 0 )
@@ -293,7 +321,7 @@ void HandDescription::plotCenter(const cv::Mat& src, cv::Mat& dst, bool show_cor
 
 }
 
-void HandDescription::plotMaxInscribedCircle(cv::Mat& src, cv::Mat& dst, bool show_center, cv::Scalar color, int thickness)
+void HandDescriptor::plotMaxInscribedCircle(cv::Mat& src, cv::Mat& dst, bool show_center, cv::Scalar color, int thickness)
 {
     if ( dst.empty() )
         dst = src.clone();
@@ -307,7 +335,7 @@ void HandDescription::plotMaxInscribedCircle(cv::Mat& src, cv::Mat& dst, bool sh
     }
 }
 
-void HandDescription::plotMinEnclosingCircle( cv::Mat& src, cv::Mat& dst, bool show_center, cv::Scalar color, int thickness)
+void HandDescriptor::plotMinEnclosingCircle( cv::Mat& src, cv::Mat& dst, bool show_center, cv::Scalar color, int thickness)
 
 {
     if ( dst.empty() )
@@ -322,7 +350,7 @@ void HandDescription::plotMinEnclosingCircle( cv::Mat& src, cv::Mat& dst, bool s
     }
 }
 
-void HandDescription::plotComplexHull( cv::Mat& src, cv::Mat& dst, bool show_points, cv::Scalar color, int thickness)
+void HandDescriptor::plotComplexHull( cv::Mat& src, cv::Mat& dst, bool show_points, cv::Scalar color, int thickness)
 {
     if ( dst.empty() )
         dst = src.clone();
@@ -342,7 +370,7 @@ void HandDescription::plotComplexHull( cv::Mat& src, cv::Mat& dst, bool show_poi
 }
 
 
-void HandDescription::plotConvexityDefects(cv::Mat &src, cv::Mat &dst, bool draw_points)
+void HandDescriptor::plotConvexityDefects(cv::Mat &src, cv::Mat &dst, bool draw_points)
 {
     if ( dst.empty() )
         dst = src.clone();
@@ -368,7 +396,7 @@ void HandDescription::plotConvexityDefects(cv::Mat &src, cv::Mat &dst, bool draw
     }
 }
 
-void HandDescription::plotFingertips(cv::Mat &src, cv::Mat &dst, bool draw_lines, cv::Scalar color, int thickness)
+void HandDescriptor::plotFingertips(cv::Mat &src, cv::Mat &dst, bool draw_lines, cv::Scalar color, int thickness)
 {
     if ( dst.empty() )
         dst = src.clone();
@@ -384,7 +412,7 @@ void HandDescription::plotFingertips(cv::Mat &src, cv::Mat &dst, bool draw_lines
 
 }
 
-void HandDescription::plotHandInterface(cv::Mat &src, cv::Mat &dst)
+void HandDescriptor::plotHandInterface(cv::Mat &src, cv::Mat &dst)
 {
     if ( dst.empty() )
         dst = src.clone();
@@ -402,7 +430,7 @@ void HandDescription::plotHandInterface(cv::Mat &src, cv::Mat &dst)
 
 
 
-void HandDescription::angleControl(bool show_corrected, bool show_actual, bool show_predicted)
+void HandDescriptor::angleControl(bool show_corrected, bool show_actual, bool show_predicted)
 {
     //-- Prints the angle gauge
 
@@ -452,7 +480,7 @@ void HandDescription::angleControl(bool show_corrected, bool show_actual, bool s
 //-- Functions that extract characteristics:
 //-----------------------------------------------------------------------------------------------------------------------
 
-void HandDescription::contourExtraction(const cv::Mat& skinMask)
+void HandDescriptor::contourExtraction(const cv::Mat& skinMask)
 {
     const int epsilon = 1; //-- Max error for polygon approximation
 
@@ -478,7 +506,7 @@ void HandDescription::contourExtraction(const cv::Mat& skinMask)
             cv::approxPolyDP( filtered_hand_contours[i], _hand_contour[i], epsilon, True );
 }
 
-void HandDescription::boundingBoxExtraction(const cv::Mat& src)
+void HandDescriptor::boundingBoxExtraction(const cv::Mat& src)
 {
     //-- Extract minimal rectangle enclosing the hand:
     _hand_rotated_bounding_box = cv::minAreaRect( _hand_contour[0]);
@@ -488,7 +516,7 @@ void HandDescription::boundingBoxExtraction(const cv::Mat& src)
 
 }
 
-void HandDescription::handPalmExtraction()
+void HandDescriptor::handPalmExtraction()
 {
     //-- Parameters describing this hand palm procedure:
     const int x_ratio = 3; //-- Section of the bounding box used for finding center (along X)
@@ -558,7 +586,7 @@ void HandDescription::handPalmExtraction()
 
 }
 
-void HandDescription::ROIExtraction( const cv::Mat& src)
+void HandDescriptor::ROIExtraction( const cv::Mat& src)
 {
     //! \todo Change definition of ROI to avoid drawing a rectangle out of the image (and therefore getting a exception)
 
@@ -597,7 +625,7 @@ void HandDescription::ROIExtraction( const cv::Mat& src)
     //cv::imshow("[Debug] Hand", _hand_ROI);
 }
 
-void HandDescription::defectsExtraction()
+void HandDescriptor::defectsExtraction()
 {
     std::vector< cv::Vec4i > convexity_defects;
 
@@ -646,7 +674,7 @@ void HandDescription::defectsExtraction()
 
 }
 
-void HandDescription::fingerExtraction(const cv::Mat &src)
+void HandDescriptor::fingerExtraction(const cv::Mat &src)
 {
     std::vector< ConvexityDefect > passed_first_condition; //-- At this point, I lost all imagination available for variable naming
     std::vector< ConvexityDefect > passed_second_condition;
@@ -781,7 +809,7 @@ void HandDescription::fingerExtraction(const cv::Mat &src)
     }
 }
 
-void HandDescription::angleExtraction()
+void HandDescriptor::angleExtraction()
 {
     //-- Create matrix for storing the measurement (measured position of hand)
     cv::Mat_<float> angleMeasurement(1, 1);
@@ -801,7 +829,7 @@ void HandDescription::angleExtraction()
     _hand_angle_estimation = angleEstimation.at<float>(0);
 }
 
-void HandDescription::centerExtraction()
+void HandDescriptor::centerExtraction()
 {
     //-- Predict next center position with kalman filter:
     cv::Mat prediction = kalmanFilterCenter.predict();
