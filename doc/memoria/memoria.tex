@@ -70,10 +70,41 @@ ABDULLA HUSSEIN ABDULRAHM AL KAFF
 In this document a gesture recognition software named GECKO is presented. This software will allow the user to interact with a computer using just hand gestures. 
 
 \subsection{Motivation}
-
+The idea of implementing a gesture recognition software appeared ...
 \subsection{First Steps}
+The first approach was to make a color segmentation (using the HSV color space) and select the hand using the size of the contour. Once the hand was detected, it was possible (after pressing a key) to move the mouse with the hand. The control was not very accurate due to the different problems present in the system such as illumination changes or having parts of the palm and fingers with a color outside the selected skin color range. In this first approach, it was possible to select between the theoretical values and the custom values obtained by placing the hand inside a square and getting automatically the skin HSV range. 
 
-\subsection{Final Solution}
+The theoretical skin range worked better than the custom range and as it was previously mentioned, the poor segmentation caused a fluctuant output image, that did not allow to obtain a good gesture recognition.   
+
+In order to better the hand's position and orientation estimation, two kalman filters were implemented. Those filters improved these features and allowed a moderatedly accurate mouse control, if the background did not interfere with the hand segmentation (i.e. the background had to be a plain color). 
+
+As it can be seen, the main problem this software had was the hand segmentation. Some research was made and different papers were found that allowed us to implement a better hand segmentation. 
+  
+\section{Software Explanation}
+
+The final version here presented is a software that can be divided in the following parts: Hand Segmentation, Hand Description, Gesture Recognition.
+\subsection{Hand Segmentation}
+The segmentation of the hand was one of the most important parts of the software since in it depends the correct functioning of the next parts. 
+The flowchart of the segmentation of the code is as follows: 
+
+\begin{center}
+ \includegraphics[scale=0.4]{../hand_filter.jpeg} 
+ \end{center} 
+ 
+As it can be seen in the diagram, the first thing done is to detect the face using the "Face Detection using Haar Cascades" already implemented in OpenCV. After this detection, a binary mask is made in which appear a black square over the face to hide it.
+
+Next, a Mixture of Gaussians background subtractor is used to remove the background of the image and detect more easily the hand. From this step, another binary mask is created. 
+
+Afterwards, the resulting image with the latter masks being applied is converted to the HSV color space and is thresholded using the appropriate HSV skin range.
+
+Finally, in order to better the output binary image, a gaussian blur and a thresholding is applied to eliminate blobs and unite different regions of the hand. It was chosen this configuration because it was much faster and gave better results than making an opening to the image. 
+
+ 
+\subsection{Hand Description}
+
+
+\subsection{Gesture Recognition} 
+
 
 \section{User Guide}
 This code was developed using the following libraries: 
@@ -106,15 +137,35 @@ In order to execute the software, press the convinient button of the QtCreator I
 
 Once the code is compiled and started, a first window will appear with the information about the software. After pressing enter to continue, this menu will pop up: 
 \begin{center}
-\includegraphics[scale=0.5]{../../img/menu.png} 
+\fbox{\includegraphics[scale=0.5]{../../img/menu.png} }
 \end{center}
 
+\vspace{1cm}
 The first option will take the theoretical HSV skin values proposed in \textbf{[CITE]}. Afterwards, the application will allow us to adjust those HSV ranges to adecuate them to the room's conditions. 
 Once all the adjustments are done, pressing ENTER will start the program. 
 
 The second option will pop up a window with a green square in the middle. Place the hand so that the square is in the middle of your palm and press ENTER. The program will automatically calculate the HSV range of your skin. Afterwards you will be able once more to manually adjust those ranges. Pressing ENTER one last time will start the program. 
 \\
-\textbf{[EXPLAIN EVERYTHING ABOUT THE GESTURES]}
+ 
+The main program will track the hand and trace two circles, the first one around the palm and the second one surrounding the whole hand. The center of the palm is also shown, as well as the angle described by the hand. 
+
+There are different functionalities implemented in this software. 
+\begin{itemize}
+\item Open hand(i.e. the program detects the five fingers): the mouse moves with the hand's movement.
+\item Closed hand: click.
+\item "Victory sign": the gedit text editor is opened.
+\item "Gun or L sign": a terminal is opened. 
+\end{itemize}
+
+The two last functionalities may be changed using a configuration file named apps.config (gecko/data/apps.config). 
+That configuration file contains the following:
+\\[0.5cm]
+\$gedit\$ 3 \\
+\$gnome-terminal\$ 4
+\\[0.5cm]
+The three refers to the victory sign, and the 4 to the gun or L sign. To change the functionality the only thing needed is to change the programs written between the two dollar signs with the wanted one. 
+
+
 \section{Software Documentation}
 \textbf{[PASTE DOXYGEN OUTPUT]}
 
