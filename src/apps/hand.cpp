@@ -40,6 +40,7 @@ int main( int argc, char * argv[] )
     int delay = 24; //-- Force 24 ms delay
 
 
+
     //-- Declare variables
     //--------------------------------------------------------------------
     //-- Program control
@@ -61,7 +62,10 @@ int main( int argc, char * argv[] )
     //-- AppLauncher for launching programs
     AppLauncher launcher( "../data/apps.config", 30, 5);
 
+
+
     //-- Initial screen
+    //---------------------------------------------------------------------
     cv::Mat init_screen=cv::imread("../img/init.png");
 
     while (1)
