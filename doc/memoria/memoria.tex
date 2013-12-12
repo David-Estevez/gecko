@@ -102,6 +102,31 @@ Finally, in order to better the output binary image, a gaussian blur and a thres
  
 \subsection{Hand Description}
 
+The input of this section is the binary image that was the output of the previous one. This part of the software characterizes and extracts the hand's parameters. 
+The flowchart is as follows: 
+
+\begin{center}
+\includegraphics[scale=0.5]{../hand_description.jpeg} 
+\end{center}
+
+As it can be seen in the diagram, the first step is to extract the contours of the hand and decide from its size if it is a hand or only a blob remaining from the hand segmentation. 
+
+If the size is appropriate, a bounding rectangle is found. Afterwards, the palm is extracted. In order to do that, a raw center of the palm and the radius of the inscribed circle is obtained from the points of the contour.
+
+Then, the ROI (Region Of Interest), i.e. the rectangle that contains the maximum circle that represents the hand boundary.  
+
+Afterwards, another contour extraction inside the extracted ROI is made in order to eliminate once more the smaller contours that may appear. 
+
+Using the largest contour found in this last step, the minimum enclosing circle is obtained. This circle will be used as a hand's descriptor.
+
+The following step is to compute the convexity defects, that will be used when extracting the number of fingers present in the image. 
+In order to assure that a certain part of the image is a finger, three conditions must be fulfilled: 
+\begin{itemize}
+\item The depth of the convexity defect must be in between the minimum inscribed radius and the maximum inscribed radius. 
+\item The angle between the possible fingertips must be less than 90º. 
+\item The fingertips must have a k-curvature inside a certain range.
+\end{itemize}
+
 
 \subsection{Gesture Recognition} 
 
@@ -133,7 +158,7 @@ The folder structure used is the typical of a CMake project. In order to compile
 \end{enumerate}
 
 \subsection{Use the software}
-In order to execute the software, press the convinient button of the QtCreator IDE or open a terminal in the bin directory (gecko/bin) and enter the command "./hand.cpp". 
+In order to execute the software, press the convinient button of the QtCreator IDE or open a terminal in the bin directory (gecko/bin) and enter the command "./gecko.cpp". 
 
 Once the code is compiled and started, a first window will appear with the information about the software. After pressing enter to continue, this menu will pop up: 
 \begin{center}
