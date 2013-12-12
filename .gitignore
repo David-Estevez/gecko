@@ -2,3 +2,8 @@ bin/
 build/
 lib/
 *.txt.user
+*.aux
+*.log
+*.synctex.gz
+*.tex.bak
+*.toc
