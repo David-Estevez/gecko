@@ -111,7 +111,7 @@ void HandDescription::update(const cv::Mat& src, const cv::Mat& skinMask )
 
 void HandDescription::gestureExtraction()
 {
-    const int closed_hand_threshold = 10;
+    const float closed_hand_threshold = 2; //-- Ratio between the outer circle and the inner circle
 
     if ( _hand_found)
     {
@@ -135,7 +135,7 @@ void HandDescription::gestureExtraction()
         //-- Closed hand
         else if (_hand_num_fingers == 0)
         {
-            if ( _min_enclosing_circle_radius - _max_circle_inscribed_radius < closed_hand_threshold )
+            if ( _min_enclosing_circle_radius / _max_circle_inscribed_radius < closed_hand_threshold )
                 _hand_gesture = GECKO_GESTURE_CLOSED_PALM;
             else
                 _hand_gesture = GECKO_GESTURE_NONE;

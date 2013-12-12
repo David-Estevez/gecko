@@ -106,3 +106,53 @@ std::pair<int, int> getMousePos()
 }
 
 
+
+
+void click()
+{
+    //-- Open a display of X server:
+    Display *display = XOpenDisplay(NULL);
+    XEvent event;
+
+    if ( display == NULL)
+    {
+        std::cerr << "[Mouse] Error: error opening display." << std::endl;
+        exit(-1);
+    }
+
+    //-- Setup event to send:
+    memset( &event, 0x00, sizeof(event));
+    event.type = ButtonPress;
+    event.xbutton.button = Button1;
+    event.xbutton.same_screen = True;
+
+    XQueryPointer( display, RootWindow(display, DefaultScreen(display)), &event.xbutton.root, &event.xbutton.window, &event.xbutton.x_root, &event.xbutton.y_root, &event.xbutton.x, &event.xbutton.y, &event.xbutton.state);
+
+    event.xbutton.subwindow = event.xbutton.window;
+
+    while(event.xbutton.subwindow)
+    {
+        event.xbutton.window = event.xbutton.subwindow;
+        XQueryPointer(display, event.xbutton.window, &event.xbutton.root, &event.xbutton.subwindow, &event.xbutton.x_root, &event.xbutton.y_root, &event.xbutton.x, &event.xbutton.y, &event.xbutton.state);
+    }
+
+    if(XSendEvent(display, PointerWindow, True, 0xfff, &event) == 0)
+        std::cerr << "[Mouse] Error: error ocurred while sending the click event." << std::endl;
+
+    XFlush(display);
+
+    usleep(100000);
+
+    event.type = ButtonRelease;
+    event.xbutton.state = 0x100;
+
+    if(XSendEvent(display, PointerWindow, True, 0xfff, &event) == 0)
+        std::cerr << "[Mouse] Error: error ocurred while sending the click release event." << std::endl;
+
+    XFlush(display);
+
+    XCloseDisplay(display);
+
+    std::cout << "[Debug] Click! " << std::endl;
+
+}

@@ -55,8 +55,11 @@ int main( int argc, char * argv[] )
     //-- State machine for tracking the cursor
     StateMachine cursor_SM( GECKO_GESTURE_OPEN_PALM, 3, 5);
 
+    //-- State machine for clicking
+    StateMachine click_SM( GECKO_GESTURE_CLOSED_PALM, 15, 5);
+
     //-- AppLauncher for launching programs
-    AppLauncher launcher( "../data/apps.config", 20, 5);
+    AppLauncher launcher( "../data/apps.config", 30, 5);
 
     //-- Initial screen
     cv::Mat init_screen=cv::imread("../img/init.png");
@@ -174,7 +177,7 @@ int main( int argc, char * argv[] )
 
         if ( hand_descriptor.handFound() )
         {
-            cv::circle( display, cv::Point( display.cols - 50, display.rows - 50 ), 25, color, fill );
+            cv::circle( display, cv::Point( display.cols - 50, display.rows - 25 ), 7.5, color, fill );
         }
 
 
@@ -210,42 +213,68 @@ int main( int argc, char * argv[] )
 
 
         //-----------------------------------------------------------------------------------------------------
-        //-- Move Cursor
+        //-- Command mode actions
         //-----------------------------------------------------------------------------------------------------
-        if ( debugValue == 2)
+        if ( debugValue == 2 && hand_descriptor.handFound() )
         {
-            if ( hand_descriptor.handFound() )
+            //-- Move Cursor
+            //-----------------------------------------------------------------------------------------------------
+
+            //-- Check the state machine
+            cursor_SM.update( hand_descriptor.getGesture() );
+
+            if ( cursor_SM.getFound() )
             {
-                //-- Check the state machine
-                cursor_SM.update( hand_descriptor.getGesture() );
+                //-- Show hand center of screen
+                hand_descriptor.plotCenter( display, display );
 
-                if ( cursor_SM.getFound() )
-                {
-                    //-- Show hand center of screen
-                    hand_descriptor.plotCenter( display, display );
+                //-- Calculate relative position and move there:
+                const int border = 50; //-- Leave a 50 px border around image
+//                cv::Point win_up_left = cv::Point( border, border);
+//                cv::Point win_down_right = cv::Point( display.cols - border, display.rows - border);
+//                cv::rectangle( display, win_up_left, win_down_right, cv::Scalar(255,255,255), 2);
 
-                    //-- Calculate relative position and move there:
-                    cv::Point hand_center = hand_descriptor.getCenterHandEstimated();
+                cv::Point hand_center = hand_descriptor.getCenterHandEstimated();
 
-                    std::pair< float, float> relativeCoordinates;
-                    relativeCoordinates.first = hand_center.x /  (double) frame.cols;
-                    relativeCoordinates.second= hand_center.y / (double) frame.rows;
+                std::pair< float, float> relativeCoordinates;
 
-                    moveMousePercentage( relativeCoordinates );
-                }
-                else
-                {
-                    printProgressBar( display, display, cursor_SM.getPercentageMatches(), cv::Scalar( 255, 0, 0) );
-                }
+                //-- Find if hand center is out of the window ( and limit it to the window border )
+                if ( hand_center.x < border ) hand_center.x = border;
+                if ( hand_center.y < border ) hand_center.y = border;
+                if ( hand_center.x > display.cols - border ) hand_center.x = display.cols - border;
+                if ( hand_center.y > display.rows - border ) hand_center.y = display.rows - border;
+
+                //relativeCoordinates.first = hand_center.x /  (double) frame.cols;
+                //relativeCoordinates.second= hand_center.y / (double) frame.rows;
+
+                relativeCoordinates.first = (hand_center.x - border) /  (double)( frame.cols - 2 * border);
+                relativeCoordinates.second = (hand_center.y - border) /  (double)( frame.rows - 2 * border);
+
+                moveMousePercentage( relativeCoordinates );
             }
-        }
+            else
+            {
+                printProgressBar( display, display, cursor_SM.getPercentageMatches(), cv::Scalar( 255, 0, 0) );
+            }
+
+            //-- Click action:
+            //---------------------------------------------------------------------------------------------------
+            //-- Check the state machine
+            click_SM.update( hand_descriptor.getGesture() );
+
+            if ( click_SM.getFound() )
+            {
+                click();
+                click_SM;
+            }
+            else
+                printProgressBar( display, display, click_SM.getPercentageMatches(), cv::Scalar(255, 255, 255) );
 
 
-        //----------------------------------------------------------------------------------------------------
-        //-- Run apps
-        //----------------------------------------------------------------------------------------------------
-        if( hand_descriptor.handFound() )
-        {
+
+            //-- Run apps
+            //----------------------------------------------------------------------------------------------------
+
             //-- Update the launcher state machines
             launcher.update( hand_descriptor.getGesture() );
 
@@ -255,13 +284,14 @@ int main( int argc, char * argv[] )
                     cv::Scalar bar_color;
                     switch( launcher.getValueToTrackAt(i) )
                     {
-                        case GECKO_GESTURE_VICTORY: bar_color = cv::Scalar( 0, 255, 0); break;
-                        case GECKO_GESTURE_GUN: bar_color = cv::Scalar( 0, 0, 255); break;
-                        case GECKO_GESTURE_CLOSED_PALM: bar_color = cv::Scalar(255, 255, 255); break;
+                    case GECKO_GESTURE_VICTORY: bar_color = cv::Scalar( 0, 255, 0); break;
+                    case GECKO_GESTURE_GUN: bar_color = cv::Scalar( 0, 0, 255); break;
+                    case GECKO_GESTURE_CLOSED_PALM: bar_color = cv::Scalar(255, 255, 255); break;
                     }
 
                     printProgressBar( display, display, launcher.getPercentageMatches(i), bar_color );
                 }
+
         }
 
 
@@ -294,6 +324,8 @@ int main( int argc, char * argv[] )
         case (char) 27:
             stop = true;
             break;
+        case 'c':
+            click();
         default:
             continue;
         }

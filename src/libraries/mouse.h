@@ -35,6 +35,10 @@ void moveMouse( std::pair <int, int> coordinates, const bool absoluteMode = true
  */
 void moveMousePercentage( std::pair <double, double> coordinates );
 
+/*!
+ * \brief Sends a click event to the X server
+ */
+void click();
 
 std::pair<int, int> getDisplayDimensions( );
 std::pair<int, int> getMousePos();

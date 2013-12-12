@@ -207,7 +207,7 @@ void printProgressBar(cv::Mat &src, cv::Mat &dst, float percentage, cv::Scalar c
         dst = src.clone();
 
     //-- Print progress on screen
-    cv::Point start( 50, dst.rows - thickness );
+    cv::Point start( thickness, dst.rows - thickness );
     cv::Point end( (dst.cols - 100)  * percentage + 50, dst.rows );
     cv::rectangle( dst, start, end, color, CV_FILLED );
 }
