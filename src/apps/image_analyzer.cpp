@@ -56,7 +56,7 @@ int main( int argc, char * argv[] )
     handDetector(image, processed);
 
     //-- Contour extraction
-    hand_descriptor( image, processed );
+    hand_descriptor( processed );
 
 
     //-- Hand's angle
@@ -82,7 +82,7 @@ int main( int argc, char * argv[] )
     case GECKO_GESTURE_OPEN_PALM: color = cv::Scalar( 255, 0, 0); break;
     case GECKO_GESTURE_VICTORY: color = cv::Scalar( 0, 255, 0); break;
     case GECKO_GESTURE_GUN: color = cv::Scalar( 0, 0, 255); break;
-    case GECKO_GESTURE_CLOSED_PALM: color = cv::Scalar(255, 255, 255); break;
+    case GECKO_GESTURE_CLOSED_FIST: color = cv::Scalar(255, 255, 255); break;
     default: color = cv::Scalar( 255, 255, 255); fill = 1;
     }
 
