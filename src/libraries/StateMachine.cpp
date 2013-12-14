@@ -31,8 +31,8 @@
 StateMachine::StateMachine(int value_to_track, unsigned int positive_matches, unsigned int negative_matches)
 {
     this->value_to_track = value_to_track;
-    this->positive_matches = positive_matches;
-    this->negative_matches = negative_matches;
+    this->min_positive_matches = positive_matches;
+    this->max_negative_matches = negative_matches;
 
     current_positive_matches = 0;
     current_negative_matches = 0;
@@ -44,21 +44,21 @@ void StateMachine::update(int current_value)
 {
     if ( current_value == value_to_track )
     {
-        if ( current_positive_matches < positive_matches)
+        if ( current_positive_matches < min_positive_matches)
             current_positive_matches++;
 
         current_negative_matches = 0;
     }
     else
     {
-        if ( current_negative_matches < negative_matches)
+        if ( current_negative_matches < max_negative_matches)
             current_negative_matches++;
     }
 
-    if ( current_positive_matches == positive_matches )
+    if ( current_positive_matches == min_positive_matches )
         found = true;
 
-    if ( current_negative_matches == negative_matches )
+    if ( current_negative_matches == max_negative_matches )
     {
         reset();
     }
@@ -81,11 +81,12 @@ int StateMachine::getValue_to_track() const
 void StateMachine::setValue_to_track(const int &value)
 {
     value_to_track = value;
+    reset();
 }
 
 float StateMachine::getPercentageMatches()
 {
-    return current_positive_matches / (float) positive_matches;
+    return current_positive_matches / (float) min_positive_matches;
 }
 
 bool StateMachine::getFound()

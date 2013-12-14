@@ -175,7 +175,7 @@ int main( int argc, char * argv[] )
         handDetector(frame, processed);
 
         //-- Contour extraction
-	hand_descriptor( processed );
+        hand_descriptor( processed );
 
 
         //-- Hand's angle

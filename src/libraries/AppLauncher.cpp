@@ -133,7 +133,7 @@ void AppLauncher::configFileParser(std::string config_file)
 
         _commands_to_launch.push_back(newCommand);
 
-        std::cout << "[AppLauncher][Debug] Read: " << newCommand << " " << newValue << std::endl;
+       // std::cout << "[AppLauncher][Debug] Read: " << newCommand << " " << newValue << std::endl;
     }
 
     file.close();
