@@ -76,19 +76,24 @@ Also, the possibility of extending this software in the future to different mach
 
 
 \subsection{First Steps}
+In this section, the process followed when developing the software will be presented. 
+
 The first approach was to make a color segmentation (using the HSV color space) and select the hand using the size of the contour. Once the hand was detected, it was possible (after pressing a key) to move the mouse with the hand. The control was not very accurate due to the different problems present in the system such as illumination changes or having parts of the palm and fingers with a color outside the selected skin color range. In this first approach, it was possible to select between the theoretical values and the custom values obtained by placing the hand inside a square and getting automatically the skin HSV range. 
 
-The theoretical skin range worked better than the custom range and as it was previously mentioned, the poor segmentation caused a fluctuant output image, that did not allow to obtain a good gesture recognition.   
+The theoretical skin range worked better than the custom range, but the poor segmentation caused a fluctuant output image. This  did not allow to obtain a good gesture recognition.   
 
-In order to better the hand's position and orientation estimation, two kalman filters were implemented. Those filters improved these features and allowed a moderatedly accurate mouse control, if the background did not interfere with the hand segmentation (i.e. the background had to be a plain color). 
+In order to better the hand's position and orientation estimation, two kalman filters were implemented. Those filters allowed a moderatedly accurate mouse control, if the background did not interfere with the hand segmentation (i.e. the background had to be a plain color). 
 
-As it can be seen, the main problem this software had was the hand segmentation. Some research was made and different papers were found that allowed us to implement a better hand segmentation [1][2]. 
+As it can be seen, the main problem this software had was the hand segmentation. Some research was made and different papers were found that allowed us to implement a better hand segmentation [1].
+
+Reading [1] another source of improvement appeared: change the color space. Another short research on the subject and [2] was found,  in which an extensive comparison between color spaces and its results in skin detection was made. In it, the conclusion was that the difference between color spaces was insignificant. Hence, the color space used in this project (HSV) was not changed. 
 
 
   
 \section{Software Explanation}
 
 The final version here presented is a software that can be divided in the following parts: Hand Segmentation, Hand Description, Gesture Recognition.
+
 \subsection{Hand Segmentation}
 The segmentation of the hand was one of the most important parts of the software since in it depends the correct functioning of the next parts. 
 The flowchart of the segmentation of the code is as follows: 
@@ -146,7 +151,7 @@ The output of this part of the software is a number that encodes the type of ges
 This section of the software has as an input the output of the previous, again. Hence, it will implement a state machine that, depending on the input (the gesture) will execute one function or other. 
 
 \begin{center}
-\includegraphics[scale=0.6]{../gesture_recognition.jpeg} 
+%\includegraphics[scale=0.6]{../gesture_recognition.jpeg} 
 \end{center}
 
 The configuration of the actions to be made when an opened or closed palm appears is hardcoded in the program, since those values will not be changeables. In order to obtain the action for each of the two other gestures that may be customized, the software will read the configuration file, and execute the action specified in there. 
