@@ -24,22 +24,44 @@
  * \date Dec 12th, 2013
  */
 
+
 #ifndef HAND_DETECTOR
 #define HAND_DETECTOR
 
 #include <opencv2/opencv.hpp>
 #include "handUtils.h"
 
-class HandDetector {
-   public:
+
+/*! \class HandDetector
+ *  \brief Segments the hand silouette from the original image and returns the information in a binary image
+ *
+ *
+ *  This class offers different means of calibrating the skin:
+ *   -Theoretical HSV values
+ *   -Custom HSV values calculated from a sample of the user's skin color
+ *
+ *  In order to obtain the segmented hand, the operator () or the function filter_hand may be used
+ */
+
+class HandDetector
+{
+
+public:
+
 	//-- Constructors
-	HandDetector();
+    //-----------------------------------------------------------------------
+    //! \brief Default constructor
+    HandDetector();
+    //! \brief Constructor that takes as argument an image of the hand's skin to obtain the custom HSV range
 	HandDetector( cv::Mat& ROI);
 
-    //-- Destructors
+    //-- Destructor
+    //-----------------------------------------------------------------------
     ~HandDetector();
 
+
 	//-- Calibration loop
+
     void calibrationLoop(cv::VideoCapture);
 
     void defaultValues(cv::VideoCapture cap);
@@ -48,7 +70,12 @@ class HandDetector {
 
 
 	//-- Calibration functions
+    //-----------------------------------------------------------------------
+
+    //! \brief Changes the HSV range accordingly with the input skin color image
 	void calibrate( cv::Mat& ROI);
+
+
 	void calibrate( cv::Scalar lower_limit = cv::Scalar( 0, 58, 89), cv::Scalar upper_limit = cv::Scalar( 25, 173, 229) );
 	void getCalibration( cv::Scalar& lower_limit, cv::Scalar& upper_limit);
 
