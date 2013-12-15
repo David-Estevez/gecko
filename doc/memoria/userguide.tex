@@ -1,6 +1,6 @@
 \section{User Guide}
-\subsection{Compile and install}
-\subsubsection{Requirements}
+\subsection{Compile and install }
+\subsubsection{Requirements }
 This software has currently support only for GNU/Linux systems, as the cursor control is platform-dependent, but as it has a modular design it can be easily extended for being used on Windows or Mac platforms. Nevertheless we do not have any early plans of porting it to other platforms. 
 
 The requirements for compiling and using the software are:
@@ -12,7 +12,7 @@ The requirements for compiling and using the software are:
 
 
 \subsubsection{Compiling}
-\paragraph{Using CMake}
+\paragraph{Using CMake }
 The folder structure used is the typical of a CMake project. In order to compile using the terminal follow this steps: 
 \begin{enumerate}
  \item Open a terminal in the build directory (gecko/build). 
@@ -25,9 +25,9 @@ To open the software as a QtCreator project, the only thing needed is to open th
 Afterwards, press the "build" icon to build the project. 
 
 
-\subsubsection{Running the software}
+\subsection{Running the software}
 
-In order to execute the software, press the convinient button of the QtCreator IDE or open a terminal in the bin directory (gecko/bin) and enter the command ``./gecko''. 
+In order to execute the software, press the convinient button of the QtCreator IDE or open a terminal in the bin directory (gecko/bin) and enter the command "./gecko". 
 
 Once the code is compiled and started, a first window will appear with the information about the software. After pressing enter to continue, this menu will pop up: 
 \begin{center}
@@ -60,5 +60,8 @@ That configuration file contains the following lines:
 \\[0.5cm]
 
 The number 3 refers to the victory sign, and  4 to the gun or L sign. To change the functionality the only thing needed is to change the programs written between the two dollar signs with the wanted one. 
+
+The user should take into account that when the program recognizes a gesture, a bar will appear in the window. In order to filter possible false positives, the user must remain in the same posture until the bar is completely filled for the correct execution of the task associated with the gesture. 
+
 
 \newpage
