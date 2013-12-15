@@ -64,6 +64,7 @@ public:
 
     void calibrationLoop(cv::VideoCapture);
 
+
     void defaultValues(cv::VideoCapture cap);
 
     void customValues(cv::VideoCapture cap);
@@ -75,32 +76,72 @@ public:
     //! \brief Changes the HSV range accordingly with the input skin color image
 	void calibrate( cv::Mat& ROI);
 
-
+    //! \brief Sets the HSV skin colors range with the inputs. If there are no inputs, default values are set.
 	void calibrate( cv::Scalar lower_limit = cv::Scalar( 0, 58, 89), cv::Scalar upper_limit = cv::Scalar( 25, 173, 229) );
-	void getCalibration( cv::Scalar& lower_limit, cv::Scalar& upper_limit);
+    //! \brief Returns the HSV range
+    void getCalibration( cv::Scalar& lower_limit, cv::Scalar& upper_limit);
 
 	//-- Hand-detection
+    //-----------------------------------------------------------------------
+    /*! \brief Update the segmented hand binary image
+     *
+     *  This operator is a wrapper of the filter_hand function.
+     *
+     *  \param src Original image coming from the video input.
+     *  \param dst Final binary image containing the segmented image.
+     */
     void operator()(cv::Mat& src, cv::Mat& dst);
+
+    /*! \brief Update the segmented hand image using the new frame of the video input.
+     *
+     *  Removes the background, thresholds the skin color and makes morphology transformations to improve the binary output image
+     *
+     *  \param src Original image coming from the video input.
+     *  \param dst Final binary image containing the segmented image.
+     */
     void filter_hand(cv::Mat& src, cv::Mat& dst);
 
 	//-- Face-tracking
+    //-----------------------------------------------------------------------
+    //! \brief Returns the last position of the face
 	std::vector< cv::Rect >& getLastFacesPos();
+
+    /*! \brief Tracks and covers the faces that appear in the image.
+     *
+     *  The faces are covered with a square so they do not interfere with the rest of the segmentation.
+     *
+     *  \param src Original image coming from the video input.
+     *  \param dst Output image with the squares over the faces.
+     *  \param color Color of the squares, default is black.
+     *  \param thickness Thickness of the square drawn over the faces.
+     */
 	void drawFaceMarks( const cv::Mat& src, cv::Mat& dst , cv::Scalar color = cv::Scalar(0, 255, 0), int thickness = 1  );
 	
 	//-- Get lower and upper level (calibration)
+    //-----------------------------------------------------------------------
+    //! \brief Returns the lower HSV skin values
 	cv::Scalar getLower(); 
+    //! \brief Returns the upper HSV skin values
 	cv::Scalar getUpper(); 
 
 
     private:
 	//-- Statistical functions:
-	//! \todo OpenCV already has this functions, so use then instead.
+    //! \todo OpenCV already has this functions, so use them instead.
+    //! \brief Returns the average of the pixel's values
 	int average( cv::Mat& ROI);
+    //! \brief Returns the median of the pixel's values
 	int median( cv::Mat& ROI);
+    //! \brief Returns the standard deviation of the pixel's values
 	int stdDeviation( cv::Mat& ROI);
 
 	//-- Hand filtering functions:
-    void backgroundSubstraction(cv::Mat& src, cv::Mat& dst);
+    //-----------------------------------------------------------------------
+    /*! \brief Thresholds the input image using the HSV range
+     *
+     *  \param src Input image
+     *  \param dst Binary output image
+     */
 	void threshold( const cv::Mat& src, cv::Mat& dst);
 	void filterBlobs( const cv::Mat& src, cv::Mat& dst);
 
@@ -109,6 +150,12 @@ public:
 
     //-- Background substractor:
     //---------------------------------------------------------------------------------
+    /*! \brief Substracts the background from the input image
+     *
+     *  \param src Input image
+     *  \param dst Output image
+     */
+    void backgroundSubstraction(cv::Mat& src, cv::Mat& dst);
     backgroundSubstractor bg ;
     void initBackgroundSubstractor();
 
