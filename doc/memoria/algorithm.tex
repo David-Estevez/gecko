@@ -4,17 +4,21 @@ The final version here presented is a software that can be divided in the follow
 
 \subsection{Hand Segmentation}
 The segmentation of the hand was one of the most important parts of the software since in it depends the correct functioning of the next parts. 
-The flowchart of the segmentation of the code is as follows: 
+The flowchart of this part of the code is as follows: 
 
 \begin{center}
  \includegraphics[scale=0.4]{../hand_filter.jpeg} 
- \end{center} 
+\end{center} 
  
-As it can be seen in the diagram, the first thing done is to detect the face using the "Face Detection using Haar Cascades" already implemented in OpenCV. After this detection, a binary mask is made in which appear a black square over the face to hide it.
+As it can be seen in the diagram, the first thing done is to detect the face using the "Face Detection using Haar Cascades" already implemented and trained in OpenCV. It is a very reliable clasifier because of the huge dataset used in the training phase. It was used this one instead of making our own in order to have a reliable detector without spending too much time on it, as is just a small part of the segmentation. 
 
-Next, a Mixture of Gaussians background subtractor is used to remove the background of the image and detect more easily the hand. From this step, another binary mask is created. 
+After the face detection, a binary mask is made in which a black square is drawn over the face to hide it.
+
+Next, a Mixture of Gaussians background subtractor is used to remove the background of the image and detect more easily the hand. From this step, another binary mask is created and applied to the original image. 
+The background subtractor is inherited from the class cv::BackgroundSubtractorMOG2 made in order to modify the protected parameter "backgroundRatio". This parameter measures the frequency at which the background image is updated. In this code, the backgroundRatio is a very low number to make the background update as low as possible. This allows the user to keep the hand in the same position for a while without being recognized as background.  
 
 Afterwards, the resulting image with the latter masks being applied is converted to the HSV color space and is thresholded using the appropriate HSV skin range.
+This skin range can be modified at the begining of the program, selecting the theoretical range or calculating a custom range from a skin color sample. Also, is is possible to manually adjust the minimum and maximum HSV values in another window before starting the gesture recognition. 
 
 Finally, in order to better the output binary image, a gaussian blur and a thresholding is applied to eliminate blobs and unite different regions of the hand. It was chosen this configuration because it was much faster and gave better results than making an opening to the image. 
 
