@@ -92,7 +92,7 @@ Reading [1] another source of improvement appeared: change the color space. Anot
   
 \section{Software Explanation}
 
-The final version here presented is a software that can be divided in the following parts: Hand Segmentation, Hand Description, Gesture Recognition.
+The final version here presented is a software that can be divided in the following parts: Hand Segmentation, Hand Description, Gesture Interface.
 
 \subsection{Hand Segmentation}
 The segmentation of the hand was one of the most important parts of the software since in it depends the correct functioning of the next parts. 
@@ -147,7 +147,7 @@ Finally, the gesture made by the hand is extracted, taking as descriptors the nu
 The output of this part of the software is a number that encodes the type of gesture made by the user.
 
 
-\subsection{Gesture Recognition} 
+\subsection{Gesture Interface} 
 This section of the software has as an input the output of the previous, again. Hence, it will implement a state machine that, depending on the input (the gesture) will execute one function or other. 
 
 \begin{center}
@@ -172,11 +172,10 @@ Therefore, those libraries are needed for the correct functioning of the softwar
 \subsection{Compile the software [UBUNTU]}
 
 In order to compile the code, there are various options. Here it will be explained how to compile using qt and terminal. 
-
+\\
 To open the software as a Qt project, the only thing needed is to open the main CMakeLists.txt (gecko/CMakeLists.txt) with QtCreator. This will parse the whole project. 
 Afterwards, press the "build" icon to build the project. 
-
-
+\\[0.5cm]
 The folder structure used is the typical of a CMake project. In order to compile using the terminal follow this steps: 
 \begin{enumerate}
  \item Open a terminal in the build directory (gecko/build). 
@@ -185,7 +184,7 @@ The folder structure used is the typical of a CMake project. In order to compile
 \end{enumerate}
 
 \subsection{Use the software}
-In order to execute the software, press the convinient button of the QtCreator IDE or open a terminal in the bin directory (gecko/bin) and enter the command "./gecko.cpp". 
+In order to execute the software, press the convinient button of the QtCreator IDE or open a terminal in the bin directory (gecko/bin) and enter the command "./gecko". 
 
 Once the code is compiled and started, a first window will appear with the information about the software. After pressing enter to continue, this menu will pop up: 
 \begin{center}
