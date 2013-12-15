@@ -1,29 +1,32 @@
 \section{User Guide}
-This code was developed using the following libraries: 
+\subsection{ Compile and install }
+\subsubsection{ Requirements }
+This software has currently support only for GNU/Linux systems, as the cursor control is platform-dependent, but as it has a modular design it can be easily extended for being used on Windows or Mac platforms. Nevertheless we do not have any early plans of porting it to other platforms. 
+
+The requirements for compiling and using the software are:
 \begin{itemize}
+\item CMAKE (minimum version 2.8)
 \item OpenCV (v2.4.6.1).
-\item X11 (linux native libraries that allows the control of the windows and mouse). 
+\item X11 (GNU/Linux libraries that allow the interface with the X server for controlling the cursor). 
 \end{itemize}
-The software was compiled using CMAKE (minimum version 2.8).
-\\[0.5cm]
-Therefore, those libraries are needed for the correct functioning of the software. 
 
 
-\subsection{Compile the software [UBUNTU]}
-
-In order to compile the code, there are various options. Here it will be explained how to compile using qt and terminal. 
-\\
-To open the software as a Qt project, the only thing needed is to open the main CMakeLists.txt (gecko/CMakeLists.txt) with QtCreator. This will parse the whole project. 
-Afterwards, press the "build" icon to build the project. 
-\\[0.5cm]
+\subsubsection{Compiling}
+\paragraph{ Using CMake }
 The folder structure used is the typical of a CMake project. In order to compile using the terminal follow this steps: 
 \begin{enumerate}
  \item Open a terminal in the build directory (gecko/build). 
- \item Enter the command "cmake ..". 
- \item Enter the command "make". 
+ \item Enter the command ``cmake ..''
+ \item Enter the command ``make''
 \end{enumerate}
 
-\subsection{Use the software}
+\paragraph{ Using QtCreator}
+To open the software as a QtCreator project, the only thing needed is to open the main CMakeLists.txt (gecko/CMakeLists.txt) with QtCreator. This will parse the whole project. 
+Afterwards, press the "build" icon to build the project. 
+
+
+\subsubsection{ Run the software without installing it}
+
 In order to execute the software, press the convinient button of the QtCreator IDE or open a terminal in the bin directory (gecko/bin) and enter the command "./gecko". 
 
 Once the code is compiled and started, a first window will appear with the information about the software. After pressing enter to continue, this menu will pop up: 
@@ -42,19 +45,21 @@ The main program will track the hand and trace two circles, the first one around
 
 There are different functionalities implemented in this software. 
 \begin{itemize}
-\item Open hand(i.e. the program detects the five fingers): the mouse moves with the hand's movement.
+\item Open hand: the mouse moves with the hand's movement.
 \item Closed hand: click.
-\item "Victory sign": the gedit text editor is opened.
-\item "Gun or L sign": a terminal is opened. 
+\item ``Victory sign'': the gedit text editor is opened.
+\item ``Gun or L sign'': a terminal is opened. 
 \end{itemize}
 
 The two last functionalities may be changed using a configuration file named apps.config (gecko/data/apps.config). 
-That configuration file contains the following:
+
+That configuration file contains the following lines:
 \\[0.5cm]
 \$gedit\$ 3 \\
 \$gnome-terminal\$ 4
 \\[0.5cm]
-The three refers to the victory sign, and the 4 to the gun or L sign. To change the functionality the only thing needed is to change the programs written between the two dollar signs with the wanted one. 
+
+The number 3 refers to the victory sign, and  4 to the gun or L sign. To change the functionality the only thing needed is to change the programs written between the two dollar signs with the wanted one. 
 
 The user should take into account that when the program recognizes a gesture, a rectangle will appear in the window. In order to filter possible false positives, the user must remain in the same posture until the rectangle is completely filled for the correct execution of the task associated with the gesture. 
 
