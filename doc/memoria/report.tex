@@ -5,6 +5,18 @@
 \usepackage[top=1.55cm, bottom=2.29cm, left=1.6cm, right=1.47cm]{geometry}
 \usepackage{fancyhdr}
 
+% Initial pararagraph blankspace
+\makeatletter 
+\renewcommand{\paragraph}{\@startsection{paragraph}{4}{\z@}{-3.25ex \@plus 
+-1ex \@minus -.2ex}{1.5ex \@plus .2ex}{\normalfont\normalsize\bfseries}} 
+\makeatother
+
+% Makes figures stay in place:
+\usepackage{float}
+
+\usepackage{parskip}
+\setlength{\parindent}{15pt}
+
 \begin{document}
 
 %%%% FRONTPAGE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,4 +1,4 @@
-\section{Software Explanation}
+\section{Algorithm Explanation}
 
 The final version here presented is a software that can be divided in the following parts: Hand Segmentation, Hand Description, Gesture Interface.
 
@@ -21,38 +21,43 @@ Finally, in order to better the output binary image, a gaussian blur and a thres
  
 \subsection{Hand Description}
 
-The input of this section is the binary image that was the output of the previous one. This part of the software characterizes and extracts the hand's parameters. 
-The flowchart is as follows: 
+The input of this section is the binary image that was the output of the previous one. This part of the software characterizes and extracts the hand parameters. 
 
 \begin{center}
 \includegraphics[scale=0.5]{../hand_description.jpeg} 
 \end{center}
 
-As it can be seen in the diagram, the first step is to extract the contours of the hand and decide from its size if it is a hand or only a blob remaining from the hand segmentation. 
+The first step is to find all the contours on the binary image, and discard the ones that are too small, as they are likely noise blobs on the image. Once the small contours are filtered, a polygon approximation is carried out to make the contour smaller and reduce the computational load of the algorithm.
 
-If the size is appropriate, a bounding rectangle is found. Afterwards, the palm is extracted. In order to do that, a raw center of the palm and the radius of the inscribed circle is obtained from the points of the contour.
+If a contour large enough is found, it calculates the bounding box of the contour and the minimum rotated rectangle bounding the contour, for the later angle calculation. Then, the maximum inscribed circunference, that describes the hand palm, is found by calculating the point which maximizes the distance to the hand contour (the inscribed circle center), and its distance (the inscribed circle radius).
 
-Then, the ROI (Region Of Interest), i.e. the rectangle that contains the maximum circle that represents the hand boundary.  
+The hand is supposed to be inside a circunference of 3.5 times the radius of the maximum inscribed circunference, so we extract that region of interest and find the contours again inside that region, to eliminate any contour due to the forearm skin. The minimum enclosing circunference for that contour is found, which will be used for closed fist / open palm gesture detection.
 
-Afterwards, another contour extraction inside the extracted ROI is made in order to eliminate once more the smaller contours that may appear. 
+For the finger detection, the first step is to calculate the convex hull of the hand contour, and then find the convexity defects, the points of the original contour between the vertex of the convex hull that are the furthest away from the hull segment. Each of that defects will represent the valley between two potential fingers, but before they can be considered fingers they have to fulfill three conditions:
 
-Using the largest contour found in this last step, the minimum enclosing circle is obtained. This circle will be used as a hand's descriptor.
+\begin{enumerate}
+\item The depth of the convexity defect must be in between the minimum bounding circunference radius and the maximum inscribed circunference radius. 
+\item The angle between the segments joining the defect depth point and the defect start/end points that represents the angle between two consecutive fingers, must be lower than 90º.
+\item The last condition is related to the k-curvature, that should be lower than 70º. The k-curvature is the angle between two segments joining a point close to the fingertip and a point of the contour k places before and after that point. For our software, the value of k chosen was 9, but if the contours used had more points one should increase this value. This condition allows us to find the fingerprint points more accurately.
+\end{enumerate}
 
-The following step is to compute the convexity defects, that will be used to extract the number of fingers present in the image. 
-In order to assure that a certain part of the image is a finger, three conditions must be fulfilled: 
+Those points that fulfilled these three conditions and that were close enough were considered as the same fingerprint.
+
+This method works very well with most of the gestures except for the case when the hand has only one finger shown, as the resultant contour will not have any hull defect that accomplishes these conditions.
+
+Next, the angle and center of the hand are extracted and filtered using a Kalman filter, for smoothing the output values and getting a more constant cursor trajectory that allows the user to select buttons and GUI controls more precisely.
+
+Finally, the gesture of the hand is guessed based on the hand descriptors previously extracted. The gestures implemented in this version are:
+
 \begin{itemize}
-\item The depth of the convexity defect must be in between the minimum inscribed radius and the maximum inscribed radius. 
-\item The angle between the possible fingertips must be less than 90º. 
-\item The fingertips must have a k-curvature inside a certain range.
+\item {\bfseries Open palm:} number of fingers found is either 4 or 5.
+\item {\bfseries Closed fist:} no fingers were detected, the ratio between the minimum enclosing circunference radius and the maximum inscribed circunference radius is less than 2.
+\item {\bfseries Victory sign:} two fingers found, angle between them less than 60º.
+\item {\bfseries Gun sign:} two fingers found, angle between them more than 60º (and less than 90º).
+\item {\bfseries No gesture found:} The descriptors extracted do not match any of the previous conditions.
 \end{itemize}
 
-In the next stage of the process, the angle of the hand is obtained measuring the angle of the minimum bounding box. A Kalman filter is placed in order to smooth the response of the system to sudden changes, that are assumed to be errors. 
-
-Then, the hand center location is extracted using the center of the maximum inscribed circle and another Kalman filter to predict the position and eliminate the noise. 
-
-Finally, the gesture made by the hand is extracted, taking as descriptors the number of fingers, the angle between fingers, and both the maximum and minimum inscribed circles. 
-
-The output of this part of the software is a number that encodes the type of gesture made by the user.
+Those gestures are encoded using a integer value and used by other parts of the software.
 
 
 \subsection{Gesture Interface} 
@@ -65,3 +70,5 @@ This section of the software has as an input the output of the previous, again. 
 The configuration of the actions to be made when an opened or closed palm appears is hardcoded in the program, since those values will not be changeables. In order to obtain the action for each of the two other gestures that may be customized, the software will read the configuration file, and execute the action specified in there. 
 
 More information about the configuration file, the gestures and how to use the software in the following section "User Guide". 
+
+\newpage
