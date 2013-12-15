@@ -119,12 +119,12 @@ public:
      */
 	void drawFaceMarks( const cv::Mat& src, cv::Mat& dst , cv::Scalar color = cv::Scalar(0, 255, 0), int thickness = 1  );
 	
-	//-- Get lower and upper level (calibration)
+    //-- Get lower and upper level (calibration)
     //-----------------------------------------------------------------------
     //! \brief Returns the lower HSV skin values
-	cv::Scalar getLower(); 
+    cv::Scalar getLower();
     //! \brief Returns the upper HSV skin values
-	cv::Scalar getUpper(); 
+    cv::Scalar getUpper();
 
 
     private:
@@ -187,6 +187,7 @@ public:
 	void filterFace(const cv::Mat& src, cv::Mat& dstMask );
 
 
+
 	//-- Skin hue calibration
 	//-----------------------------------------------------------------------------------
 	//-- HSV limits
@@ -207,6 +208,11 @@ public:
 
     //! \brief Size of the calibration box used when capturing the custom HSV range
     static const int halfSide=40;
+
+    //! \brief Lower limit of the HSV skin range
+    cv::Scalar lower;
+    //! \brief Upper limit of the HSV skin range
+    cv::Scalar upper;
 };
 
 #endif // HAND_DETECTOR

@@ -185,7 +185,7 @@ void HandDetector::calibrationLoop(cv::VideoCapture cap)
             exit(0);
     }
 
-
+    //-- Create the calibration window with the trackbars
     cv::namedWindow("Calibrating skin");
     cv::createTrackbar("H min", "Calibrating skin", &h[0], 255);
     cv::createTrackbar("H max", "Calibrating skin", &h[1], 255);
@@ -351,7 +351,7 @@ void HandDetector::filter_hand(cv::Mat &src, cv::Mat &dst)
 //    static cv::Mat sum=cv::Mat::zeros(dummy.rows, dummy.cols,dummy.type());
 //    static cv::Mat last_sum=cv::Mat::zeros(dummy.rows, dummy.cols,dummy.type());
 
-
+//-- Average the thresholded images of different frames to reduce random noise
 //    if (it <3)
 //    {
 //        sum+=dummy;
@@ -488,11 +488,11 @@ void HandDetector::drawFaceMarks(const cv::Mat &src, cv::Mat &dst, cv::Scalar co
 
 cv::Scalar HandDetector::getLower()
 {
-	return lower;
+    return lower;
 }
 cv::Scalar HandDetector:: getUpper()
 {
-	return upper;
+    return upper;
 }
 
 
