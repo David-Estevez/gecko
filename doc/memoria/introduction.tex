@@ -1,6 +1,15 @@
 \section{Introduction}
 In this document a gesture recognition software named GECKO is presented. This software will allow the user to interact with a computer using just hand gestures. 
 
+For the software development we used a version control system based on git, and stored the code on the following online repository:
+
+\begin{center}
+{\bfseries https://github.com/David-Estevez/gecko}
+\end{center}
+~\\
+\noindent
+The code is released under a GPLv3 license, for anyone to download, study and improve our code.
+
 \subsection{Motivation}
 The necessity of doing a software for this subject (Systems of perception) gave us the opportunity to have a deeper knowledge of the theory of the course and of the OpenCV libraries. The first thing that was clear was that the software developed should be useful, and not only implement the theoretical concepts but also have an utility afterwards. That is how the idea of developing a gesture recognition system appeared. 
 
@@ -8,14 +17,16 @@ Also, the possibility of extending this software in the future to different mach
 
 
 \subsection{First Steps}
-In this section, the process followed when developing the software will be presented. 
 
 The first approach was to make a color segmentation (using the HSV color space) and select the hand using the size of the contour. Once the hand was detected, it was possible (after pressing a key) to move the mouse with the hand. The control was not very accurate due to the different problems present in the system such as illumination changes or having parts of the palm and fingers with a color outside the selected skin color range. In this first approach, it was possible to select between the theoretical values and the custom values obtained by placing the hand inside a square and getting automatically the skin HSV range. 
 
-The theoretical skin range worked better than the custom range, but the poor segmentation caused a fluctuant output image. This  did not allow to obtain a good gesture recognition.   
+The theoretical skin range worked better than the custom range, but the poor segmentation caused a fluctuant output image. This did not allow to obtain a good gesture recognition.   
 
 In order to better the hand's position and orientation estimation, two kalman filters were implemented. Those filters allowed a moderatedly accurate mouse control, if the background did not interfere with the hand segmentation (i.e. the background had to be a plain color). 
 
 As it can be seen, the main problem this software had was the hand segmentation. Some research was made and different papers were found that allowed us to implement a better hand segmentation [1].
 
-Reading [1] another source of improvement appeared: change the color space. Another short research on the subject and [2] was found,  in which an extensive comparison between color spaces and its results in skin detection was made. In it, the conclusion was that the difference between color spaces was insignificant. Hence, the color space used in this project (HSV) was not changed. 
+Reading [1] another source of improvement appeared: change the color space. Another short research on the subject and [2] was found, in which an extensive comparison between color spaces and its results in skin detection was made. In it, the conclusion was that the difference between color spaces was insignificant. Hence, the color space used in this project (HSV) was not changed. 
+
+After the reading of some papers about the state of the art in this kind of interfaces, and once we had studied all the class theory about computer vision, a more complex second version of the software was implemented, and that version is the one that will be described in the following sections.
+\newpage

@@ -1,15 +1,16 @@
 \section{Algorithm Explanation}
 
-The final version here presented is a software that can be divided in the following parts: Hand Segmentation, Hand Description, Gesture Interface.
+The final version here presented is a software that can be divided in the following parts: Hand Segmentation, Hand Description and Gesture Interface.
 
 \subsection{Hand Segmentation}
 The segmentation of the hand was one of the most important parts of the software since in it depends the correct functioning of the next parts. 
 The flowchart of the segmentation of the code is as follows: 
 
-\begin{center}
- \includegraphics[scale=0.4]{../hand_filter.jpeg} 
- \end{center} 
- 
+\begin{figure}[H]
+	\centering
+	 \includegraphics[width=0.4\textwidth]{../hand_filter.jpeg} 
+\end{figure}
+
 As it can be seen in the diagram, the first thing done is to detect the face using the "Face Detection using Haar Cascades" already implemented in OpenCV. After this detection, a binary mask is made in which appear a black square over the face to hide it.
 
 Next, a Mixture of Gaussians background subtractor is used to remove the background of the image and detect more easily the hand. From this step, another binary mask is created. 
@@ -23,9 +24,11 @@ Finally, in order to better the output binary image, a gaussian blur and a thres
 
 The input of this section is the binary image that was the output of the previous one. This part of the software characterizes and extracts the hand parameters. 
 
-\begin{center}
-\includegraphics[scale=0.5]{../hand_description.jpeg} 
-\end{center}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.5\textwidth]{../hand_description.jpeg} 
+\end{figure}
+
 
 The first step is to find all the contours on the binary image, and discard the ones that are too small, as they are likely noise blobs on the image. Once the small contours are filtered, a polygon approximation is carried out to make the contour smaller and reduce the computational load of the algorithm.
 
@@ -61,14 +64,16 @@ Those gestures are encoded using a integer value and used by other parts of the 
 
 
 \subsection{Gesture Interface} 
-This section of the software has as an input the output of the previous, again. Hence, it will implement a state machine that, depending on the input (the gesture) will execute one function or other. 
 
-\begin{center}
-%\includegraphics[scale=0.6]{../gesture_recognition.jpeg} 
-\end{center}
+The gesture interface takes as input the gesture guess data from the previous hand description stage, and triggers several actions depending on the gesture and the configuration selected. Due to the presence of false positives and false negatives in the output of the previous stage, and as it could trigger unwanted actions on the computer, a simple state machine is implemented to assure that the program triggers these actions only when they are desired by the user.
 
-The configuration of the actions to be made when an opened or closed palm appears is hardcoded in the program, since those values will not be changeables. In order to obtain the action for each of the two other gestures that may be customized, the software will read the configuration file, and execute the action specified in there. 
+The state machine has two states, ``found'' and ``not found'', representing the cases in which the gesture has ocurred or it has not ocurred yet, respectively. It also has two counters, one counting the number of positive matches with the value to track, and the other the number of consecutive negative matches.
 
-More information about the configuration file, the gestures and how to use the software in the following section "User Guide". 
+If the number of consecutive negative matches is equal to the maximum value allowed, it resets the positive matches counter. If the the number of positive matches equals the minimum value of positive matches needed, it reaches the ``found'' state, and stays there until it is reseted (either by the user or by the arrival of negative matches). 
+
+
+This interface allows the user to control the cursor and move it around when a ``open hand'' gesture is detected, and to click with a ``closed fist'' gesture. It also allows to launch two different commands with the remaining implemented gestures, than can be configured with a configuration file.
+
+More information about the configuration file, the gestures and how to use the software in the ``User Guide''. 
 
 \newpage
