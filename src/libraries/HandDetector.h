@@ -42,7 +42,6 @@
  *
  *  In order to obtain the segmented hand, the operator () or the function filter_hand may be used
  */
-
 class HandDetector
 {
 
@@ -61,12 +60,15 @@ public:
 
 
 	//-- Calibration loop
-
+    //! \brief Allows the user to adjust the HSV range manually to improve the segmentation
     void calibrationLoop(cv::VideoCapture);
-
-
+    //! \brief Shows an image with information and starts calibrationLoop function
     void defaultValues(cv::VideoCapture cap);
-
+    /*! \brief Obtains the custom HSV skin range
+     *
+     *  Shows and image with information, then shows the calibration image and from the information obtained calculates
+     *  the HSV skin color range. Finally, it calls the calibrationLoop function
+     */
     void customValues(cv::VideoCapture cap);
 
 
@@ -143,6 +145,11 @@ public:
      *  \param dst Binary output image
      */
 	void threshold( const cv::Mat& src, cv::Mat& dst);
+    /*! \brief Applies Gaussian Blur and thresholding to improve the final binary image
+     *
+     *  \param src Input image
+     *  \param dst Binary output image
+     */
 	void filterBlobs( const cv::Mat& src, cv::Mat& dst);
 
 	//-- Filter contours:
@@ -150,14 +157,17 @@ public:
 
     //-- Background substractor:
     //---------------------------------------------------------------------------------
+    //! \brief Background Subtractor object that derives from cv::BackgroundSubtractorMOG2
+    backgroundSubstractor bg ;
+    //! \brief Sets the parameters of the background subtractor object
+    void initBackgroundSubstractor();
     /*! \brief Substracts the background from the input image
      *
      *  \param src Input image
      *  \param dst Output image
      */
     void backgroundSubstraction(cv::Mat& src, cv::Mat& dst);
-    backgroundSubstractor bg ;
-    void initBackgroundSubstractor();
+
 
 	//-- Filter face:
 	//----------------------------------------------------------------------------------
@@ -180,20 +190,22 @@ public:
 	//-- Skin hue calibration
 	//-----------------------------------------------------------------------------------
 	//-- HSV limits
+    //! \brief Lower limit of the HSV skin range
 	cv::Scalar lower_limit;
+    //! \brief Upper limit of the HSV skin range
 	cv::Scalar upper_limit;
+    //! \brief Boolean that will be true if color limit is arround 0
 	bool hue_invert;
 
 	//-- HSV sigma multiplier
+    //! \brief Hue sigma multiplier used when calculating the custom HSV skin range
 	int hue_sigma_mult;
+    //! \brief Saturation sigma multiplier used when calculating the custom HSV skin range
 	int sat_sigma_mult;
+    //! \brief Value sigma multiplier used when calculating the custom HSV skin range
 	int val_sigma_mult;
 
-	cv::Scalar lower, upper;
-
-
-
-	//-- Calibration box size
+    //! \brief Size of the calibration box used when capturing the custom HSV range
     static const int halfSide=40;
 };
 
