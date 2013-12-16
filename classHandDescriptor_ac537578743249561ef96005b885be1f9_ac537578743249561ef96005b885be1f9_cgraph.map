@@ -1,0 +1,11 @@
+<map id="G" name="G">
+<area shape="rect" id="node3" href="$classHandDescriptor_a1ebfa54c4a05970ee61e341447b6565b.html#a1ebfa54c4a05970ee61e341447b6565b" title="Extracts the hand angle from its bounding box and a Kalman Filter." alt="" coords="279,5,548,35"/>
+<area shape="rect" id="node5" href="$classHandDescriptor_aca53f6a07227b74adab35f3bfc56a6fe.html#aca53f6a07227b74adab35f3bfc56a6fe" title="Extracts the bounding boxes around the hand contour ( rectangle and rotated rectange)" alt="" coords="255,59,572,88"/>
+<area shape="rect" id="node7" href="$classHandDescriptor_a0e98437eec0b5778e8368e5be5346706.html#a0e98437eec0b5778e8368e5be5346706" title="Extracts the hand center and applies a Kalman Filter for improved stability." alt="" coords="275,112,552,141"/>
+<area shape="rect" id="node9" href="$classHandDescriptor_a72362dacbbe739a438033b1bfe536ad0.html#a72362dacbbe739a438033b1bfe536ad0" title="Extract the hand contours from a binary image containing hand candidates." alt="" coords="271,165,556,195"/>
+<area shape="rect" id="node11" href="$classHandDescriptor_a496bfeb97d62c62c878407dd4c3b5672.html#a496bfeb97d62c62c878407dd4c3b5672" title="Finds the convexity defects of the hand convex hull, that are used to find the fingers." alt="" coords="271,219,556,248"/>
+<area shape="rect" id="node13" href="$classHandDescriptor_a8badf233f878b9904c57c27a5921d040.html#a8badf233f878b9904c57c27a5921d040" title="Extracts the number, position and orientation of the fingers." alt="" coords="275,272,552,301"/>
+<area shape="rect" id="node15" href="$classHandDescriptor_a2764b88200ce08a44d332f224e1d0ccd.html#a2764b88200ce08a44d332f224e1d0ccd" title="Guesses the hand gesture using the hand characteristic data previouly found." alt="" coords="271,325,556,355"/>
+<area shape="rect" id="node17" href="$classHandDescriptor_ac1ec426618e5499afc8045ca4257fd38.html#ac1ec426618e5499afc8045ca4257fd38" title="Finds the maximum inscribed circle of the hand contour, which describes the hand palm." alt="" coords="267,379,560,408"/>
+<area shape="rect" id="node19" href="$classHandDescriptor_abe0f4b088aea56ad3b0acd5fab1578e3.html#abe0f4b088aea56ad3b0acd5fab1578e3" title="Extracts a mask of the region of interest in which the hand is contained." alt="" coords="287,432,540,461"/>
+</map>

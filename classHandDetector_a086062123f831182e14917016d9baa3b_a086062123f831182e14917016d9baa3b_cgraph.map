@@ -1,0 +1,12 @@
+<map id="G" name="G">
+<area shape="rect" id="node3" href="$classHandDetector_a8f29bfa5d2f632826bfbfddaaab2cbf2.html#a8f29bfa5d2f632826bfbfddaaab2cbf2" title="Changes the HSV range accordingly with the input skin color image." alt="" coords="311,59,516,88"/>
+<area shape="rect" id="node9" href="$classHandDetector_abdde0278dcd154e61521da534b835628.html#abdde0278dcd154e61521da534b835628" title="Allows the user to adjust the HSV range manually to improve the segmentation." alt="" coords="287,112,540,141"/>
+<area shape="rect" id="node21" href="$classHandDetector_a1647d77155646b1c1a57e9a79f695f05.html#a1647d77155646b1c1a57e9a79f695f05" title="Returns the HSV range." alt="" coords="291,165,536,195"/>
+<area shape="rect" id="node5" href="$classHandDetector_a373dc89731ba958da62fc5d8824ea203.html#a373dc89731ba958da62fc5d8824ea203" title="Returns the median of the pixel&#39;s values." alt="" coords="615,5,796,35"/>
+<area shape="rect" id="node7" href="$classHandDetector_a374a59b5a699a774cbbfdc4de231231d.html#a374a59b5a699a774cbbfdc4de231231d" title="Returns the standard deviation of the pixel&#39;s values." alt="" coords="591,59,820,88"/>
+<area shape="rect" id="node11" href="$classHandDetector_a885d4a6d45df555117792d11425a91bc.html#a885d4a6d45df555117792d11425a91bc" title="Update the segmented hand image using the new frame of the video input." alt="" coords="595,112,816,141"/>
+<area shape="rect" id="node13" href="$classHandDetector_ad808e35e0ac39a8196d8281ef4264fa2.html#ad808e35e0ac39a8196d8281ef4264fa2" title="Substracts the background from the input image." alt="" coords="871,32,1180,61"/>
+<area shape="rect" id="node15" href="$classHandDetector_ae4ef1a2a60b91c68cb87150827df9d11.html#ae4ef1a2a60b91c68cb87150827df9d11" title="Applies Gaussian Blur and thresholding to improve the final binary image." alt="" coords="915,85,1136,115"/>
+<area shape="rect" id="node17" href="$classHandDetector_ab69e0e366506efd7aa79c4735d4af53c.html#ab69e0e366506efd7aa79c4735d4af53c" title="Removes the face from the src image." alt="" coords="919,139,1132,168"/>
+<area shape="rect" id="node19" href="$classHandDetector_a87ccb737778e82958bfe2f54b3ffc284.html#a87ccb737778e82958bfe2f54b3ffc284" title="Thresholds the input image using the HSV range." alt="" coords="923,192,1128,221"/>
+</map>

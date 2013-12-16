@@ -1,0 +1,5 @@
+<map id="G" name="G">
+<area shape="rect" id="node3" href="$classHandDetector_a0bbb36f24ce6118dbc3eb064a7d2bdac.html#a0bbb36f24ce6118dbc3eb064a7d2bdac" title="Sets the parameters of the background subtractor object." alt="" coords="287,5,620,35"/>
+<area shape="rect" id="node7" href="$classHandDetector_afbf309525bcc4b571caa1977d5d8d505.html#afbf309525bcc4b571caa1977d5d8d505" title="Initializes the face detector." alt="" coords="303,59,604,88"/>
+<area shape="rect" id="node5" href="$classbackgroundSubstractor_a62703e4d4c6b79d991f49223a195585e.html#a62703e4d4c6b79d991f49223a195585e" title="backgroundSubstractor::setbackgroundRatio" alt="" coords="671,5,1020,35"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="G" name="G">
+<area shape="rect" id="node3" href="$classHandDetector_ad808e35e0ac39a8196d8281ef4264fa2.html#ad808e35e0ac39a8196d8281ef4264fa2" title="Substracts the background from the input image." alt="" coords="279,5,588,35"/>
+<area shape="rect" id="node5" href="$classHandDetector_ae4ef1a2a60b91c68cb87150827df9d11.html#ae4ef1a2a60b91c68cb87150827df9d11" title="Applies Gaussian Blur and thresholding to improve the final binary image." alt="" coords="323,59,544,88"/>
+<area shape="rect" id="node7" href="$classHandDetector_ab69e0e366506efd7aa79c4735d4af53c.html#ab69e0e366506efd7aa79c4735d4af53c" title="Removes the face from the src image." alt="" coords="327,112,540,141"/>
+<area shape="rect" id="node9" href="$classHandDetector_a87ccb737778e82958bfe2f54b3ffc284.html#a87ccb737778e82958bfe2f54b3ffc284" title="Thresholds the input image using the HSV range." alt="" coords="331,165,536,195"/>
+</map>
