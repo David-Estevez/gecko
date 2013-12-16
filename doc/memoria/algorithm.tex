@@ -8,16 +8,16 @@ The flowchart of this part of the code is as follows:
 
 \begin{figure}[H]
 	\centering
-	 \includegraphics[width=0.4\textwidth]{../hand_filter.jpeg} 
+	 \includegraphics[width=0.4\textwidth]{../images/hand_filter.jpeg} 
 \end{figure}
  
-As it can be seen in the diagram, the first thing done is to detect the face using the "Face Detection using Haar Cascades" already implemented and trained in OpenCV. It is a very reliable clasifier because of the huge dataset used in the training phase. It was used this one instead of making our own in order to have a reliable detector without spending too much time on it, as is just a small part of the segmentation. 
+As it can be seen in the diagram, the first thing done is to detect the face using the ``Face Detection using Haar Cascades'' already implemented and trained in OpenCV. It is a very reliable clasifier because of the huge dataset used in the training phase. It was used this one instead of making our own in order to have a reliable detector without spending too much time on it, as is just a small part of the segmentation. 
 
 
 After the face detection, a binary mask is made in which a black square is drawn over the face to hide it.
 
 Next, a Mixture of Gaussians background subtractor is used to remove the background of the image and detect more easily the hand. From this step, another binary mask is created and applied to the original image. 
-The background subtractor is inherited from the class cv::BackgroundSubtractorMOG2 made in order to modify the protected parameter "backgroundRatio". This parameter measures the frequency at which the background image is updated. In this code, the backgroundRatio is a very low number to make the background update as low as possible. This allows the user to keep the hand in the same position for a while without being recognized as background.  
+The background subtractor is inherited from the class cv::BackgroundSubtractorMOG2 made in order to modify the protected parameter ``backgroundRatio''. This parameter measures the frequency at which the background image is updated. In this code, the backgroundRatio is a very low number to make the background update as low as possible. This allows the user to keep the hand in the same position for a while without being recognized as background.  
 
 Afterwards, the resulting image with the latter masks being applied is converted to the HSV color space and is thresholded using the appropriate HSV skin range.
 This skin range can be modified at the begining of the program, selecting the theoretical range or calculating a custom range from a skin color sample. Also, is is possible to manually adjust the minimum and maximum HSV values in another window before starting the gesture recognition. 
@@ -31,7 +31,7 @@ The input of this section is the binary image that was the output of the previou
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.5\textwidth]{../hand_description.jpeg} 
+	\includegraphics[width=0.5\textwidth]{../images/hand_description.jpeg} 
 \end{figure}
 
 
