@@ -22,6 +22,10 @@ The background subtractor is inherited from the class cv::BackgroundSubtractorMO
 Afterwards, the resulting image with the latter masks being applied is converted to the HSV color space and is thresholded using the appropriate HSV skin range.
 This skin range can be modified at the begining of the program, selecting the theoretical range or calculating a custom range from a skin color sample. Also, is is possible to manually adjust the minimum and maximum HSV values in another window before starting the gesture recognition. 
 
+\begin{center}
+\includegraphics[scale=0.5]{images/threshold.png} 
+\end{center}
+
 Finally, in order to better the output binary image, a gaussian blur and a thresholding is applied to eliminate blobs and unite different regions of the hand. It was chosen this configuration because it was much faster and gave better results than making an opening to the image. 
 
  
@@ -40,7 +44,9 @@ The first step is to find all the contours on the binary image, and discard the 
 If a contour large enough is found, it calculates the bounding box of the contour and the minimum rotated rectangle bounding the contour, for the later angle calculation. Then, the maximum inscribed circunference, that describes the hand palm, is found by calculating the point which maximizes the distance to the hand contour (the inscribed circle center), and its distance (the inscribed circle radius).
 
 The hand is supposed to be inside a circunference of 3.5 times the radius of the maximum inscribed circunference, so we extract that region of interest and find the contours again inside that region, to eliminate any contour due to the forearm skin. The minimum enclosing circunference for that contour is found, which will be used for closed fist / open palm gesture detection.
-
+\begin{center}
+\includegraphics[scale=1]{images/click_cropped.png} 
+\end{center}
 For the finger detection, the first step is to calculate the convex hull of the hand contour, and then find the convexity defects, the points of the original contour between the vertex of the convex hull that are the furthest away from the hull segment. Each of that defects will represent the valley between two potential fingers, but before they can be considered fingers they have to fulfill three conditions:
 
 \begin{enumerate}
@@ -50,6 +56,10 @@ For the finger detection, the first step is to calculate the convex hull of the 
 \end{enumerate}
 
 Those points that fulfilled these three conditions and that were close enough were considered as the same fingerprint.
+
+\begin{center}
+\includegraphics[scale=0.7]{images/5fingers_cropped.png} 
+\end{center}
 
 This method works very well with most of the gestures except for the case when the hand has only one finger shown, as the resultant contour will not have any hull defect that accomplishes these conditions.
 
@@ -64,6 +74,13 @@ Finally, the gesture of the hand is guessed based on the hand descriptors previo
 \item {\bfseries Gun sign:} two fingers found, angle between them more than 60º (and less than 90º).
 \item {\bfseries No gesture found:} The descriptors extracted do not match any of the previous conditions.
 \end{itemize}
+
+\hspace{-1.6cm}
+\includegraphics[scale=0.65]{images/5fingers_cropped.png} 
+\includegraphics[scale=0.82]{images/click_cropped.png} 
+\includegraphics[scale=0.65]{images/victory_cropped.png}
+\includegraphics[scale=0.68]
+{images/Lgesture_cropped.png} 
 
 Those gestures are encoded using a integer value and used by other parts of the software.
 
