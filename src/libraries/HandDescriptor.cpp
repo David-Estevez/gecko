@@ -126,7 +126,7 @@ void HandDescriptor::update( const cv::Mat& skinMask )
 
     if (_hand_found)
     {
-	fingerExtraction();
+        fingerExtraction();
         angleExtraction();
         centerExtraction();
         gestureExtraction();
