@@ -35,12 +35,25 @@
 
 //-- Constants for the gesture recognition
 //-----------------------------------------------------------------------
+//! \brief No gesture found
 static const unsigned int GECKO_GESTURE_NONE = 0;
+//! \brief Open palm, 4 or 5 fingers seen
 static const unsigned int GECKO_GESTURE_OPEN_PALM = 1;
-static const unsigned int GECKO_GESTURE_CLOSED_PALM = 2;
+//! \brief Fist closed
+static const unsigned int GECKO_GESTURE_CLOSED_FIST = 2;
+//! \brief Sign of victory, index and middle fingers in a < 60º angle
 static const unsigned int GECKO_GESTURE_VICTORY = 3;
+//! \brief Index and thumb at right angles, making a gun
 static const unsigned int GECKO_GESTURE_GUN = 4;
 
+
+/*! \class HandDescriptor
+ *  \brief Finds the main characteristics of the hand from a binary image containing a hand silouette.
+ *
+ *  To look for or to update the stored characteristics of the hand and its gesture, the update member
+ *  or the operator () can be called. One can then know if a hand was found using handFound member, prior
+ *  to retrieving any of the hand characteristics / gesture.
+ */
 class HandDescriptor
 {
 
@@ -53,8 +66,22 @@ public:
 
     //-- Refresh the detected hand characteristics
     //-----------------------------------------------------------------------
-    void operator ()(const cv::Mat& src, const cv::Mat& skinMask );
-    void update(const cv::Mat& src, const cv::Mat& skinMask );
+    /*! \brief Update the internal characteristics stored
+     *
+     *  This is a wrapper of the update function, to call it in a more
+     *  intuitive way.
+     *
+     *  \param skinMask Binary image containing the skin zones of hand candidates
+     */
+    void operator ()(const cv::Mat& skinMask );
+
+    /*! \brief Update the internal characteristics stored
+     *
+     *  Extracts all the hand characteristics and guesses the current gesture
+     *
+     *  \param skinMask Binary image containing the skin zones of hand candidates
+     */
+    void update(const cv::Mat& skinMask );
 
 
     //-- Get the characteristics of the hand:
@@ -64,12 +91,16 @@ public:
 
     //! \brief Returns the angle of the box enclosing the hand
     double getHandAngle();
+    //! \brief Returns the angle of the box enclosing the hand predicted by the Kalman filter
     double getHandAnglePredicted();
+     //! \brief Returns the angle of the box enclosing the hand estimated by the Kalman filter after updating the prediction with the actual value
     double getHandAngleEstimated();
 
     //! \brief Returns the position of the center of the hand
-    cv::Point getCenterHand( );
+    cv::Point getCenterHand();
+    //! \brief Returns the position of the center of the hand predicted by the Kalman filter
     cv::Point getCenterHandPredicted();
+    //! \brief Returns the position of the center of the hand estimated by the Kalman filter after updating the prediction with the actual value
     cv::Point getCenterHandEstimated();
 
     //! \brief Returns the contours of the detected hand
@@ -78,10 +109,10 @@ public:
     //! \brief Returns the bounding box enclosing the detected hand
     cv::Rect getBoundingBox();
 
-    //! \brief Returns the detected gesture:
+    //! \brief Returns the detected gesture
     int getGesture();
 
-    //! \brief Returns the number of fingers found:
+    //! \brief Returns the number of fingers found
     int getNumFingers();
 
 
@@ -120,15 +151,43 @@ public:
 private:
     //-- Functions that extract characteristics:
     //--------------------------------------------------------------------------
+    /*! \brief Extract the hand contours from a binary image containing hand candidates
+     *
+     *  After the contour extraction it filters out the smaller contours, that are likely to
+     *  be noise, and carries a polygon approximation to reduce the number of points in the
+     *  contour.
+     *
+     *  \param skinMask Binary image containing the hand candidates, previously filtered by a
+     *  HandDetector object.
+     */
     void contourExtraction(const cv::Mat& skinMask);
-    void boundingBoxExtraction( const cv::Mat& src);
+
+    //! \brief Extracts the bounding boxes around the hand contour ( rectangle and rotated rectange)
+    void boundingBoxExtraction();
+
+    //! \brief Finds the maximum inscribed circle of the hand contour, which describes the hand palm
     void handPalmExtraction();
+
+    /*! \brief Extracts a mask of the region of interest in which the hand is contained
+     *  \param src Binary image containing the hand candidates, to extract the dimensions of the mask image
+     */
     void ROIExtraction( const cv::Mat& src);
+
+    //! \brief Finds the convexity defects of the hand convex hull, that are used to find the fingers
     void defectsExtraction();
-    void fingerExtraction(const cv::Mat &src);
+
+    //! \brief Extracts the number, position and orientation of the fingers
+    void fingerExtraction();
+
+    //! \brief Extracts the hand angle from its bounding box and a Kalman Filter
     void angleExtraction();
+
+    //! \brief Extracts the hand center and applies a Kalman Filter for improved stability
     void centerExtraction();
+
+    //! \brief Guesses the hand gesture using the hand characteristic data previouly found
     void gestureExtraction();
+
 
     //-- Parameters that describe the hand:
     //--------------------------------------------------------------------------
@@ -158,19 +217,20 @@ private:
 
     //! \brief Contours of the candidates to be a hand
     std::vector< std::vector<cv::Point> > _hand_contour;
-    std::vector< std::vector<cv::Point> > _hand_contour_raw;
 
 
-    //! \brief Box enclosing the hand
+    //! \brief Minimum RotatedRect enclosing the hand
     cv::RotatedRect _hand_rotated_bounding_box;
+
+    //! \brief Minimum Rect enclosing the hand
     cv::Rect _hand_bounding_box;
 
 
-    //! \brief Last detected gesture
+    //! \brief Last detected gesture, coded as an integer (see constants for correspondence between integer and gesture)
     int _hand_gesture;
 
 
-    //-- Describe fingers:
+
     //! \brief Number of fingers (visible)
     int _hand_num_fingers;
 
@@ -179,6 +239,7 @@ private:
 
     //! \brief Position of the finger line origin points
     std::vector< cv::Point > _hand_finger_line_origin;
+
 
     //-- Describe hand palm:
     //-------------------------------------------------------------------------
@@ -194,17 +255,15 @@ private:
     //! \brief Center of the min. enclosing circle
     cv::Point2f _min_enclosing_circle_center;
 
+
     //! \brief Complex hull of the hand
     std::vector< cv::Point > _hand_hull;
 
     //! \brief Convexity defects of the hand
-    //std::vector< cv::Vec4i > _hand_convexity_defects;
     std::vector< ConvexityDefect > _hand_convexity_defects;
 
 
-
-    //-- ROI of the hand, for gesture analysis:
-    //-------------------------------------------------------------------------
+    //! \brief Mask containing ROI of the hand
     cv::Mat _hand_ROI;
 
 
@@ -215,7 +274,6 @@ private:
 
     //! \brief Kalman filter for the center of the hand
     cv::KalmanFilter kalmanFilterCenter;
-
 
 
 };

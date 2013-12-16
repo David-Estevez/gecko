@@ -57,19 +57,18 @@ void moveMouse( std::pair <int, int> coordinates, const bool absoluteMode = true
  */
 void moveMousePercentage( std::pair <double, double> coordinates );
 
-/*!
- * \brief Sends a click event to the X server
- */
+
+//! \brief Sends a click event to the X server
 void click();
 
 /*!
- * \brief getDisplayDimensions
- * \return Current Screen dimensions
+ * \brief Get the current screen dimensions
+ * \return Current screen dimensions
  */
 std::pair<int, int> getDisplayDimensions( );
 
 /*!
- * \brief getMousePos
+ * \brief Get the current mouse position
  * \return Current mouse position
  */
 std::pair<int, int> getMousePos();

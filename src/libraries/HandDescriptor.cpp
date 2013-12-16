@@ -90,12 +90,12 @@ HandDescriptor:: HandDescriptor()
 //-----------------------------------------------------------------------------------------------------------------------
 //-- Refresh the detected hand characteristics
 //-----------------------------------------------------------------------------------------------------------------------
-void HandDescriptor::operator ()(const cv::Mat& src, const cv::Mat& skinMask )
+void HandDescriptor::operator ()(const cv::Mat& skinMask )
 {
-    update ( src, skinMask );
+    update ( skinMask );
 }
 
-void HandDescriptor::update(const cv::Mat& src, const cv::Mat& skinMask )
+void HandDescriptor::update( const cv::Mat& skinMask )
 {
     //-- Do things to update each parameter
     contourExtraction( skinMask );
@@ -104,13 +104,12 @@ void HandDescriptor::update(const cv::Mat& src, const cv::Mat& skinMask )
     if ( _hand_found )
     {
         //-- Find bounding boxes
-        boundingBoxExtraction(src);
+	boundingBoxExtraction();
 
         //-- Find hand palm
         handPalmExtraction();
 
-        //-- Second roi and contourExtraction (optional right now)
-        //! \todo Second ROI and contourExtraction on HandDescriptor
+	//-- Second roi and contourExtraction
         ROIExtraction( skinMask );
 
         cv::Mat remaskedHand;
@@ -127,13 +126,11 @@ void HandDescriptor::update(const cv::Mat& src, const cv::Mat& skinMask )
 
     if (_hand_found)
     {
-        fingerExtraction(src);
-
+        fingerExtraction();
         angleExtraction();
         centerExtraction();
-
-    }
         gestureExtraction();
+    }
 
 }
 
@@ -164,7 +161,7 @@ void HandDescriptor::gestureExtraction()
         else if (_hand_num_fingers == 0)
         {
             if ( _min_enclosing_circle_radius / _max_circle_inscribed_radius < closed_hand_threshold )
-                _hand_gesture = GECKO_GESTURE_CLOSED_PALM;
+                _hand_gesture = GECKO_GESTURE_CLOSED_FIST;
             else
                 _hand_gesture = GECKO_GESTURE_NONE;
         }
@@ -179,7 +176,7 @@ void HandDescriptor::gestureExtraction()
             case GECKO_GESTURE_OPEN_PALM:   std::cout << "Open Palm";    break;
             case GECKO_GESTURE_VICTORY:     std::cout << "Victory sign"; break;
             case GECKO_GESTURE_GUN:         std::cout << "Gun sign";     break;
-            case GECKO_GESTURE_CLOSED_PALM: std::cout << "Closed hand";  break;
+            case GECKO_GESTURE_CLOSED_FIST: std::cout << "Closed hand";  break;
             default:                        std::cout << "No sign";
         }
         std::cout << std::endl;
@@ -498,15 +495,12 @@ void HandDescriptor::contourExtraction(const cv::Mat& skinMask)
     //-- If contour was found, make a aproximation of them:
     _hand_contour = std::vector<std::vector<cv::Point > >( filtered_hand_contours.size() );
 
-    //-- Save hand raw contours:
-    _hand_contour_raw = filtered_hand_contours;
-
     if ( _hand_found )
         for( int i = 0; i < filtered_hand_contours.size(); i++)
             cv::approxPolyDP( filtered_hand_contours[i], _hand_contour[i], epsilon, True );
 }
 
-void HandDescriptor::boundingBoxExtraction(const cv::Mat& src)
+void HandDescriptor::boundingBoxExtraction()
 {
     //-- Extract minimal rectangle enclosing the hand:
     _hand_rotated_bounding_box = cv::minAreaRect( _hand_contour[0]);
@@ -674,7 +668,7 @@ void HandDescriptor::defectsExtraction()
 
 }
 
-void HandDescriptor::fingerExtraction(const cv::Mat &src)
+void HandDescriptor::fingerExtraction()
 {
     std::vector< ConvexityDefect > passed_first_condition; //-- At this point, I lost all imagination available for variable naming
     std::vector< ConvexityDefect > passed_second_condition;

@@ -85,7 +85,7 @@ int main( int argc, char * argv[] )
     StateMachine cursor_SM( GECKO_GESTURE_OPEN_PALM, 3, 5);
 
     //-- State machine for clicking
-    StateMachine click_SM( GECKO_GESTURE_CLOSED_PALM, 15, 5);
+    StateMachine click_SM( GECKO_GESTURE_CLOSED_FIST, 15, 5);
 
     //-- AppLauncher for launching programs
     AppLauncher launcher( "../data/apps.config", 30, 5);
@@ -175,7 +175,7 @@ int main( int argc, char * argv[] )
         handDetector(frame, processed);
 
         //-- Contour extraction
-        hand_descriptor( frame, processed );
+        hand_descriptor( processed );
 
 
         //-- Hand's angle
@@ -203,7 +203,7 @@ int main( int argc, char * argv[] )
             case GECKO_GESTURE_OPEN_PALM: color = cv::Scalar( 255, 0, 0); break;
             case GECKO_GESTURE_VICTORY: color = cv::Scalar( 0, 255, 0); break;
             case GECKO_GESTURE_GUN: color = cv::Scalar( 0, 0, 255); break;
-            case GECKO_GESTURE_CLOSED_PALM: color = cv::Scalar(255, 255, 255); break;
+            case GECKO_GESTURE_CLOSED_FIST: color = cv::Scalar(255, 255, 255); break;
             default: color = cv::Scalar( 255, 255, 255); fill = 1;
         }
 
@@ -318,7 +318,7 @@ int main( int argc, char * argv[] )
                     {
                     case GECKO_GESTURE_VICTORY: bar_color = cv::Scalar( 0, 255, 0); break;
                     case GECKO_GESTURE_GUN: bar_color = cv::Scalar( 0, 0, 255); break;
-                    case GECKO_GESTURE_CLOSED_PALM: bar_color = cv::Scalar(255, 255, 255); break;
+                    case GECKO_GESTURE_CLOSED_FIST: bar_color = cv::Scalar(255, 255, 255); break;
                     }
 
                     printProgressBar( display, display, launcher.getPercentageMatches(i), bar_color );
