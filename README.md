@@ -48,7 +48,7 @@ The folder structure used is the typical of a CMake project. In order to compile
 To open the software as a QtCreator project, the only thing needed is to open the main CMakeLists.txt (gecko/CMakeLists.txt) with QtCreator. This will parse the whole project.
 Afterwards, press the "build" icon to build the project.
 
-3. Doxygen documentacion
+3. Doxygen documentation
 --------------------------------------------------------------------
 
 There is doxygen-generated documentation available for GECKO [here](http://david-estevez.github.io/gecko).
