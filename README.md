@@ -15,10 +15,10 @@ Index
 -------------------------------------------------------------------
  * 1.Introduction
  * 2.Compile and run
-     * 2.1. Dependencies
-     * 2.2. Compiling
-     * 2.3. Doxygen documentation
-     * 2.4. More info
+     * 2.1.Dependencies
+     * 2.2.Compiling
+ * 3.Doxygen documentation
+ * 4.More info
 
 
 1. Introduction
@@ -55,3 +55,8 @@ There is doxygen-generated documentation available for GECKO [here](http://david
 
 4. More info
 --------------------------------------------------------------------
+You can find more info about GECKO on the authors' personal webpages:
+
+* [dsquaredrobotics.com](http://www.dsquaredrobotics.com/wiki/doku.php?id=en:gecko)
+* [irenesanz.com](http://www.irenesanz.com/gecko.html)
+
