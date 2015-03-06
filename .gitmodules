@@ -1,0 +1,3 @@
+[submodule "external/ColorDebug"]
+	path = external/ColorDebug
+	url = https://github.com/jgvictores/ColorDebug.git
