@@ -21,24 +21,24 @@
 #include <yarp/os/ResourceFinder.h>
 #include <yarp/os/Network.h>
 
-//#include "ColorDebug.hpp"
+#include "ColorDebug.hpp"
 #include "GeckoModule.hpp"
 
 int main(int argc, char *argv[])
 {
     yarp::os::ResourceFinder rf;
     rf.setVerbose(true);
-    rf.setDefaultContext("cylinderTracker");
-    //rf.setDefaultConfigFile("cylinderTracker.ini");
+    rf.setDefaultContext("yarp_module");
+    //rf.setDefaultConfigFile("yarp_module.ini");
     rf.configure(argc, argv);
 
-//    CD_INFO("Checking for yarp network...\n");
+    CD_INFO("Checking for yarp network...\n");
     yarp::os::Network::init();
-//    if (!yarp.checkNetwork()) {
-//        CD_ERROR("Found no yarp network (try running \"yarpserver &\"), bye!\n");
-//        return -1;
-//    }
-//    CD_SUCCESS("Found yarp network.\n");
+    if (!yarp.checkNetwork()) {
+        CD_ERROR("Found no yarp network (try running \"yarpserver &\"), bye!\n");
+        return -1;
+    }
+    CD_SUCCESS("Found yarp network.\n");
 
     GeckoModule gecko;
     return gecko.runModule(rf);

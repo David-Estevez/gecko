@@ -25,6 +25,7 @@ set(GECKO_INCLUDE_DIRS CACHE INTERNAL "appended header dirs" FORCE)
 set(GECKO_LINK_DIRS CACHE INTERNAL "appended link dirs" FORCE)
 set(GECKO_LIBRARIES CACHE INTERNAL "appended libraries" FORCE)
 
+add_subdirectory(external)
 add_subdirectory(src)
 
 
