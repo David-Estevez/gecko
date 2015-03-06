@@ -28,8 +28,8 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "../libraries/HandDetector.h"
-#include "../libraries/HandDescriptor.h"
+#include "HandDetector.h"
+#include "HandDescriptor.h"
 
 int main( int argc, char * argv[] )
 {

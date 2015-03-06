@@ -30,12 +30,12 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <unistd.h>
 
-#include "../libraries/HandDetector.h"
-#include "../libraries/HandDescriptor.h"
-#include "../libraries/handUtils.h"
-#include "../libraries/mouse.h"
-#include "../libraries/StateMachine.h"
-#include "../libraries/AppLauncher.h"
+#include "HandDetector.h"
+#include "HandDescriptor.h"
+#include "handUtils.h"
+#include "mouse.h"
+#include "StateMachine.h"
+#include "AppLauncher.h"
 
 
 int main( int argc, char * argv[] )
