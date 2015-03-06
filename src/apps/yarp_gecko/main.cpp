@@ -1,10 +1,10 @@
 // -*- mode:C++; tab-width:4; c-basic-offset:4; indent-tabs-mode:nil -*-
 
 //------------------------------------------------------------------------------
-//-- Gecko_image_analyzer
+//-- yarp_gecko
 //------------------------------------------------------------------------------
 //--
-//-- Demonstration of the Gecko main program features by analyzing static images
+//-- YARP module to track hands and gestures
 //--
 //------------------------------------------------------------------------------
 //--
@@ -13,7 +13,6 @@
 //--
 //------------------------------------------------------------------------------
 //-- Authors: David Estevez Fernandez
-//--          Irene Sanz Nieto
 //--
 //-- Released under the GPL license (more info on LICENSE.txt file)
 //------------------------------------------------------------------------------
@@ -23,6 +22,8 @@
 
 #include "ColorDebug.hpp"
 #include "GeckoModule.hpp"
+
+using namespace gecko;
 
 int main(int argc, char *argv[])
 {
@@ -34,7 +35,7 @@ int main(int argc, char *argv[])
 
     CD_INFO("Checking for yarp network...\n");
     yarp::os::Network::init();
-    if (!yarp.checkNetwork()) {
+    if (!yarp::os::Network::checkNetwork()) {
         CD_ERROR("Found no yarp network (try running \"yarpserver &\"), bye!\n");
         return -1;
     }
