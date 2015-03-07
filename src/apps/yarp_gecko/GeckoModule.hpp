@@ -41,7 +41,7 @@ typedef yarp::sig::ImageOf<yarp::sig::PixelRgb> Image;
  * A YARP module to track cylinder from point cloud
  *
  */
-class GeckoModule : public yarp::os::RFModule
+class GeckoModule : public yarp::os::RFModule, public yarp::os::TypedReaderCallback<Image>
 {
     public:
         GeckoModule();
@@ -55,6 +55,8 @@ class GeckoModule : public yarp::os::RFModule
         static const std::string DEBUG_PORT;
         static const std::string GESTURE_PORT;
         static const std::string POSITION_PORT;
+
+        void onRead(Image& src);
 
     protected:
         virtual double getPeriod();

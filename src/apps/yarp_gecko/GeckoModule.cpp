@@ -52,6 +52,19 @@ bool gecko::GeckoModule::updateModule()
 
 }
 
+void gecko::GeckoModule::onRead(gecko::Image &src)
+{
+    CD_INFO("Received image!\n");
+
+    if (debugOn)
+    {
+        Image& out = debug_port.prepare();
+        out.zero();
+        out.copy(src);
+        debug_port.write();
+    }
+}
+
 bool gecko::GeckoModule::close()
 {
     return closePorts();
@@ -68,6 +81,7 @@ bool gecko::GeckoModule::openPorts()
     else
     {
         //! \todo Enable callback here!!!
+        input_port.useCallback(*this);
     }
 
     //-- Gesture port
