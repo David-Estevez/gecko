@@ -22,6 +22,7 @@
 
 #include <yarp/os/RFModule.h>
 #include <yarp/os/ResourceFinder.h>
+#include <yarp/os/Network.h>
 #include <yarp/os/BufferedPort.h>
 #include <yarp/sig/Image.h>
 
@@ -67,7 +68,13 @@ class GeckoModule : public yarp::os::RFModule
         yarp::os::BufferedPort<yarp::os::Bottle> gesture_port;
         yarp::os::BufferedPort<yarp::os::Bottle> position_port;
 
+        bool openPorts();
+        bool closePorts();
+
         bool debugOn;
+
+        bool connectInput;
+        std::string rgbStreamPort;
 
 };
 
