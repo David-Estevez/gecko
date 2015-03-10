@@ -7,6 +7,7 @@ const float gecko::GeckoModule::MODULE_PERIOD = 3.0;
 const std::string gecko::GeckoModule::PORT_PREFIX = "/gecko";
 const std::string gecko::GeckoModule::INPUT_PORT = "/src:i";
 const std::string gecko::GeckoModule::DEBUG_PORT = "/debug:o";
+const std::string gecko::GeckoModule::SEGMENTATION_DEGUB_PORT = "/segmentation:o";
 const std::string gecko::GeckoModule::GESTURE_PORT = "/gesture:o";
 const std::string gecko::GeckoModule::POSITION_PORT = "/handPos:o";
 
@@ -14,6 +15,7 @@ const std::string gecko::GeckoModule::POSITION_PORT = "/handPos:o";
 gecko::GeckoModule::GeckoModule()
 {
     debugOn = false;
+    segmentationDebugOn = false;
 }
 
 bool gecko::GeckoModule::configure(yarp::os::ResourceFinder &rf)
@@ -26,6 +28,9 @@ bool gecko::GeckoModule::configure(yarp::os::ResourceFinder &rf)
 
     //-- This enables image output on debug port
     debugOn = rf.check("debug");
+
+    //-- This enables segmentation image output on debug port
+    segmentationDebugOn = rf.check("debugSegmentation");
 
     //-- This auto-connects the input stream with the specified port
     connectInput = rf.check("connectInput");
@@ -80,6 +85,19 @@ void gecko::GeckoModule::onRead(gecko::Image &src)
         out.wrapIplImage(&display_ipl);
         debug_port.write();
     }
+
+    //-- Send back segmentation image if debug is enabled
+    if (segmentationDebugOn)
+    {
+        cv::Mat display = processed.clone();
+        handDescriptor.plotHandInterface(display, display);
+        IplImage display_ipl = IplImage(display);
+
+        Image& out = segmentation_debug_port.prepare();
+        out.zero();
+        out.wrapIplImage(&display_ipl);
+        segmentation_debug_port.write();
+    }
 }
 
 bool gecko::GeckoModule::close()
@@ -120,7 +138,17 @@ bool gecko::GeckoModule::openPorts()
     {
         if (!debug_port.open(PORT_PREFIX+DEBUG_PORT))
         {
-            CD_ERROR("Could not open debug output port at %s\n", (PORT_PREFIX+POSITION_PORT).c_str());
+            CD_ERROR("Could not open debug output port at %s\n", (PORT_PREFIX+DEBUG_PORT).c_str());
+            return false;
+        }
+    }
+
+    //-- Debug port
+    if ( segmentationDebugOn )
+    {
+        if (!segmentation_debug_port.open(PORT_PREFIX+SEGMENTATION_DEGUB_PORT))
+        {
+            CD_ERROR("Could not open debug output port at %s\n", (PORT_PREFIX+SEGMENTATION_DEGUB_PORT).c_str());
             return false;
         }
     }
@@ -158,5 +186,12 @@ bool gecko::GeckoModule::closePorts()
     {
         debug_port.interrupt();
         debug_port.close();
+    }
+
+    //-- Segmentation Debug port
+    if (segmentationDebugOn)
+    {
+        segmentation_debug_port.interrupt();
+        segmentation_debug_port.close();
     }
 }

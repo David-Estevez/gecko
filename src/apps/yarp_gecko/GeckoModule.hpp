@@ -56,6 +56,7 @@ class GeckoModule : public yarp::os::RFModule, public yarp::os::TypedReaderCallb
         static const std::string PORT_PREFIX;
         static const std::string INPUT_PORT;
         static const std::string DEBUG_PORT;
+        static const std::string SEGMENTATION_DEGUB_PORT;
         static const std::string GESTURE_PORT;
         static const std::string POSITION_PORT;
 
@@ -70,6 +71,7 @@ class GeckoModule : public yarp::os::RFModule, public yarp::os::TypedReaderCallb
         //-- Ports
         yarp::os::BufferedPort<Image> input_port;
         yarp::os::BufferedPort<Image> debug_port;
+        yarp::os::BufferedPort<Image> segmentation_debug_port;
         yarp::os::BufferedPort<yarp::os::Bottle> gesture_port;
         yarp::os::BufferedPort<yarp::os::Bottle> position_port;
 
@@ -77,6 +79,7 @@ class GeckoModule : public yarp::os::RFModule, public yarp::os::TypedReaderCallb
         bool closePorts();
 
         bool debugOn;
+        bool segmentationDebugOn;
 
         bool connectInput;
         std::string rgbStreamPort;
