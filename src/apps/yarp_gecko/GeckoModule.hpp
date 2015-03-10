@@ -30,6 +30,9 @@
 
 #include "ColorDebug.hpp"
 
+#include "HandDetector.h"
+#include "HandDescriptor.h"
+
 namespace gecko
 {
 
@@ -77,6 +80,9 @@ class GeckoModule : public yarp::os::RFModule, public yarp::os::TypedReaderCallb
 
         bool connectInput;
         std::string rgbStreamPort;
+
+        HandDetector handDetector;
+        HandDescriptor handDescriptor;
 
 };
 

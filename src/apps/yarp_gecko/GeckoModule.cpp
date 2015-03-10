@@ -56,11 +56,28 @@ void gecko::GeckoModule::onRead(gecko::Image &src)
 {
     CD_INFO("Received image!\n");
 
+    //-- Extract OpenCV image from YARP image
+    IplImage *cvImage = cvCreateImage(cvSize(src.width(), src.height()), IPL_DEPTH_8U, 3 );
+    cvCvtColor((IplImage*)src.getIplImage(), cvImage, CV_RGB2BGR);
+
+    cv::Mat frame(cvImage);
+
+    cv::Mat processed;
+    handDetector(frame, processed);
+
+    //-- Contour extraction
+    handDescriptor( processed );
+
+    //-- Send back image if debug is enabled
     if (debugOn)
     {
+        cv::Mat display = frame.clone();
+        handDescriptor.plotHandInterface(display, display);
+        IplImage display_ipl = IplImage(display);
+
         Image& out = debug_port.prepare();
         out.zero();
-        out.copy(src);
+        out.wrapIplImage(&display_ipl);
         debug_port.write();
     }
 }
