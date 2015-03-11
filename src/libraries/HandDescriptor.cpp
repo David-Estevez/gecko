@@ -22,14 +22,20 @@
  *
  * \author David Estevez Fernandez ( http://github.com/David-Estevez )
  * \author Irene Sanz Nieto ( https://github.com/irenesanznieto )
- * \date Dec 12th, 2013
  */
 
 
 #include "HandDescriptor.h"
 
+
+const unsigned int HandDescriptor::GECKO_GESTURE_NONE = 0;
+const unsigned int HandDescriptor::GECKO_GESTURE_OPEN_PALM = 1;
+const unsigned int HandDescriptor::GECKO_GESTURE_CLOSED_FIST = 2;
+const unsigned int HandDescriptor::GECKO_GESTURE_VICTORY = 3;
+const unsigned int HandDescriptor::GECKO_GESTURE_GUN = 4;
+
 //-- Initialization of the private parameters in the constructor
-HandDescriptor:: HandDescriptor()
+HandDescriptor::HandDescriptor()
 {
     //-- Initalize hand parameters
     //-----------------------------------------------------------------------

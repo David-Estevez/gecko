@@ -22,7 +22,6 @@
  *
  * \author David Estevez Fernandez ( http://github.com/David-Estevez )
  * \author Irene Sanz Nieto ( https://github.com/irenesanznieto )
- * \date Dec 12th, 2013
  */
 
 
@@ -33,18 +32,6 @@
 #include "handUtils.h"
 #include "mouse.h"
 
-//-- Constants for the gesture recognition
-//-----------------------------------------------------------------------
-//! \brief No gesture found
-static const unsigned int GECKO_GESTURE_NONE = 0;
-//! \brief Open palm, 4 or 5 fingers seen
-static const unsigned int GECKO_GESTURE_OPEN_PALM = 1;
-//! \brief Fist closed
-static const unsigned int GECKO_GESTURE_CLOSED_FIST = 2;
-//! \brief Sign of victory, index and middle fingers in a < 60º angle
-static const unsigned int GECKO_GESTURE_VICTORY = 3;
-//! \brief Index and thumb at right angles, making a gun
-static const unsigned int GECKO_GESTURE_GUN = 4;
 
 
 /*! \class HandDescriptor
@@ -58,6 +45,19 @@ class HandDescriptor
 {
 
 public:
+    //-- Constants for the gesture recognition
+    //-----------------------------------------------------------------------
+    //! \brief No gesture found
+    static const unsigned int GECKO_GESTURE_NONE;
+    //! \brief Open palm, 4 or 5 fingers seen
+    static const unsigned int GECKO_GESTURE_OPEN_PALM;
+    //! \brief Fist closed
+    static const unsigned int GECKO_GESTURE_CLOSED_FIST;
+    //! \brief Sign of victory, index and middle fingers in a < 60º angle
+    static const unsigned int GECKO_GESTURE_VICTORY;
+    //! \brief Index and thumb at right angles, making a gun
+    static const unsigned int GECKO_GESTURE_GUN;
+
     //-- Constructor
     //-----------------------------------------------------------------------
     //! \brief Default constructor
