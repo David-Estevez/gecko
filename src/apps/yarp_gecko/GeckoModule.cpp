@@ -83,8 +83,39 @@ void gecko::GeckoModule::onRead(gecko::Image &src)
         segmentation_debug_port.write();
     }
 
-    //-- Contour extraction
+    //-- Descriptor extraction
     handDescriptor( processed );
+
+    if(handDescriptor.handFound())
+    {
+        //-- Get position
+        cv::Point hand_pos = handDescriptor.getCenterHand();
+        yarp::os::Bottle& pos_msg  = position_port.prepare();
+        pos_msg.clear();
+        pos_msg.addInt(hand_pos.x);
+        pos_msg.addInt(hand_pos.y);
+        position_port.write();
+
+        //-- Get gesture
+        int gesture = handDescriptor.getGesture();
+        yarp::os::Bottle& gesture_msg = gesture_port.prepare();
+        gesture_msg.clear();
+        gesture_msg.addInt(gesture);
+
+        //-- Put a readable string
+        if ( gesture == HandDescriptor::GECKO_GESTURE_OPEN_PALM )
+            gesture_msg.addString("open palm");
+        else if (gesture == HandDescriptor::GECKO_GESTURE_VICTORY)
+            gesture_msg.addString("victory");
+        else if (gesture == HandDescriptor::GECKO_GESTURE_GUN)
+            gesture_msg.addString("gun");
+        else if (gesture == HandDescriptor::GECKO_GESTURE_CLOSED_FIST)
+            gesture_msg.addString("closed fist");
+        else
+            gesture_msg.addString("no gesture");
+
+        gesture_port.write();
+    }
 
     //-- Send back image if debug is enabled
     if (debugOn)

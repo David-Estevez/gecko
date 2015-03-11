@@ -77,13 +77,18 @@ int main( int argc, char * argv[] )
     //-------------------------------------------
     cv::Scalar color;
     int fill = CV_FILLED;
-    switch( hand_descriptor.getGesture() )
+    if ( hand_descriptor.getGesture() == HandDescriptor::GECKO_GESTURE_OPEN_PALM )
+        color = cv::Scalar( 255, 0, 0);
+    else if (hand_descriptor.getGesture() == HandDescriptor::GECKO_GESTURE_VICTORY)
+        color = cv::Scalar( 0, 255, 0);
+    else if (hand_descriptor.getGesture() == HandDescriptor::GECKO_GESTURE_GUN)
+        color = color = cv::Scalar( 0, 0, 255);
+    else if (hand_descriptor.getGesture() == HandDescriptor::GECKO_GESTURE_CLOSED_FIST)
+        color = cv::Scalar(255, 255, 255);
+    else
     {
-    case GECKO_GESTURE_OPEN_PALM: color = cv::Scalar( 255, 0, 0); break;
-    case GECKO_GESTURE_VICTORY: color = cv::Scalar( 0, 255, 0); break;
-    case GECKO_GESTURE_GUN: color = cv::Scalar( 0, 0, 255); break;
-    case GECKO_GESTURE_CLOSED_FIST: color = cv::Scalar(255, 255, 255); break;
-    default: color = cv::Scalar( 255, 255, 255); fill = 1;
+        color = cv::Scalar( 255, 255, 255);
+        fill = 1;
     }
 
     if ( hand_descriptor.handFound() )
