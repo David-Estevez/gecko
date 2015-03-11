@@ -67,8 +67,21 @@ void gecko::GeckoModule::onRead(gecko::Image &src)
 
     cv::Mat frame(cvImage);
 
+    //-- Hand segmentation
     cv::Mat processed;
     handDetector(frame, processed);
+
+    //-- Send back segmentation image if debug is enabled
+    if (segmentationDebugOn)
+    {
+        cv::Mat display = processed.clone();
+        IplImage display_ipl = IplImage(display);
+
+        Image& out = segmentation_debug_port.prepare();
+        out.zero();
+        out.wrapIplImage(&display_ipl);
+        segmentation_debug_port.write();
+    }
 
     //-- Contour extraction
     handDescriptor( processed );
@@ -86,18 +99,7 @@ void gecko::GeckoModule::onRead(gecko::Image &src)
         debug_port.write();
     }
 
-    //-- Send back segmentation image if debug is enabled
-    if (segmentationDebugOn)
-    {
-        cv::Mat display = processed.clone();
-        handDescriptor.plotHandInterface(display, display);
-        IplImage display_ipl = IplImage(display);
 
-        Image& out = segmentation_debug_port.prepare();
-        out.zero();
-        out.wrapIplImage(&display_ipl);
-        segmentation_debug_port.write();
-    }
 }
 
 bool gecko::GeckoModule::close()
